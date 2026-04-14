@@ -1,0 +1,25 @@
+{
+  "name": "@miru/ui",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "sideEffects": false,
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "clsx": "^2",
+    "tailwind-merge": "^2"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "react": "^19",
+    "react-dom": "^19",
+    "@types/react": "^19"
+  }
+}

@@ -1,0 +1,40 @@
+// Miru — schema Prisma minimal transitoire.
+// Permet au client de compiler avec le module anime hexagonal.
+// Le schema définitif (users, watchlist, reviews, characters, etc.) viendra à l'étape data modeling.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Anime {
+  id                 String   @id @default(cuid())
+  title              String
+  titleJp            String?
+  titleEn            String?
+  synopsis           String?
+  status             String
+  format             String
+  episodeCount       Int?
+  year               Int?
+  studioName         String?
+  coverUrl           String?
+  bannerUrl          String?
+  trailerUrl         String?
+  averageRating      Float?
+  externalAnilistId  Int?     @unique
+  genres             Genre[]  @relation("AnimeGenres")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Genre {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  slug   String  @unique
+  animes Anime[] @relation("AnimeGenres")
+}

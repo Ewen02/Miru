@@ -1,0 +1,15 @@
+{
+  "name": "@miru/anilist",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "graphql-request": "^7"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

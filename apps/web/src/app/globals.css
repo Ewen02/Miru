@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/*
+ * Miru Design Tokens — CSS Custom Properties
+ * Source of truth pour tout le theming.
+ */
+
+@theme {
+  /* Backgrounds */
+  --color-bg-base: #08080c;
+  --color-bg-surface: #111118;
+  --color-bg-elevated: #1a1a24;
+
+  /* Borders */
+  --color-border: #1e1e2a;
+  --color-border-subtle: #16161f;
+
+  /* Text — opacités */
+  --color-text-primary: rgba(255, 255, 255, 0.95);
+  --color-text-secondary: rgba(255, 255, 255, 0.55);
+  --color-text-tertiary: rgba(255, 255, 255, 0.32);
+
+  /* Accent — dynamique, overridé par anime */
+  --color-accent: #c8a2ff;
+  --color-accent-muted: rgba(200, 162, 255, 0.12);
+  --color-accent-subtle: rgba(200, 162, 255, 0.06);
+
+  /* Status */
+  --color-success: #3ecf8e;
+  --color-warning: #f5a623;
+  --color-error: #ef4444;
+
+  /* Font families */
+  --font-display: 'Clash Display', sans-serif;
+  --font-body: 'General Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+}
+
+body {
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+}

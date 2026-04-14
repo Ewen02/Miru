@@ -1,0 +1,20 @@
+{
+  "extends": "@miru/config/tsconfig.nest.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "incremental": true,
+    "removeComments": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@modules/*": ["modules/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}

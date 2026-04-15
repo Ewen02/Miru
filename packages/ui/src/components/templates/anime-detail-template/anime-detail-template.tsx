@@ -6,6 +6,7 @@ interface AnimeDetailTemplateProps {
   synopsis: ReactNode;
   info: ReactNode;
   episodes: ReactNode;
+  characters?: ReactNode;
   back?: ReactNode;
   className?: string;
 }
@@ -15,6 +16,7 @@ export function AnimeDetailTemplate({
   synopsis,
   info,
   episodes,
+  characters,
   back,
   className,
 }: AnimeDetailTemplateProps) {
@@ -43,6 +45,15 @@ export function AnimeDetailTemplate({
           <div className="flex flex-col gap-2">{info}</div>
         </aside>
       </section>
+
+      {characters && (
+        <section className="mx-auto flex w-full max-w-300 flex-col gap-4 px-6">
+          <h2 className="font-display text-sm uppercase tracking-wide text-text-tertiary">
+            Personnages
+          </h2>
+          {characters}
+        </section>
+      )}
 
       <section className="mx-auto flex w-full max-w-300 flex-col gap-4 px-6">
         <h2 className="font-display text-sm uppercase tracking-wide text-text-tertiary">

@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { AnimeDetailTemplate, AnimeHero, EpisodeRow } from "@miru/ui";
-import { fetchAnimeDetail } from "@/lib/api";
+import { AnimeDetailTemplate, AnimeHero, CharacterCard, EpisodeRow } from "@miru/ui";
+import { fetchAnimeCharacters, fetchAnimeDetail } from "@/lib/api";
+import type { CharacterCard as CharacterCardDTO } from "@miru/types";
 
 interface AnimeDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -25,7 +26,10 @@ export async function generateMetadata({
 
 export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) {
   const { slug } = await params;
-  const anime = await fetchAnimeDetail(slug);
+  const [anime, characters] = await Promise.all([
+    fetchAnimeDetail(slug),
+    fetchAnimeCharacters(slug),
+  ]);
   if (!anime) notFound();
 
   return (
@@ -59,6 +63,11 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
         )
       }
       info={<AnimeInfoList anime={anime} />}
+      characters={
+        characters.length > 0 ? (
+          <CharactersSection characters={characters} />
+        ) : undefined
+      }
       episodes={<EpisodesSection episodes={anime.episodes} />}
     />
   );
@@ -92,6 +101,27 @@ function AnimeInfoList({
         </div>
       ))}
     </dl>
+  );
+}
+
+function CharactersSection({
+  characters,
+}: {
+  characters: CharacterCardDTO[];
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      {characters.map((c) => (
+        <CharacterCard
+          key={c.id}
+          name={c.name}
+          nameJp={c.nameJp}
+          imageUrl={c.imageUrl}
+          role={c.role}
+          voiceActor={c.voiceActor}
+        />
+      ))}
+    </div>
   );
 }
 

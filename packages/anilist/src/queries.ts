@@ -1,6 +1,7 @@
 export const MEDIA_FRAGMENT = `
   fragment MediaFragment on Media {
     id
+    idMal
     title { romaji english native }
     description
     coverImage { large extraLarge color }

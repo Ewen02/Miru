@@ -1,5 +1,6 @@
 export interface AniListAnime {
   id: number;
+  idMal: number | null;
   title: {
     romaji: string | null;
     english: string | null;

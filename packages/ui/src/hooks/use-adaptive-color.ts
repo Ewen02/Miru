@@ -35,7 +35,10 @@ export function useAdaptiveColor(imageUrl: string | null, fallback = "#c8a2ff") 
         ctx.drawImage(img, 0, 0, 10, 10);
 
         const data = ctx.getImageData(0, 0, 10, 10).data;
-        let r = 0, g = 0, b = 0, count = 0;
+        let r = 0,
+          g = 0,
+          b = 0,
+          count = 0;
 
         for (let i = 0; i < data.length; i += 4) {
           // Ignorer les pixels trop sombres ou trop clairs

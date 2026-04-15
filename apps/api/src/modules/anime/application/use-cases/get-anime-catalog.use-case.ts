@@ -12,7 +12,10 @@ interface GetAnimeCatalogInput {
 }
 
 @Injectable()
-export class GetAnimeCatalogUseCase implements UseCase<GetAnimeCatalogInput, PaginatedResult<AnimeEntity>> {
+export class GetAnimeCatalogUseCase implements UseCase<
+  GetAnimeCatalogInput,
+  PaginatedResult<AnimeEntity>
+> {
   constructor(
     @Inject(ANIME_REPOSITORY)
     private readonly animeRepository: AnimeRepositoryPort,

@@ -9,9 +9,7 @@ interface AnimeDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: AnimeDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: AnimeDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
   const anime = await fetchAnimeDetail(slug).catch(() => null);
   if (!anime) return { title: "Anime introuvable — Miru" };
@@ -63,31 +61,20 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
         )
       }
       info={<AnimeInfoList anime={anime} />}
-      characters={
-        characters.length > 0 ? (
-          <CharactersSection characters={characters} />
-        ) : undefined
-      }
+      characters={characters.length > 0 ? <CharactersSection characters={characters} /> : undefined}
       episodes={<EpisodesSection episodes={anime.episodes} />}
     />
   );
 }
 
-function AnimeInfoList({
-  anime,
-}: {
-  anime: Awaited<ReturnType<typeof fetchAnimeDetail>> & {};
-}) {
+function AnimeInfoList({ anime }: { anime: Awaited<ReturnType<typeof fetchAnimeDetail>> & {} }) {
   if (!anime) return null;
   const rows: Array<[string, string | null]> = [
     ["Format", anime.format],
     ["Statut", anime.status],
     ["Année", anime.year?.toString() ?? null],
     ["Studio", anime.studioName],
-    [
-      "Épisodes",
-      anime.episodeCount != null ? anime.episodeCount.toString() : null,
-    ],
+    ["Épisodes", anime.episodeCount != null ? anime.episodeCount.toString() : null],
     ["Titre EN", anime.titleEn],
     ["Genres", anime.genres.length > 0 ? anime.genres.join(", ") : null],
   ];
@@ -104,11 +91,7 @@ function AnimeInfoList({
   );
 }
 
-function CharactersSection({
-  characters,
-}: {
-  characters: CharacterCardDTO[];
-}) {
+function CharactersSection({ characters }: { characters: CharacterCardDTO[] }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {characters.map((c) => (

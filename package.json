@@ -10,12 +10,15 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "db:generate": "turbo db:generate",
     "db:push": "turbo db:push",
     "db:seed": "turbo db:seed",
     "clean": "turbo clean"
   },
   "devDependencies": {
+    "prettier": "^3.4.2",
     "turbo": "^2"
   },
   "packageManager": "pnpm@9.15.0"

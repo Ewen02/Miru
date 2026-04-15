@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Miru — Explorer, Organiser, Partager",
-  description: "Plateforme anime — explorer les trending, organiser ta watchlist, partager tes découvertes.",
+  description:
+    "Plateforme anime — explorer les trending, organiser ta watchlist, partager tes découvertes.",
 };
 
 export default function RootLayout({
@@ -25,9 +26,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
         />
       </head>
-      <body className="min-h-full bg-bg-base font-body text-text-primary">
-        {children}
-      </body>
+      <body className="min-h-full bg-bg-base font-body text-text-primary">{children}</body>
     </html>
   );
 }

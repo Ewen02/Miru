@@ -10,8 +10,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary:
-    "border border-accent/40 bg-accent-muted text-text-primary hover:border-accent/60",
+  primary: "border border-accent/40 bg-accent-muted text-text-primary hover:border-accent/60",
   ghost:
     "border border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated hover:text-text-primary",
 };
@@ -21,12 +20,7 @@ const SIZES: Record<ButtonSize, string> = {
   md: "px-3 py-1.5 text-sm",
 };
 
-export function Button({
-  variant = "ghost",
-  size = "md",
-  className,
-  ...rest
-}: ButtonProps) {
+export function Button({ variant = "ghost", size = "md", className, ...rest }: ButtonProps) {
   return (
     <button
       {...rest}

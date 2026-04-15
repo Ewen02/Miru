@@ -43,9 +43,7 @@ export function AnimeCard({
       </div>
 
       <div className="p-3.5">
-        <h3 className="truncate font-display text-sm font-semibold text-text-primary">
-          {title}
-        </h3>
+        <h3 className="truncate font-display text-sm font-semibold text-text-primary">{title}</h3>
         <p className="mt-1 font-body text-xs text-text-tertiary">
           {[studioName, year].filter(Boolean).join(" · ") || "—"}
         </p>

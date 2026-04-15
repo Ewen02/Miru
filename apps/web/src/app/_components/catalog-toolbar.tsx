@@ -10,18 +10,13 @@ interface CatalogToolbarProps {
   resultCount: number;
 }
 
-export function CatalogToolbar({
-  availableGenres,
-  resultCount,
-}: CatalogToolbarProps) {
+export function CatalogToolbar({ availableGenres, resultCount }: CatalogToolbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
 
-  const [searchDraft, setSearchDraft] = useState(
-    searchParams.get("search") ?? "",
-  );
+  const [searchDraft, setSearchDraft] = useState(searchParams.get("search") ?? "");
 
   const status = searchParams.get("status");
   const format = searchParams.get("format");

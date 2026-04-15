@@ -31,9 +31,9 @@
   --color-error: #ef4444;
 
   /* Font families */
-  --font-display: 'Clash Display', sans-serif;
-  --font-body: 'General Sans', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: "Clash Display", sans-serif;
+  --font-body: "General Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 
   /* Radius */
   --radius-sm: 6px;

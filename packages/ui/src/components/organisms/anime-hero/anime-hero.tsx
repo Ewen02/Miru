@@ -30,12 +30,7 @@ export function AnimeHero({
       <div className="relative h-80 w-full overflow-hidden bg-bg-elevated sm:h-100">
         {bannerUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={bannerUrl}
-            alt=""
-            loading="eager"
-            className="h-full w-full object-cover"
-          />
+          <img src={bannerUrl} alt="" loading="eager" className="h-full w-full object-cover" />
         ) : null}
         <div className="absolute inset-0 bg-linear-to-b from-bg-base/40 via-bg-base/60 to-bg-base" />
       </div>
@@ -44,12 +39,7 @@ export function AnimeHero({
         <div className="relative aspect-3/4 w-40 shrink-0 overflow-hidden rounded-lg border border-border bg-bg-surface sm:w-48">
           {coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={coverUrl}
-              alt={title}
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
+            <img src={coverUrl} alt={title} loading="lazy" className="h-full w-full object-cover" />
           ) : null}
         </div>
 
@@ -75,9 +65,7 @@ export function AnimeHero({
           <h1 className="font-display text-3xl font-semibold text-text-primary sm:text-4xl">
             {title}
           </h1>
-          {titleJp && (
-            <p className="font-body text-sm text-text-tertiary">{titleJp}</p>
-          )}
+          {titleJp && <p className="font-body text-sm text-text-tertiary">{titleJp}</p>}
 
           {rating != null && (
             <div className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md border border-border bg-bg-surface px-2.5 py-1 font-mono text-sm text-text-secondary">

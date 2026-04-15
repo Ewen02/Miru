@@ -28,7 +28,5 @@ export async function generateUniqueAnimeSlug(
     }
   }
 
-  throw new Error(
-    `Could not generate unique slug for title "${title}" (base: ${base})`,
-  );
+  throw new Error(`Could not generate unique slug for title "${title}" (base: ${base})`);
 }

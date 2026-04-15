@@ -17,11 +17,7 @@ interface CatalogPageProps {
 const PAGE_SIZE = 20;
 
 function parseFilters(sp: Awaited<CatalogPageProps["searchParams"]>): CatalogFilters {
-  const genres = sp.genres
-    ? Array.isArray(sp.genres)
-      ? sp.genres
-      : [sp.genres]
-    : undefined;
+  const genres = sp.genres ? (Array.isArray(sp.genres) ? sp.genres : [sp.genres]) : undefined;
   const year = sp.year ? Number(sp.year) : undefined;
   const page = sp.page ? Math.max(1, Number(sp.page)) : 1;
   return {
@@ -35,10 +31,7 @@ function parseFilters(sp: Awaited<CatalogPageProps["searchParams"]>): CatalogFil
   };
 }
 
-function buildPageHref(
-  sp: Awaited<CatalogPageProps["searchParams"]>,
-  targetPage: number,
-): string {
+function buildPageHref(sp: Awaited<CatalogPageProps["searchParams"]>, targetPage: number): string {
   const params = new URLSearchParams();
   if (sp.search) params.set("search", sp.search);
   if (sp.status) params.set("status", sp.status);
@@ -65,9 +58,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
     fetchGenres().catch(() => []),
   ]);
 
-  const totalPages = catalog
-    ? Math.max(1, Math.ceil(catalog.total / PAGE_SIZE))
-    : 1;
+  const totalPages = catalog ? Math.max(1, Math.ceil(catalog.total / PAGE_SIZE)) : 1;
 
   return (
     <main className="mx-auto max-w-300 px-6 py-14">
@@ -84,10 +75,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
       </header>
 
       <div className="mb-10">
-        <CatalogToolbar
-          availableGenres={genres}
-          resultCount={catalog?.total ?? 0}
-        />
+        <CatalogToolbar availableGenres={genres} resultCount={catalog?.total ?? 0} />
       </div>
 
       {catalog === null ? (

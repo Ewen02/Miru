@@ -644,16 +644,16 @@ Avant d'écrire du code dans une zone, lis le CLAUDE.md correspondant.
 
 Disponibles via `/nom-de-commande` dans Claude Code (fichiers dans [.claude/commands/](.claude/commands/)) :
 
-| Commande          | Rôle                                                                      |
-| ----------------- | ------------------------------------------------------------------------- |
-| `/commit`         | Créer un commit atomique avec message conventionnel (scope monorepo)      |
-| `/pr`             | Ouvrir une PR sur GitHub avec résumé structuré                            |
-| `/check`          | `pnpm turbo type-check build` + remonter les erreurs                      |
-| `/dev`            | Lancer `pnpm dev` (web + api) en tâche de fond                            |
-| `/new-module`     | Scaffolder un module hexagonal complet dans `apps/api/src/modules/`       |
-| `/new-usecase`    | Ajouter un use case + DTO + mapper + wiring dans un module existant       |
-| `/new-ui`         | Créer un composant `@miru/ui` avec le pattern projet                      |
-| `/sync-db`        | `prisma format && prisma validate && prisma generate` (pas de `db push`)  |
+| Commande       | Rôle                                                                     |
+| -------------- | ------------------------------------------------------------------------ |
+| `/commit`      | Créer un commit atomique avec message conventionnel (scope monorepo)     |
+| `/pr`          | Ouvrir une PR sur GitHub avec résumé structuré                           |
+| `/check`       | `pnpm turbo type-check build` + remonter les erreurs                     |
+| `/dev`         | Lancer `pnpm dev` (web + api) en tâche de fond                           |
+| `/new-module`  | Scaffolder un module hexagonal complet dans `apps/api/src/modules/`      |
+| `/new-usecase` | Ajouter un use case + DTO + mapper + wiring dans un module existant      |
+| `/new-ui`      | Créer un composant `@miru/ui` avec le pattern projet                     |
+| `/sync-db`     | `prisma format && prisma validate && prisma generate` (pas de `db push`) |
 
 ## Subagents du projet
 

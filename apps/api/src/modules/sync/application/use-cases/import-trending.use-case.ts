@@ -38,7 +38,9 @@ export class ImportTrendingUseCase implements UseCase<ImportTrendingInput, Impor
       }
       imported += entities.length;
 
-      this.logger.log(`Page ${page}/${pages}: ${entities.length} anime imported (total ${imported})`);
+      this.logger.log(
+        `Page ${page}/${pages}: ${entities.length} anime imported (total ${imported})`,
+      );
     }
 
     return { imported, pagesFetched };

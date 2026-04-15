@@ -30,6 +30,7 @@ packages/ui/src/components/{niveau}s/{name}/
 ```
 
 Exemples de chemins :
+
 - `packages/ui/src/components/atoms/button/button.tsx`
 - `packages/ui/src/components/organisms/anime-hero/anime-hero.tsx`
 
@@ -68,6 +69,7 @@ export function {Name}({ className, ...props }: {Name}Props) {
 ## Règle de dépendance atomic
 
 Un niveau ne peut importer QUE des niveaux inférieurs :
+
 - `atoms` → indépendants
 - `molecules` → `atoms`
 - `organisms` → `atoms` + `molecules`

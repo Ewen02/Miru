@@ -7,12 +7,7 @@ interface PaginationProps {
   className?: string;
 }
 
-export function Pagination({
-  currentPage,
-  totalPages,
-  makeHref,
-  className,
-}: PaginationProps) {
+export function Pagination({ currentPage, totalPages, makeHref, className }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const prev = currentPage > 1 ? currentPage - 1 : null;
@@ -26,17 +21,11 @@ export function Pagination({
         className,
       )}
     >
-      <PageLink
-        href={prev != null ? makeHref(prev) : undefined}
-        label="← Précédent"
-      />
+      <PageLink href={prev != null ? makeHref(prev) : undefined} label="← Précédent" />
       <span className="uppercase tracking-wide text-text-tertiary">
         Page {currentPage} / {totalPages}
       </span>
-      <PageLink
-        href={next != null ? makeHref(next) : undefined}
-        label="Suivant →"
-      />
+      <PageLink href={next != null ? makeHref(next) : undefined} label="Suivant →" />
     </nav>
   );
 }

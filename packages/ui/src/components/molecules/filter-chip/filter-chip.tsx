@@ -7,12 +7,7 @@ interface FilterChipProps {
   className?: string;
 }
 
-export function FilterChip({
-  label,
-  active,
-  onToggle,
-  className,
-}: FilterChipProps) {
+export function FilterChip({ label, active, onToggle, className }: FilterChipProps) {
   return (
     <button
       type="button"

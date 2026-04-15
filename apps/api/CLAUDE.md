@@ -86,30 +86,30 @@ Pour les side effects cross-modules, utiliser `EventEmitter2`.
 
 ## Conventions de naming
 
-| Type            | Convention                    | Exemple                                |
-| --------------- | ----------------------------- | -------------------------------------- |
-| Entity          | `PascalCase` + `Entity`      | `AnimeEntity`                          |
-| Value Object    | `PascalCase` + `VO`          | `RatingVO`                             |
-| Port            | `PascalCase` + `Port`        | `AnimeRepositoryPort`                  |
-| Use Case        | `PascalCase` + `UseCase`     | `GetAnimeCatalogUseCase`               |
-| Repository      | `Prisma` + `PascalCase`      | `PrismaAnimeRepository`                |
-| Controller      | `PascalCase` + `Controller`  | `AnimeController`                      |
-| DTO             | `PascalCase` + `Dto`         | `AnimeCatalogQueryDto`                 |
-| Token           | `SCREAMING_SNAKE`            | `ANIME_REPOSITORY`                     |
-| Exception       | `PascalCase` + `Exception`   | `AnimeNotFoundException`               |
-| Fichiers        | `kebab-case`                 | `get-anime-catalog.use-case.ts`        |
+| Type         | Convention                  | Exemple                         |
+| ------------ | --------------------------- | ------------------------------- |
+| Entity       | `PascalCase` + `Entity`     | `AnimeEntity`                   |
+| Value Object | `PascalCase` + `VO`         | `RatingVO`                      |
+| Port         | `PascalCase` + `Port`       | `AnimeRepositoryPort`           |
+| Use Case     | `PascalCase` + `UseCase`    | `GetAnimeCatalogUseCase`        |
+| Repository   | `Prisma` + `PascalCase`     | `PrismaAnimeRepository`         |
+| Controller   | `PascalCase` + `Controller` | `AnimeController`               |
+| DTO          | `PascalCase` + `Dto`        | `AnimeCatalogQueryDto`          |
+| Token        | `SCREAMING_SNAKE`           | `ANIME_REPOSITORY`              |
+| Exception    | `PascalCase` + `Exception`  | `AnimeNotFoundException`        |
+| Fichiers     | `kebab-case`                | `get-anime-catalog.use-case.ts` |
 
 ## Modules du projet
 
-| Module       | Responsabilité                                   | Ports sortants                  |
-| ------------ | ------------------------------------------------ | ------------------------------- |
-| `anime`      | CRUD anime, catalogue, recherche, fiches         | AnimeRepositoryPort             |
-| `user`       | Auth, profil, préférences                        | UserRepositoryPort              |
-| `watchlist`  | Statuts, progression, favoris                    | WatchlistRepositoryPort         |
-| `review`     | Notes, reviews, modération                       | ReviewRepositoryPort            |
-| `sync`       | Import AniList, sync data, enrichissement        | AnimeSyncPort, AnimeRepository  |
-| `character`  | Personnages, VA, liens anime                     | CharacterRepositoryPort         |
-| `platform`   | Plateformes de streaming, liens                  | PlatformRepositoryPort          |
+| Module      | Responsabilité                            | Ports sortants                 |
+| ----------- | ----------------------------------------- | ------------------------------ |
+| `anime`     | CRUD anime, catalogue, recherche, fiches  | AnimeRepositoryPort            |
+| `user`      | Auth, profil, préférences                 | UserRepositoryPort             |
+| `watchlist` | Statuts, progression, favoris             | WatchlistRepositoryPort        |
+| `review`    | Notes, reviews, modération                | ReviewRepositoryPort           |
+| `sync`      | Import AniList, sync data, enrichissement | AnimeSyncPort, AnimeRepository |
+| `character` | Personnages, VA, liens anime              | CharacterRepositoryPort        |
+| `platform`  | Plateformes de streaming, liens           | PlatformRepositoryPort         |
 
 Seul `anime` est scaffoldé pour l'instant comme template de référence. Les autres suivront le même pattern.
 

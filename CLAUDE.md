@@ -35,6 +35,7 @@ Imports inter-packages via `@miru/*`. Barrel exports dans chaque `src/index.ts`.
 - `/commit` — commit conventionnel scopé (api|web|ui|db|types|anilist|config|repo)
 - `/pr` — PR GitHub avec template
 - `/check` — `pnpm turbo type-check build`
+- `/format` — Prettier write sur tout le monorepo (`/format check` pour vérifier)
 - `/dev` — dev server background (web :3000, api :3001)
 - `/new-module <nom>` — scaffold module hexagonal api
 - `/new-usecase <module> <action>` — ajoute un use case
@@ -61,6 +62,7 @@ Prochaine action : Phase 1.1 — fiche anime `/anime/[id]`.
 ## Archives
 
 Les guides de setup initial (longs, one-shot) sont dans [.claude/docs/](.claude/docs/) :
+
 - `monorepo-setup.md` — scaffold complet du repo (déjà exécuté)
 - `ui-setup.md` — init du package `@miru/ui`
 

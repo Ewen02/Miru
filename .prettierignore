@@ -1,0 +1,15 @@
+node_modules
+pnpm-lock.yaml
+*.log
+
+# Build outputs
+dist
+.next
+.turbo
+coverage
+packages/*/dist
+apps/*/dist
+apps/*/.next
+
+# Prisma handled separately via `prisma format`
+packages/db/prisma/migrations

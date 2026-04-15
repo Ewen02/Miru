@@ -47,23 +47,13 @@ export function FilterBar({
     <div className={cn("flex flex-col gap-4", className)}>
       <FilterGroup label="Statut">
         {STATUSES.map((s) => (
-          <FilterChip
-            key={s}
-            label={s}
-            active={status === s}
-            onToggle={() => onToggleStatus(s)}
-          />
+          <FilterChip key={s} label={s} active={status === s} onToggle={() => onToggleStatus(s)} />
         ))}
       </FilterGroup>
 
       <FilterGroup label="Format">
         {FORMATS.map((f) => (
-          <FilterChip
-            key={f}
-            label={f}
-            active={format === f}
-            onToggle={() => onToggleFormat(f)}
-          />
+          <FilterChip key={f} label={f} active={format === f} onToggle={() => onToggleFormat(f)} />
         ))}
       </FilterGroup>
 
@@ -108,13 +98,7 @@ export function FilterBar({
   );
 }
 
-function FilterGroup({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
       <span className="w-16 shrink-0 font-mono text-xs uppercase tracking-wide text-text-tertiary">

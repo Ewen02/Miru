@@ -114,11 +114,13 @@ interface AnimeCardProps {
 
 export function AnimeCard({ title, coverUrl, className }: AnimeCardProps) {
   return (
-    <article className={cn(
-      "group relative overflow-hidden rounded-lg border border-border bg-bg-surface",
-      "transition-transform duration-200 ease-out hover:-translate-y-1",
-      className,
-    )}>
+    <article
+      className={cn(
+        "group relative overflow-hidden rounded-lg border border-border bg-bg-surface",
+        "transition-transform duration-200 ease-out hover:-translate-y-1",
+        className,
+      )}
+    >
       {/* ... */}
     </article>
   );

@@ -16,9 +16,7 @@ export class AnimeCatalogQueryDto {
   format?: AnimeFormat;
 
   @IsOptional()
-  @Transform(({ value }) =>
-    value == null ? undefined : Array.isArray(value) ? value : [value],
-  )
+  @Transform(({ value }) => (value == null ? undefined : Array.isArray(value) ? value : [value]))
   @IsString({ each: true })
   genres?: string[];
 

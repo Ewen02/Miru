@@ -73,9 +73,9 @@ mkdir -p packages/ui/src/{components,tokens,hooks,utils}
 export const colors = {
   // Backgrounds — du plus profond au plus élevé
   bg: {
-    base: "#08080c",        // fond principal
-    surface: "#111118",     // cards, containers
-    elevated: "#1a1a24",    // hover states, menus
+    base: "#08080c", // fond principal
+    surface: "#111118", // cards, containers
+    elevated: "#1a1a24", // hover states, menus
     overlay: "rgba(8, 8, 12, 0.8)", // modals backdrop
   },
 
@@ -268,10 +268,10 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  sm: "6px",     // tags, pills, petits éléments
-  md: "10px",    // inputs, boutons
-  lg: "12px",    // cards
-  xl: "14px",    // containers, modals
+  sm: "6px", // tags, pills, petits éléments
+  md: "10px", // inputs, boutons
+  lg: "12px", // cards
+  xl: "14px", // containers, modals
   full: "9999px", // avatars uniquement
 } as const;
 
@@ -332,9 +332,9 @@ Dans `apps/web`, le fichier `app.css` principal configure Tailwind avec les toke
   --color-error: #ef4444;
 
   /* Font families */
-  --font-display: 'Clash Display', sans-serif;
-  --font-body: 'General Sans', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: "Clash Display", sans-serif;
+  --font-body: "General Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 
   /* Radius */
   --radius-sm: 6px;
@@ -398,7 +398,10 @@ export function useAdaptiveColor(imageUrl: string | null, fallback = "#c8a2ff") 
         ctx.drawImage(img, 0, 0, 10, 10);
 
         const data = ctx.getImageData(0, 0, 10, 10).data;
-        let r = 0, g = 0, b = 0, count = 0;
+        let r = 0,
+          g = 0,
+          b = 0,
+          count = 0;
 
         for (let i = 0; i < data.length; i += 4) {
           // Ignorer les pixels trop sombres ou trop clairs
@@ -460,17 +463,20 @@ src/components/
 Liste des composants à implémenter pour le MVP, par priorité :
 
 **Primitives (building blocks)**
+
 - `Text` — wrapper typographique, props `variant` mappé au typeScale
 - `Button` — primary, secondary, ghost. Sizes sm/md/lg
 - `Badge` — genre tags, status pills
 - `Icon` — wrapper pour lucide-react, taille cohérente
 
 **Layout**
+
 - `Container` — max-width + padding responsive
 - `Stack` — flex vertical avec gap configurable
 - `Grid` — CSS grid responsive, supporte asymétrie
 
 **Anime-specific**
+
 - `AnimeCard` — card catalogue avec cover, titre, studio, note. Hover expand
 - `EpisodeRow` — ligne épisode compacte (numéro, titre, durée, progression)
 - `CharacterCard` — portrait vertical, nom, rôle
@@ -481,6 +487,7 @@ Liste des composants à implémenter pour le MVP, par priorité :
 - `AnimeHero` — hero section fiche anime (banner + overlay + titre)
 
 **Feedback**
+
 - `Toast` — notifications micro (ajout watchlist, etc.)
 - `Shimmer` — placeholder loading qui reprend la forme du contenu
 
@@ -519,10 +526,14 @@ export function AnimeCard({
         "transition-transform duration-200 ease-out hover:-translate-y-1",
         className,
       )}
-      style={accentColor ? {
-        "--card-accent": accentColor,
-        boxShadow: "0 0 0 transparent",
-      } as React.CSSProperties : undefined}
+      style={
+        accentColor
+          ? ({
+              "--card-accent": accentColor,
+              boxShadow: "0 0 0 transparent",
+            } as React.CSSProperties)
+          : undefined
+      }
     >
       {/* Cover */}
       <div className="aspect-[3/4] overflow-hidden">
@@ -545,9 +556,7 @@ export function AnimeCard({
 
       {/* Info */}
       <div className="p-3.5">
-        <h3 className="font-display text-sm font-semibold text-text-primary truncate">
-          {title}
-        </h3>
+        <h3 className="font-display text-sm font-semibold text-text-primary truncate">{title}</h3>
         <p className="font-body text-xs text-text-tertiary mt-1">
           {[studioName, year].filter(Boolean).join(" · ")}
         </p>
@@ -595,6 +604,7 @@ export { cn } from "./utils/cn";
 ## Règles de design à respecter
 
 ### Ce qu'on fait
+
 - **Opacité pour la hiérarchie texte** : `text-text-primary`, `text-text-secondary`, `text-text-tertiary`
 - **Transitions sur tout ce qui est interactif** : `transition-*` avec `duration-200` ou `duration-300`
 - **Border radius cohérent** : `rounded-sm` (6px) pour tags, `rounded-md` (10px) pour boutons, `rounded-lg` (12px) pour cards, `rounded-xl` (14px) pour containers
@@ -603,6 +613,7 @@ export { cn } from "./utils/cn";
 - **Focus visible** : `focus-visible:ring-2 focus-visible:ring-accent/30 focus-visible:outline-none`
 
 ### Ce qu'on ne fait PAS
+
 - ❌ Gradients violet-bleu en background
 - ❌ Blobs flous décoratifs
 - ❌ Ombres portées sur les cards (on utilise les borders subtiles)
@@ -614,6 +625,7 @@ export { cn } from "./utils/cn";
 - ❌ Tailles de texte moyennes partout — contraste grand/petit
 
 ### Animations prioritaires
+
 1. **View Transitions** : cover card → hero fiche anime (shared element)
 2. **Scroll compression** : hero se réduit en header compact au scroll
 3. **Hover cards** : scale subtil + reveal synopsis

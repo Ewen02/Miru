@@ -9,9 +9,9 @@
 export const colors = {
   // Backgrounds — du plus profond au plus élevé
   bg: {
-    base: "#08080c",        // fond principal
-    surface: "#111118",     // cards, containers
-    elevated: "#1a1a24",    // hover states, menus
+    base: "#08080c", // fond principal
+    surface: "#111118", // cards, containers
+    elevated: "#1a1a24", // hover states, menus
     overlay: "rgba(8, 8, 12, 0.8)", // modals backdrop
   },
 

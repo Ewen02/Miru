@@ -22,9 +22,8 @@ async function fetchWithRetry(url: URL): Promise<Response> {
     if (attempt >= MAX_RETRIES) return res;
 
     const retryAfter = Number(res.headers.get("retry-after"));
-    const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
-      ? retryAfter * 1000
-      : 2000 * (attempt + 1);
+    const waitMs =
+      Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 2000 * (attempt + 1);
     await sleep(waitMs);
     attempt += 1;
   }

@@ -52,12 +52,7 @@ export function EpisodeRow({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-text-tertiary">
-            <svg
-              aria-hidden
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6 w-6"
-            >
+            <svg aria-hidden viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>
@@ -66,17 +61,14 @@ export function EpisodeRow({
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-2">
         <div className="flex items-baseline gap-2">
-          <span className="shrink-0 font-mono text-xs text-text-tertiary">
-            {paddedNumber}
-          </span>
+          <span className="shrink-0 font-mono text-xs text-text-tertiary">{paddedNumber}</span>
           <h3 className="truncate font-body text-sm text-text-primary">
             {title ?? <span className="text-text-tertiary">Épisode {number}</span>}
           </h3>
         </div>
         <p className="font-mono text-xs text-text-tertiary">
-          {[duration != null ? `${duration} min` : null, airedLabel]
-            .filter(Boolean)
-            .join(" · ") || "—"}
+          {[duration != null ? `${duration} min` : null, airedLabel].filter(Boolean).join(" · ") ||
+            "—"}
         </p>
       </div>
 

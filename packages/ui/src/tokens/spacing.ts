@@ -23,10 +23,10 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  sm: "6px",     // tags, pills, petits éléments
-  md: "10px",    // inputs, boutons
-  lg: "12px",    // cards
-  xl: "14px",    // containers, modals
+  sm: "6px", // tags, pills, petits éléments
+  md: "10px", // inputs, boutons
+  lg: "12px", // cards
+  xl: "14px", // containers, modals
   full: "9999px", // avatars uniquement
 } as const;
 

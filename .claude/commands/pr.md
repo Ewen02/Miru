@@ -22,20 +22,24 @@ Ouvre une pull request pour la branche courante.
 
 ```markdown
 ## Summary
+
 - bullet 1
 - bullet 2
 
 ## Changes par scope
+
 - **api** : ...
 - **ui** : ...
 
 ## Test plan
+
 - [ ] `pnpm turbo type-check` passe
 - [ ] `pnpm turbo build` passe
 - [ ] (si UI) testé dans le browser
 - [ ] (si API) route testée manuellement (curl/Postman)
 
 ## Notes
+
 (optionnel : décisions, follow-ups, limites connues)
 ```
 

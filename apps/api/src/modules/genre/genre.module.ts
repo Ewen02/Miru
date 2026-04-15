@@ -8,10 +8,7 @@ import { GenreController } from "./infrastructure/http/genre.controller";
 @Module({
   imports: [PrismaModule],
   controllers: [GenreController],
-  providers: [
-    ListGenresUseCase,
-    { provide: GENRE_REPOSITORY, useClass: PrismaGenreRepository },
-  ],
+  providers: [ListGenresUseCase, { provide: GENRE_REPOSITORY, useClass: PrismaGenreRepository }],
   exports: [GENRE_REPOSITORY],
 })
 export class GenreModule {}

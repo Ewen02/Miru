@@ -36,12 +36,7 @@ export function CharacterCard({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-text-tertiary">
-            <svg
-              aria-hidden
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-8 w-8"
-            >
+            <svg aria-hidden viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8">
               <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
             </svg>
           </div>
@@ -58,13 +53,9 @@ export function CharacterCard({
 
       <div className="flex flex-col gap-1 p-3">
         <p className="truncate font-body text-sm text-text-primary">{name}</p>
-        {nameJp && (
-          <p className="truncate font-body text-xs text-text-tertiary">{nameJp}</p>
-        )}
+        {nameJp && <p className="truncate font-body text-xs text-text-tertiary">{nameJp}</p>}
         {voiceActor && (
-          <p className="mt-1 truncate font-mono text-xs text-text-tertiary">
-            CV · {voiceActor}
-          </p>
+          <p className="mt-1 truncate font-mono text-xs text-text-tertiary">CV · {voiceActor}</p>
         )}
       </div>
     </article>

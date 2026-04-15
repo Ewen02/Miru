@@ -6,19 +6,9 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   wrapperClassName?: string;
 }
 
-export function Input({
-  icon,
-  wrapperClassName,
-  className,
-  ...rest
-}: InputProps) {
+export function Input({ icon, wrapperClassName, className, ...rest }: InputProps) {
   return (
-    <div
-      className={cn(
-        "relative flex items-center",
-        wrapperClassName,
-      )}
-    >
+    <div className={cn("relative flex items-center", wrapperClassName)}>
       {icon && (
         <span className="pointer-events-none absolute left-3 flex items-center text-text-tertiary">
           {icon}

@@ -22,9 +22,7 @@ export function AnimeDetailTemplate({
 }: AnimeDetailTemplateProps) {
   return (
     <main className={cn("flex flex-col gap-14 pb-24", className)}>
-      {back && (
-        <div className="mx-auto w-full max-w-300 px-6 pt-6">{back}</div>
-      )}
+      {back && <div className="mx-auto w-full max-w-300 px-6 pt-6">{back}</div>}
 
       {hero}
 
@@ -39,9 +37,7 @@ export function AnimeDetailTemplate({
         </div>
 
         <aside className="flex flex-col gap-4">
-          <h2 className="font-display text-sm uppercase tracking-wide text-text-tertiary">
-            Infos
-          </h2>
+          <h2 className="font-display text-sm uppercase tracking-wide text-text-tertiary">Infos</h2>
           <div className="flex flex-col gap-2">{info}</div>
         </aside>
       </section>

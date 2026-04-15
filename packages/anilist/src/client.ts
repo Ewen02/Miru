@@ -10,12 +10,19 @@ interface GraphQLResponse<T> {
 
 export class AniListClient {
   async getTrending(page = 1, perPage = 20): Promise<AniListAnime[]> {
-    const data = await this.request<{ Page: { media: AniListAnime[] } }>(TRENDING_QUERY, { page, perPage });
+    const data = await this.request<{ Page: { media: AniListAnime[] } }>(TRENDING_QUERY, {
+      page,
+      perPage,
+    });
     return data.Page.media;
   }
 
   async search(query: string, page = 1, perPage = 20): Promise<AniListAnime[]> {
-    const data = await this.request<{ Page: { media: AniListAnime[] } }>(ANIME_SEARCH_QUERY, { query, page, perPage });
+    const data = await this.request<{ Page: { media: AniListAnime[] } }>(ANIME_SEARCH_QUERY, {
+      query,
+      page,
+      perPage,
+    });
     return data.Page.media;
   }
 

@@ -59,19 +59,52 @@ Type scale : voir [src/tokens/typography.ts](src/tokens/typography.ts) (`hero`, 
 - `cn(...inputs)` — merge clsx + tailwind-merge ([src/utils/cn.ts](src/utils/cn.ts))
 - `useAdaptiveColor(imageUrl)` — extrait la couleur dominante du cover art ([src/hooks/use-adaptive-color.ts](src/hooks/use-adaptive-color.ts))
 
+## Atomic design — organisation des composants
+
+`packages/ui/src/components/` suit la hiérarchie atomic design :
+
+```
+components/
+├── atoms/          → éléments indivisibles (Text, Button, Badge, Icon, Input, Spinner)
+├── molecules/      → combinaisons d'atoms (SearchInput, FilterChip, RatingDisplay, PlatformBadge)
+├── organisms/      → sections composites avec sens métier (AnimeCard, AnimeHero, EpisodeRow, CharacterCard)
+├── templates/      → layouts de page sans données (CatalogTemplate, AnimeDetailTemplate)
+└── (pages)         → instanciées côté apps/web/ — JAMAIS dans @miru/ui
+```
+
+### Règle de dépendance
+
+`atoms` → indépendants.
+`molecules` → peuvent importer `atoms`.
+`organisms` → peuvent importer `atoms` + `molecules`.
+`templates` → peuvent importer tous les niveaux inférieurs.
+
+Jamais de remontée inverse (un atom n'importe pas une molecule).
+
+### Où placer un nouveau composant ?
+
+- **Atom** : bouton, badge, input, icône — pas de composition interne, pas de sens métier.
+- **Molecule** : un champ de recherche (input + icon), un chip (badge + bouton close), une star rating (5 icons + label).
+- **Organism** : une card produit complète, un header d'app, une grille filtrable — porte du sens métier.
+- **Template** : la mise en page vide d'une page — slots pour hero, grid, sidebar.
+
+En cas de doute, commencer plus bas (atom/molecule) et promouvoir si ça grossit.
+
 ## Structure d'un composant
 
 ```
-src/components/{name}/
+src/components/{niveau}/{name}/
 ├── {name}.tsx
 ├── {name}.types.ts   (si props > 5 ou types exportés)
 └── index.ts
 ```
 
+Exemple : `src/components/organisms/anime-card/anime-card.tsx`.
+
 Pattern :
 
 ```tsx
-import { cn } from "../../utils/cn";
+import { cn } from "../../../utils/cn";
 
 interface AnimeCardProps {
   title: string;
@@ -92,14 +125,14 @@ export function AnimeCard({ title, coverUrl, className }: AnimeCardProps) {
 }
 ```
 
-Ajouter le re-export dans [src/index.ts](src/index.ts).
+Exporter depuis le barrel de niveau : `src/components/organisms/index.ts` réexporte `AnimeCard`. Le barrel racine [src/index.ts](src/index.ts) fait `export * from "./components/organisms"`. Pas besoin d'éditer l'index racine pour chaque nouveau composant.
 
-## Composants P0 (MVP)
+## Composants P0 (MVP) par niveau
 
-**Primitives** : `Text`, `Button`, `Badge`, `Icon`
-**Layout** : `Container`, `Stack`, `Grid`
-**Anime** : `AnimeCard`, `EpisodeRow`, `CharacterCard`, `PlatformBadge`, `RatingDisplay`, `WatchlistButton`, `StatusSelector`, `AnimeHero`
-**Feedback** : `Toast`, `Shimmer`
+**Atoms** : `Text`, `Button`, `Badge`, `Icon`, `Input`, `Spinner`
+**Molecules** : `SearchInput`, `FilterChip`, `RatingDisplay`, `PlatformBadge`, `WatchlistButton`, `StatusSelector`
+**Organisms** : `AnimeCard` ✓, `AnimeHero`, `EpisodeRow`, `CharacterCard`, `Toast`, `Shimmer`
+**Templates** : `CatalogTemplate`, `AnimeDetailTemplate`
 
 ## Règles dures
 

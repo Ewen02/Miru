@@ -7,7 +7,9 @@ export * from "./hooks";
 // Utils
 export { cn } from "./utils/cn";
 
-// Components — ajouter au fur et à mesure
-// export { AnimeCard } from "./components/anime-card";
-// export { EpisodeRow } from "./components/episode-row";
-// etc.
+// Components — atomic design (atoms → molecules → organisms → templates)
+// Pages vivent côté apps/web/.
+export * from "./components/atoms";
+export * from "./components/molecules";
+export * from "./components/organisms";
+export * from "./components/templates";

@@ -117,6 +117,8 @@ function EpisodesSection({
           title={ep.title}
           duration={ep.duration}
           airedAt={ep.airedAt}
+          thumbnail={ep.thumbnail}
+          url={ep.url}
         />
       ))}
     </div>

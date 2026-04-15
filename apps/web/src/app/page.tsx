@@ -1,65 +1,52 @@
-import Image from "next/image";
+import { AnimeCard } from "@miru/ui";
+import { fetchAnimeCatalog } from "@/lib/api";
 
-export default function Home() {
+export default async function CatalogPage() {
+  const catalog = await fetchAnimeCatalog({ pageSize: 20 }).catch((err) => {
+    console.error(err);
+    return null;
+  });
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <main className="mx-auto max-w-300 px-6 py-14">
+      <header className="mb-14">
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-text-tertiary">
+          Catalogue
+        </p>
+        <h1 className="font-display text-4xl font-bold tracking-tight text-text-primary sm:text-5xl">
+          Explorer
+        </h1>
+        <p className="mt-3 max-w-prose font-body text-text-secondary">
+          Les animes trending, importés depuis AniList.
+        </p>
+      </header>
+
+      {catalog === null ? (
+        <EmptyState message="Impossible de joindre l'API. Est-elle démarrée sur le port 3001 ?" />
+      ) : catalog.data.length === 0 ? (
+        <EmptyState message="Aucun anime en base. Lance la sync : PAGES=3 PER_PAGE=20 pnpm --filter api sync:trending" />
+      ) : (
+        <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {catalog.data.map((anime) => (
+            <AnimeCard
+              key={anime.id}
+              title={anime.title}
+              coverUrl={anime.coverUrl}
+              studioName={anime.studioName}
+              year={anime.year}
+              rating={anime.averageRating}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          ))}
+        </section>
+      )}
+    </main>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
+      <p className="font-body text-text-secondary">{message}</p>
     </div>
   );
 }

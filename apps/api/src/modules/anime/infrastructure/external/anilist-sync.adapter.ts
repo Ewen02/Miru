@@ -3,6 +3,7 @@ import { AniListClient } from "@miru/anilist";
 import type { AniListAnime } from "@miru/anilist";
 import { AnimeStatus, AnimeFormat } from "@miru/types";
 import { slugify } from "@shared/utils/slugify";
+import { cleanSynopsis } from "@shared/utils/clean-synopsis";
 import { AnimeSyncPort } from "../../domain/ports/anime-sync.port";
 import { AnimeEntity } from "../../domain/entities/anime.entity";
 
@@ -40,7 +41,7 @@ export class AniListSyncAdapter implements AnimeSyncPort {
       title,
       titleJp: a.title.native,
       titleEn: a.title.english,
-      synopsis: a.description,
+      synopsis: cleanSynopsis(a.description),
       status: this.mapStatus(a.status),
       format: this.mapFormat(a.format),
       episodeCount: a.episodes,

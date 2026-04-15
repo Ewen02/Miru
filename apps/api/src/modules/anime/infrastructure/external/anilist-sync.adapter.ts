@@ -51,6 +51,7 @@ export class AniListSyncAdapter implements AnimeSyncPort {
       averageRating: a.averageScore != null ? a.averageScore / 10 : null,
       externalAnilistId: a.id,
       genres: a.genres ?? [],
+      episodes: [],
     });
   }
 

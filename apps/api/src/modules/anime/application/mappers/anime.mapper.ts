@@ -1,5 +1,5 @@
 import { AnimeEntity } from "../../domain/entities/anime.entity";
-import { AnimeCard } from "@miru/types";
+import { AnimeCard, AnimeDetail } from "@miru/types";
 
 /**
  * Mapper Entity → DTO de sortie.
@@ -24,5 +24,22 @@ export class AnimeMapper {
 
   static toCardList(entities: AnimeEntity[]): AnimeCard[] {
     return entities.map(AnimeMapper.toCard);
+  }
+
+  static toDetail(entity: AnimeEntity): AnimeDetail {
+    return {
+      ...AnimeMapper.toCard(entity),
+      titleEn: entity.titleEn,
+      synopsis: entity.synopsis,
+      episodeCount: entity.episodeCount,
+      trailerUrl: entity.trailerUrl,
+      episodes: entity.episodes.map((e) => ({
+        id: e.id,
+        number: e.number,
+        title: e.title,
+        duration: e.duration,
+        airedAt: e.airedAt,
+      })),
+    };
   }
 }

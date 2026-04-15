@@ -2,6 +2,14 @@ import { Entity } from "@shared/domain/entity.base";
 import { AnimeStatus, AnimeFormat } from "@miru/types";
 import { InvalidRatingException } from "../exceptions/anime.exceptions";
 
+export interface EpisodeSummary {
+  id: string;
+  number: number;
+  title: string | null;
+  duration: number | null;
+  airedAt: Date | null;
+}
+
 interface AnimeProps {
   title: string;
   titleJp: string | null;
@@ -19,6 +27,7 @@ interface AnimeProps {
   averageRating: number | null;
   externalAnilistId: number | null;
   genres: string[];
+  episodes: EpisodeSummary[];
 }
 
 export class AnimeEntity extends Entity<AnimeProps> {
@@ -30,6 +39,14 @@ export class AnimeEntity extends Entity<AnimeProps> {
     return this.props.titleJp;
   }
 
+  get titleEn(): string | null {
+    return this.props.titleEn;
+  }
+
+  get synopsis(): string | null {
+    return this.props.synopsis;
+  }
+
   get status(): AnimeStatus {
     return this.props.status;
   }
@@ -38,8 +55,16 @@ export class AnimeEntity extends Entity<AnimeProps> {
     return this.props.format;
   }
 
+  get episodeCount(): number | null {
+    return this.props.episodeCount;
+  }
+
   get genres(): string[] {
     return [...this.props.genres];
+  }
+
+  get episodes(): EpisodeSummary[] {
+    return [...this.props.episodes];
   }
 
   get averageRating(): number | null {
@@ -52,6 +77,10 @@ export class AnimeEntity extends Entity<AnimeProps> {
 
   get bannerUrl(): string | null {
     return this.props.bannerUrl;
+  }
+
+  get trailerUrl(): string | null {
+    return this.props.trailerUrl;
   }
 
   get year(): number | null {

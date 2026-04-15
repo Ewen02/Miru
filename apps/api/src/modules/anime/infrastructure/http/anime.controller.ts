@@ -34,6 +34,6 @@ export class AnimeController {
   @Get(":id")
   async detail(@Param("id") id: string) {
     const anime = await this.getAnimeDetail.execute(id);
-    return AnimeMapper.toCard(anime);
+    return AnimeMapper.toDetail(anime);
   }
 }

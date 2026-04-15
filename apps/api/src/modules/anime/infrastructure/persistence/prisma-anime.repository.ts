@@ -7,7 +7,11 @@ import { AnimeEntity } from "../../domain/entities/anime.entity";
 import { PaginatedResult, PaginatedQuery } from "@shared/domain/repository.port";
 import { AnimeStatus, AnimeFormat } from "@miru/types";
 
-const INCLUDE = { genres: true, studio: true } as const satisfies Prisma.AnimeInclude;
+const INCLUDE = {
+  genres: true,
+  studio: true,
+  episodes: { orderBy: { number: "asc" } },
+} as const satisfies Prisma.AnimeInclude;
 
 type AnimeRecord = Prisma.AnimeGetPayload<{ include: typeof INCLUDE }>;
 
@@ -119,6 +123,13 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       averageRating: record.averageRating,
       externalAnilistId: record.externalAnilistId,
       genres: record.genres.map((g) => g.slug),
+      episodes: record.episodes.map((e) => ({
+        id: e.id,
+        number: e.number,
+        title: e.title,
+        duration: e.duration,
+        airedAt: e.airedAt,
+      })),
     });
   }
 

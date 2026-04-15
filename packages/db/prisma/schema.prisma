@@ -14,6 +14,7 @@ datasource db {
 model Anime {
   id                String    @id @default(cuid())
   externalAnilistId Int?      @unique
+  externalMalId     Int?      @unique
   slug              String    @unique
   title             String
   titleJp           String?
@@ -59,8 +60,12 @@ model Episode {
   id        String    @id @default(cuid())
   animeId   String
   anime     Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  number    Int
-  title     String?
+  number      Int
+  title       String?
+  titleJp     String?
+  titleRomaji String?
+  filler      Boolean  @default(false)
+  recap       Boolean  @default(false)
   thumbnail String?
   url       String?
   site      String?

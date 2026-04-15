@@ -1,2 +1,2 @@
-export { AniListClient } from "./client";
-export type { AniListAnime, AniListCharacterEdge } from "./types";
+export { AniListClient } from "./client.js";
+export type { AniListAnime, AniListCharacterEdge } from "./types.js";

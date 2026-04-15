@@ -1,4 +1,9 @@
-import type { AnimeCard, AnimeDetail, CharacterCard } from "@miru/types";
+import type {
+  AnimeCard,
+  AnimeDetail,
+  CharacterCard,
+  GenreCard,
+} from "@miru/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -10,13 +15,29 @@ interface Paginated<T> {
   hasNext: boolean;
 }
 
-export async function fetchAnimeCatalog(params?: {
+export interface CatalogFilters {
+  search?: string;
+  status?: string;
+  format?: string;
+  year?: number;
+  genres?: string[];
   page?: number;
   pageSize?: number;
-}): Promise<Paginated<AnimeCard>> {
+}
+
+export async function fetchAnimeCatalog(
+  filters: CatalogFilters = {},
+): Promise<Paginated<AnimeCard>> {
   const url = new URL("/animes", API_URL);
-  if (params?.page) url.searchParams.set("page", String(params.page));
-  if (params?.pageSize) url.searchParams.set("pageSize", String(params.pageSize));
+  if (filters.search) url.searchParams.set("search", filters.search);
+  if (filters.status) url.searchParams.set("status", filters.status);
+  if (filters.format) url.searchParams.set("format", filters.format);
+  if (filters.year != null) url.searchParams.set("year", String(filters.year));
+  if (filters.genres?.length) {
+    for (const g of filters.genres) url.searchParams.append("genres", g);
+  }
+  if (filters.page) url.searchParams.set("page", String(filters.page));
+  if (filters.pageSize) url.searchParams.set("pageSize", String(filters.pageSize));
 
   const res = await fetch(url, { next: { revalidate: 60 } });
   if (!res.ok) {
@@ -43,4 +64,13 @@ export async function fetchAnimeCharacters(slug: string): Promise<CharacterCard[
     throw new Error(`Miru API ${res.status}: ${await res.text()}`);
   }
   return res.json() as Promise<CharacterCard[]>;
+}
+
+export async function fetchGenres(): Promise<GenreCard[]> {
+  const url = new URL("/genres", API_URL);
+  const res = await fetch(url, { next: { revalidate: 3600 } });
+  if (!res.ok) {
+    throw new Error(`Miru API ${res.status}: ${await res.text()}`);
+  }
+  return res.json() as Promise<GenreCard[]>;
 }

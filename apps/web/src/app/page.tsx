@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AnimeCard } from "@miru/ui";
 import { fetchAnimeCatalog } from "@/lib/api";
 
@@ -28,14 +29,19 @@ export default async function CatalogPage() {
       ) : (
         <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {catalog.data.map((anime) => (
-            <AnimeCard
+            <Link
               key={anime.id}
-              title={anime.title}
-              coverUrl={anime.coverUrl}
-              studioName={anime.studioName}
-              year={anime.year}
-              rating={anime.averageRating}
-            />
+              href={`/anime/${anime.id}`}
+              className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+            >
+              <AnimeCard
+                title={anime.title}
+                coverUrl={anime.coverUrl}
+                studioName={anime.studioName}
+                year={anime.year}
+                rating={anime.averageRating}
+              />
+            </Link>
           ))}
         </section>
       )}

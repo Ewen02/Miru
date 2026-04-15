@@ -14,6 +14,7 @@ datasource db {
 model Anime {
   id                String    @id @default(cuid())
   externalAnilistId Int?      @unique
+  slug              String    @unique
   title             String
   titleJp           String?
   titleEn           String?

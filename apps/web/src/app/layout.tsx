@@ -1,10 +1,32 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://miru.app";
+const DESCRIPTION =
+  "Plateforme anime — explorer les trending, organiser ta watchlist, partager tes découvertes.";
+
 export const metadata: Metadata = {
-  title: "Miru — Explorer, Organiser, Partager",
-  description:
-    "Plateforme anime — explorer les trending, organiser ta watchlist, partager tes découvertes.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Miru — Explorer, Organiser, Partager",
+    template: "%s — Miru",
+  },
+  description: DESCRIPTION,
+  openGraph: {
+    title: "Miru — Explorer, Organiser, Partager",
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "Miru",
+    images: ["/og.png"],
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Miru — Explorer, Organiser, Partager",
+    description: DESCRIPTION,
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({

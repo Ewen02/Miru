@@ -12,13 +12,26 @@ interface AnimeDetailPageProps {
 export async function generateMetadata({ params }: AnimeDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
   const anime = await fetchAnimeDetail(slug).catch(() => null);
-  if (!anime) return { title: "Anime introuvable — Miru" };
+  if (!anime) return { title: "Anime introuvable" };
   const description = anime.synopsis
     ? anime.synopsis.replace(/<[^>]+>/g, "").slice(0, 180)
     : undefined;
+  const images = anime.coverUrl ? [anime.coverUrl] : undefined;
   return {
-    title: `${anime.title} — Miru`,
+    title: anime.title,
     description,
+    openGraph: {
+      title: `${anime.title} — Miru`,
+      description,
+      images,
+      type: "video.tv_show",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${anime.title} — Miru`,
+      description,
+      images,
+    },
   };
 }
 

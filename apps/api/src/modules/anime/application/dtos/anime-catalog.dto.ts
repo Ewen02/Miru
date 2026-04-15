@@ -1,5 +1,5 @@
 import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from "class-validator";
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import { AnimeStatus, AnimeFormat } from "@miru/types";
 
 export class AnimeCatalogQueryDto {
@@ -16,6 +16,9 @@ export class AnimeCatalogQueryDto {
   format?: AnimeFormat;
 
   @IsOptional()
+  @Transform(({ value }) =>
+    value == null ? undefined : Array.isArray(value) ? value : [value],
+  )
   @IsString({ each: true })
   genres?: string[];
 

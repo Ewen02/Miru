@@ -1,0 +1,1 @@
+export const GENRE_REPOSITORY = Symbol("GENRE_REPOSITORY");

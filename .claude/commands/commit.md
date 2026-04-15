@@ -28,8 +28,9 @@ Crée un commit atomique pour les changements en cours.
    - `repo` (racine : turbo.json, pnpm-workspace, CLAUDE.md, .claude/)
 4. Choisis le type : `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`.
 5. Format : `type(scope): description courte impérative` (≤72 chars, pas de point final).
-6. N'ajoute **PAS** de `Co-Authored-By` Claude — l'utilisateur commit en son nom.
-7. N'inclus **JAMAIS** `.env` ni fichiers sensibles. `git add` fichier par fichier, pas `-A`.
-8. Avant le commit, propose le message à l'utilisateur et attends confirmation si le scope est ambigu.
+6. **Ne mentionne JAMAIS Claude, Claude Code, ou un assistant IA** dans le message (titre ou body). Pas de `Co-Authored-By: Claude`, pas de "generated with Claude Code", rien.
+7. Pour les changements UI dans `packages/ui/` : **respecter la règle atomic design** — vérifier que les nouveaux composants sont bien placés dans `atoms/`, `molecules/`, `organisms/` ou `templates/` selon leur niveau. Si un composant est au mauvais niveau, le signaler avant de commit. Voir [packages/ui/CLAUDE.md](../../packages/ui/CLAUDE.md) pour les règles.
+8. N'inclus **JAMAIS** `.env` ni fichiers sensibles. `git add` fichier par fichier, pas `-A`.
+9. Avant le commit, propose le message à l'utilisateur et attends confirmation si le scope est ambigu.
 
 Arguments éventuels : $ARGUMENTS (peuvent contenir une instruction comme "wip", "split en 2", etc.)

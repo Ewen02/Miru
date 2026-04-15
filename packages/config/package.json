@@ -1,5 +1,10 @@
 {
   "name": "@miru/config",
   "private": true,
-  "files": ["tsconfig.base.json", "tsconfig.next.json", "tsconfig.nest.json"]
+  "files": [
+    "tsconfig.base.json",
+    "tsconfig.next.json",
+    "tsconfig.nest.json",
+    "tsconfig.node16.json"
+  ]
 }

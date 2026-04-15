@@ -53,6 +53,11 @@ Imports inter-packages via `@miru/*`. Barrel exports dans chaque `src/index.ts`.
 - Jamais d'import depuis `domain/` vers `infrastructure/` ou `@nestjs/*`.
 - Avant de commit : `/check`. Avant de PR : relire le diff et tester manuellement si UI.
 
+## Roadmap
+
+Plan produit complet sur 6 phases : [ROADMAP.md](ROADMAP.md).
+Prochaine action : Phase 1.1 — fiche anime `/anime/[id]`.
+
 ## Archives
 
 Les guides de setup initial (longs, one-shot) sont dans [.claude/docs/](.claude/docs/) :

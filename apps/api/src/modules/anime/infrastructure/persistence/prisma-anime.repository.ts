@@ -4,6 +4,7 @@ import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { slugify } from "@shared/utils/slugify";
 import { generateUniqueAnimeSlug } from "@shared/infrastructure/prisma/generate-unique-slug";
 import { AnimeRepositoryPort, AnimeFilters } from "../../domain/ports/anime-repository.port";
+import { EpisodeInput } from "../../domain/ports/episode-sync.port";
 import { AnimeEntity } from "../../domain/entities/anime.entity";
 import { PaginatedResult, PaginatedQuery } from "@shared/domain/repository.port";
 import { AnimeStatus, AnimeFormat } from "@miru/types";
@@ -84,6 +85,37 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     };
   }
 
+  async findAllWithMalId(limit?: number): Promise<AnimeEntity[]> {
+    const records = await this.prisma.anime.findMany({
+      where: { externalMalId: { not: null } },
+      include: INCLUDE,
+      take: limit,
+      orderBy: { averageRating: "desc" },
+    });
+    return records.map((r) => this.toDomain(r));
+  }
+
+  async saveEpisodes(animeId: string, episodes: EpisodeInput[]): Promise<void> {
+    for (const ep of episodes) {
+      const data = {
+        title: ep.title,
+        titleJp: ep.titleJp,
+        titleRomaji: ep.titleRomaji,
+        duration: ep.duration,
+        airedAt: ep.airedAt,
+        filler: ep.filler,
+        recap: ep.recap,
+        thumbnail: ep.thumbnail,
+        url: ep.url,
+      };
+      await this.prisma.episode.upsert({
+        where: { animeId_number: { animeId, number: ep.number } },
+        create: { animeId, number: ep.number, ...data },
+        update: data,
+      });
+    }
+  }
+
   async findTrending(limit: number): Promise<AnimeEntity[]> {
     const records = await this.prisma.anime.findMany({
       take: limit,
@@ -154,13 +186,20 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       trailerUrl: record.trailerUrl,
       averageRating: record.averageRating,
       externalAnilistId: record.externalAnilistId,
+      externalMalId: record.externalMalId,
       genres: record.genres.map((g) => g.slug),
       episodes: record.episodes.map((e) => ({
         id: e.id,
         number: e.number,
         title: e.title,
+        titleJp: e.titleJp,
+        titleRomaji: e.titleRomaji,
         duration: e.duration,
         airedAt: e.airedAt,
+        filler: e.filler,
+        recap: e.recap,
+        thumbnail: e.thumbnail,
+        url: e.url,
       })),
     });
   }
@@ -181,6 +220,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       trailerUrl: snap.trailerUrl,
       averageRating: snap.averageRating,
       externalAnilistId: snap.externalAnilistId,
+      externalMalId: snap.externalMalId,
     };
 
     const studio = snap.studioName && snap.studioSlug

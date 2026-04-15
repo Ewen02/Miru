@@ -38,8 +38,14 @@ export class AnimeMapper {
         id: e.id,
         number: e.number,
         title: e.title,
+        titleJp: e.titleJp,
+        titleRomaji: e.titleRomaji,
         duration: e.duration,
         airedAt: e.airedAt,
+        filler: e.filler,
+        recap: e.recap,
+        thumbnail: e.thumbnail,
+        url: e.url,
       })),
     };
   }

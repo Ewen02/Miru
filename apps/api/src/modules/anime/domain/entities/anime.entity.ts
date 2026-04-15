@@ -6,8 +6,14 @@ export interface EpisodeSummary {
   id: string;
   number: number;
   title: string | null;
+  titleJp: string | null;
+  titleRomaji: string | null;
   duration: number | null;
   airedAt: Date | null;
+  filler: boolean;
+  recap: boolean;
+  thumbnail: string | null;
+  url: string | null;
 }
 
 interface AnimeProps {
@@ -27,6 +33,7 @@ interface AnimeProps {
   trailerUrl: string | null;
   averageRating: number | null;
   externalAnilistId: number | null;
+  externalMalId: number | null;
   genres: string[];
   episodes: EpisodeSummary[];
 }
@@ -94,6 +101,10 @@ export class AnimeEntity extends Entity<AnimeProps> {
 
   get studioName(): string | null {
     return this.props.studioName;
+  }
+
+  get externalMalId(): number | null {
+    return this.props.externalMalId;
   }
 
   /** Canal d'accès pour la couche persistence. */

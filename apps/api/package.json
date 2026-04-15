@@ -19,12 +19,14 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "type-check": "tsc --noEmit",
-    "sync:trending": "pnpm build && node dist/scripts/sync-trending.js"
+    "sync:trending": "pnpm build && node dist/scripts/sync-trending.js",
+    "sync:episodes": "pnpm build && node dist/scripts/sync-episodes.js"
   },
   "dependencies": {
     "@miru/db": "workspace:*",
     "@miru/types": "workspace:*",
     "@miru/anilist": "workspace:*",
+    "@miru/jikan": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/event-emitter": "^3",

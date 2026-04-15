@@ -30,7 +30,7 @@ export type WatchStatus = (typeof WatchStatus)[keyof typeof WatchStatus];
 export const CharacterRole = {
   MAIN: "MAIN",
   SUPPORTING: "SUPPORTING",
-  ANTAGONIST: "ANTAGONIST",
+  BACKGROUND: "BACKGROUND",
 } as const;
 export type CharacterRole = (typeof CharacterRole)[keyof typeof CharacterRole];
 
@@ -78,6 +78,7 @@ export interface CharacterCard {
   nameJp: string | null;
   imageUrl: string | null;
   role: CharacterRole;
+  voiceActor: string | null;
 }
 
 export interface UserAnimeEntry {

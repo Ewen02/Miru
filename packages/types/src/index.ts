@@ -50,6 +50,11 @@ export interface AnimeCard {
   genres: string[];
 }
 
+export interface GenreCard {
+  slug: string;
+  name: string;
+}
+
 export interface EpisodeItem {
   id: string;
   number: number;

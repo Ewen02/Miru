@@ -37,6 +37,7 @@ export type CharacterRole = (typeof CharacterRole)[keyof typeof CharacterRole];
 // Shared interfaces (used across apps, distinct from Prisma models)
 export interface AnimeCard {
   id: string;
+  slug: string;
   title: string;
   titleJp: string | null;
   coverUrl: string | null;

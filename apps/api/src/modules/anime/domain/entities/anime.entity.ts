@@ -1,5 +1,6 @@
 import { Entity } from "@shared/domain/entity.base";
 import { AnimeStatus, AnimeFormat } from "@miru/types";
+import { InvalidRatingException } from "../exceptions/anime.exceptions";
 
 interface AnimeProps {
   title: string;
@@ -11,6 +12,7 @@ interface AnimeProps {
   episodeCount: number | null;
   year: number | null;
   studioName: string | null;
+  studioSlug: string | null;
   coverUrl: string | null;
   bannerUrl: string | null;
   trailerUrl: string | null;
@@ -48,9 +50,26 @@ export class AnimeEntity extends Entity<AnimeProps> {
     return this.props.coverUrl;
   }
 
+  get bannerUrl(): string | null {
+    return this.props.bannerUrl;
+  }
+
+  get year(): number | null {
+    return this.props.year;
+  }
+
+  get studioName(): string | null {
+    return this.props.studioName;
+  }
+
+  /** Canal d'accès pour la couche persistence. */
+  toSnapshot(): Readonly<AnimeProps> & { id: string } {
+    return { id: this._id, ...this.props };
+  }
+
   updateRating(newRating: number): void {
     if (newRating < 0 || newRating > 10) {
-      throw new Error("Rating must be between 0 and 10");
+      throw new InvalidRatingException(newRating);
     }
     this.props.averageRating = newRating;
   }

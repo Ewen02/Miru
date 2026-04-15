@@ -3,11 +3,12 @@ import { Module } from "@nestjs/common";
 // Application
 import { GetAnimeCatalogUseCase } from "./application/use-cases/get-anime-catalog.use-case";
 import { GetAnimeDetailUseCase } from "./application/use-cases/get-anime-detail.use-case";
-import { ANIME_REPOSITORY } from "./application/tokens";
+import { ANIME_REPOSITORY, ANIME_SYNC } from "./application/tokens";
 
 // Infrastructure
 import { AnimeController } from "./infrastructure/http/anime.controller";
 import { PrismaAnimeRepository } from "./infrastructure/persistence/prisma-anime.repository";
+import { AniListSyncAdapter } from "./infrastructure/external/anilist-sync.adapter";
 
 // Shared
 import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
@@ -16,17 +17,11 @@ import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
   imports: [PrismaModule],
   controllers: [AnimeController],
   providers: [
-    // Use cases
     GetAnimeCatalogUseCase,
     GetAnimeDetailUseCase,
-
-    // Port bindings — le cœur du pattern hexagonal
-    // On bind l'interface (token) à l'implémentation concrète
-    {
-      provide: ANIME_REPOSITORY,
-      useClass: PrismaAnimeRepository,
-    },
+    { provide: ANIME_REPOSITORY, useClass: PrismaAnimeRepository },
+    { provide: ANIME_SYNC, useClass: AniListSyncAdapter },
   ],
-  exports: [ANIME_REPOSITORY],
+  exports: [ANIME_REPOSITORY, ANIME_SYNC],
 })
 export class AnimeModule {}

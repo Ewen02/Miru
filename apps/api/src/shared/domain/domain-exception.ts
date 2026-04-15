@@ -34,3 +34,12 @@ export class ForbiddenException extends DomainException {
     super(message ?? "Access denied");
   }
 }
+
+export class ValidationException extends DomainException {
+  readonly code = "VALIDATION";
+  readonly httpStatus = 400;
+
+  constructor(message: string) {
+    super(message);
+  }
+}

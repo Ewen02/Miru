@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Controller, Get, Param, Query } from "@nestjs/common";
 import { GetAnimeCatalogUseCase } from "../../application/use-cases/get-anime-catalog.use-case";
 import { GetAnimeDetailUseCase } from "../../application/use-cases/get-anime-detail.use-case";
 import { AnimeCatalogQueryDto } from "../../application/dtos/anime-catalog.dto";
@@ -12,7 +12,6 @@ export class AnimeController {
   ) {}
 
   @Get()
-  @UsePipes(new ValidationPipe({ transform: true }))
   async catalog(@Query() query: AnimeCatalogQueryDto) {
     const result = await this.getAnimeCatalog.execute({
       filters: {

@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
 import { GetAnimeCatalogUseCase } from "../../application/use-cases/get-anime-catalog.use-case";
 import { GetAnimeDetailUseCase } from "../../application/use-cases/get-anime-detail.use-case";
+import { GetAnimeCharactersUseCase } from "../../application/use-cases/get-anime-characters.use-case";
 import { AnimeCatalogQueryDto } from "../../application/dtos/anime-catalog.dto";
 import { AnimeMapper } from "../../application/mappers/anime.mapper";
 
@@ -9,6 +10,7 @@ export class AnimeController {
   constructor(
     private readonly getAnimeCatalog: GetAnimeCatalogUseCase,
     private readonly getAnimeDetail: GetAnimeDetailUseCase,
+    private readonly getAnimeCharacters: GetAnimeCharactersUseCase,
   ) {}
 
   @Get()
@@ -35,5 +37,11 @@ export class AnimeController {
   async detail(@Param("slug") slug: string) {
     const anime = await this.getAnimeDetail.execute(slug);
     return AnimeMapper.toDetail(anime);
+  }
+
+  @Get(":slug/characters")
+  async characters(@Param("slug") slug: string) {
+    const characters = await this.getAnimeCharacters.execute(slug);
+    return AnimeMapper.toCharacterCards(characters);
   }
 }

@@ -1,6 +1,17 @@
 import { Entity } from "@shared/domain/entity.base";
-import { AnimeStatus, AnimeFormat } from "@miru/types";
+import { AnimeStatus, AnimeFormat, CharacterRole } from "@miru/types";
 import { InvalidRatingException } from "../exceptions/anime.exceptions";
+
+export interface CharacterSummary {
+  id: string | null;
+  externalAnilistId: number;
+  name: string;
+  nameJp: string | null;
+  imageUrl: string | null;
+  role: CharacterRole;
+  voiceActor: string | null;
+  order: number;
+}
 
 export interface EpisodeSummary {
   id: string;
@@ -36,6 +47,7 @@ interface AnimeProps {
   externalMalId: number | null;
   genres: string[];
   episodes: EpisodeSummary[];
+  characters: CharacterSummary[];
 }
 
 export class AnimeEntity extends Entity<AnimeProps> {
@@ -77,6 +89,10 @@ export class AnimeEntity extends Entity<AnimeProps> {
 
   get episodes(): EpisodeSummary[] {
     return [...this.props.episodes];
+  }
+
+  get characters(): CharacterSummary[] {
+    return [...this.props.characters];
   }
 
   get averageRating(): number | null {

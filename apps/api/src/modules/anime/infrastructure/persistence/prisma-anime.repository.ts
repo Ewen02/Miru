@@ -5,14 +5,18 @@ import { slugify } from "@shared/utils/slugify";
 import { generateUniqueAnimeSlug } from "@shared/infrastructure/prisma/generate-unique-slug";
 import { AnimeRepositoryPort, AnimeFilters } from "../../domain/ports/anime-repository.port";
 import { EpisodeInput } from "../../domain/ports/episode-sync.port";
-import { AnimeEntity } from "../../domain/entities/anime.entity";
+import { AnimeEntity, CharacterSummary } from "../../domain/entities/anime.entity";
 import { PaginatedResult, PaginatedQuery } from "@shared/domain/repository.port";
-import { AnimeStatus, AnimeFormat } from "@miru/types";
+import { AnimeStatus, AnimeFormat, CharacterRole } from "@miru/types";
 
 const INCLUDE = {
   genres: true,
   studio: true,
   episodes: { orderBy: { number: "asc" } },
+  characters: {
+    include: { character: true, voiceActor: true },
+    orderBy: { order: "asc" },
+  },
 } as const satisfies Prisma.AnimeInclude;
 
 type AnimeRecord = Prisma.AnimeGetPayload<{ include: typeof INCLUDE }>;
@@ -159,7 +163,66 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       ? { externalAnilistId: snap.externalAnilistId }
       : { id: snap.id };
 
-    await this.prisma.anime.upsert({ where, create: payload, update: payload });
+    const saved = await this.prisma.anime.upsert({
+      where,
+      create: payload,
+      update: payload,
+      select: { id: true },
+    });
+
+    if (snap.characters.length > 0) {
+      await this.syncCharacters(saved.id, snap.characters);
+    }
+  }
+
+  private async syncCharacters(
+    animeId: string,
+    characters: CharacterSummary[],
+  ): Promise<void> {
+    for (const c of characters) {
+      const character = await this.prisma.character.upsert({
+        where: { externalAnilistId: c.externalAnilistId },
+        create: {
+          externalAnilistId: c.externalAnilistId,
+          name: c.name,
+          nameJp: c.nameJp,
+          imageUrl: c.imageUrl,
+        },
+        update: {
+          name: c.name,
+          nameJp: c.nameJp,
+          imageUrl: c.imageUrl,
+        },
+        select: { id: true },
+      });
+
+      let voiceActorId: string | null = null;
+      if (c.voiceActor) {
+        const va = await this.prisma.voiceActor.upsert({
+          where: { name: c.voiceActor },
+          create: { name: c.voiceActor },
+          update: {},
+          select: { id: true },
+        });
+        voiceActorId = va.id;
+      }
+
+      await this.prisma.animeCharacter.upsert({
+        where: { animeId_characterId: { animeId, characterId: character.id } },
+        create: {
+          animeId,
+          characterId: character.id,
+          voiceActorId,
+          role: c.role,
+          order: c.order,
+        },
+        update: {
+          voiceActorId,
+          role: c.role,
+          order: c.order,
+        },
+      });
+    }
   }
 
   async delete(id: string): Promise<void> {
@@ -200,6 +263,16 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
         recap: e.recap,
         thumbnail: e.thumbnail,
         url: e.url,
+      })),
+      characters: record.characters.map((ac) => ({
+        id: ac.character.id,
+        externalAnilistId: ac.character.externalAnilistId,
+        name: ac.character.name,
+        nameJp: ac.character.nameJp,
+        imageUrl: ac.character.imageUrl,
+        role: ac.role as CharacterRole,
+        voiceActor: ac.voiceActor?.name ?? null,
+        order: ac.order,
       })),
     });
   }

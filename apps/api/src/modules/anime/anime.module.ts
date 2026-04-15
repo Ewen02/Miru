@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 // Application
 import { GetAnimeCatalogUseCase } from "./application/use-cases/get-anime-catalog.use-case";
 import { GetAnimeDetailUseCase } from "./application/use-cases/get-anime-detail.use-case";
+import { GetAnimeCharactersUseCase } from "./application/use-cases/get-anime-characters.use-case";
 import { ANIME_REPOSITORY, ANIME_SYNC, EPISODE_SYNC } from "./application/tokens";
 
 // Infrastructure
@@ -20,6 +21,7 @@ import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
   providers: [
     GetAnimeCatalogUseCase,
     GetAnimeDetailUseCase,
+    GetAnimeCharactersUseCase,
     { provide: ANIME_REPOSITORY, useClass: PrismaAnimeRepository },
     { provide: ANIME_SYNC, useClass: AniListSyncAdapter },
     { provide: EPISODE_SYNC, useClass: JikanEpisodeAdapter },

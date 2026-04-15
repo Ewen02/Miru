@@ -1,11 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { AniListClient } from "@miru/anilist";
 import type { AniListAnime } from "@miru/anilist";
-import { AnimeStatus, AnimeFormat } from "@miru/types";
+import { AnimeStatus, AnimeFormat, CharacterRole } from "@miru/types";
 import { slugify } from "@shared/utils/slugify";
 import { cleanSynopsis } from "@shared/utils/clean-synopsis";
 import { AnimeSyncPort } from "../../domain/ports/anime-sync.port";
-import { AnimeEntity } from "../../domain/entities/anime.entity";
+import { AnimeEntity, CharacterSummary } from "../../domain/entities/anime.entity";
 
 @Injectable()
 export class AniListSyncAdapter implements AnimeSyncPort {
@@ -36,6 +36,17 @@ export class AniListSyncAdapter implements AnimeSyncPort {
     const studioName = a.studios.nodes[0]?.name ?? null;
     const title = a.title.romaji ?? a.title.english ?? a.title.native ?? "Untitled";
 
+    const characters: CharacterSummary[] = (a.characters?.edges ?? []).map((edge, idx) => ({
+      id: null,
+      externalAnilistId: edge.node.id,
+      name: edge.node.name.full,
+      nameJp: edge.node.name.native,
+      imageUrl: edge.node.image.large,
+      role: this.mapRole(edge.role),
+      voiceActor: edge.voiceActors[0]?.name.full ?? null,
+      order: idx,
+    }));
+
     return AnimeEntity.create(`anilist-${a.id}`, {
       slug: slugify(title) || `anilist-${a.id}`,
       title,
@@ -56,7 +67,21 @@ export class AniListSyncAdapter implements AnimeSyncPort {
       externalMalId: a.idMal,
       genres: a.genres ?? [],
       episodes: [],
+      characters,
     });
+  }
+
+  private mapRole(r: string): CharacterRole {
+    switch (r) {
+      case "MAIN":
+        return CharacterRole.MAIN;
+      case "SUPPORTING":
+        return CharacterRole.SUPPORTING;
+      case "BACKGROUND":
+        return CharacterRole.BACKGROUND;
+      default:
+        return CharacterRole.SUPPORTING;
+    }
   }
 
   private mapStatus(s: string | null): AnimeStatus {

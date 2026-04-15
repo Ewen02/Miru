@@ -13,12 +13,14 @@
     "tailwind-merge": "^2"
   },
   "peerDependencies": {
+    "next": "^16",
     "react": "^19",
     "react-dom": "^19"
   },
   "devDependencies": {
     "@miru/config": "workspace:*",
     "@types/react": "^19",
+    "next": "^16",
     "react": "^19",
     "react-dom": "^19",
     "typescript": "^5"

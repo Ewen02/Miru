@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "../../../utils/cn";
 
 interface EpisodeRowProps {
@@ -43,12 +44,12 @@ export function EpisodeRow({
     >
       <div className="relative aspect-video w-24 shrink-0 bg-bg-elevated sm:w-36">
         {thumbnail ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={thumbnail}
             alt={title ?? `Épisode ${number}`}
-            loading="lazy"
-            className="h-full w-full object-cover"
+            fill
+            sizes="(max-width: 640px) 96px, 144px"
+            className="object-cover"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-text-tertiary">

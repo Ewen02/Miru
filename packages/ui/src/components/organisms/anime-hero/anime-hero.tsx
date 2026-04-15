@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "../../../utils/cn";
 
 interface AnimeHeroProps {
@@ -29,8 +30,7 @@ export function AnimeHero({
     <header className={cn("relative w-full", className)}>
       <div className="relative h-80 w-full overflow-hidden bg-bg-elevated sm:h-100">
         {bannerUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={bannerUrl} alt="" loading="eager" className="h-full w-full object-cover" />
+          <Image src={bannerUrl} alt="" fill priority sizes="100vw" className="object-cover" />
         ) : null}
         <div className="absolute inset-0 bg-linear-to-b from-bg-base/40 via-bg-base/60 to-bg-base" />
       </div>
@@ -38,8 +38,13 @@ export function AnimeHero({
       <div className="relative mx-auto -mt-32 flex max-w-300 flex-col gap-6 px-6 sm:flex-row sm:items-end">
         <div className="relative aspect-3/4 w-40 shrink-0 overflow-hidden rounded-lg border border-border bg-bg-surface sm:w-48">
           {coverUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverUrl} alt={title} loading="lazy" className="h-full w-full object-cover" />
+            <Image
+              src={coverUrl}
+              alt={title}
+              fill
+              sizes="(max-width: 640px) 160px, 192px"
+              className="object-cover"
+            />
           ) : null}
         </div>
 

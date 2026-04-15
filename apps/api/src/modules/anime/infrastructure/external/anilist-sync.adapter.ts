@@ -33,9 +33,11 @@ export class AniListSyncAdapter implements AnimeSyncPort {
 
   private toDomain(a: AniListAnime): AnimeEntity {
     const studioName = a.studios.nodes[0]?.name ?? null;
+    const title = a.title.romaji ?? a.title.english ?? a.title.native ?? "Untitled";
 
     return AnimeEntity.create(`anilist-${a.id}`, {
-      title: a.title.romaji ?? a.title.english ?? a.title.native ?? "Untitled",
+      slug: slugify(title) || `anilist-${a.id}`,
+      title,
       titleJp: a.title.native,
       titleEn: a.title.english,
       synopsis: a.description,

@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import type { Prisma } from "@miru/db";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { slugify } from "@shared/utils/slugify";
+import { generateUniqueAnimeSlug } from "@shared/infrastructure/prisma/generate-unique-slug";
 import { AnimeRepositoryPort, AnimeFilters } from "../../domain/ports/anime-repository.port";
 import { AnimeEntity } from "../../domain/entities/anime.entity";
 import { PaginatedResult, PaginatedQuery } from "@shared/domain/repository.port";
@@ -22,6 +23,14 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
   async findById(id: string): Promise<AnimeEntity | null> {
     const record = await this.prisma.anime.findUnique({
       where: { id },
+      include: INCLUDE,
+    });
+    return record ? this.toDomain(record) : null;
+  }
+
+  async findBySlug(slug: string): Promise<AnimeEntity | null> {
+    const record = await this.prisma.anime.findUnique({
+      where: { slug },
       include: INCLUDE,
     });
     return record ? this.toDomain(record) : null;
@@ -91,7 +100,29 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
    */
   async save(entity: AnimeEntity): Promise<void> {
     const snap = entity.toSnapshot();
-    const payload = this.toPersistence(snap);
+
+    const existingBySlug = await this.prisma.anime.findUnique({
+      where: { slug: snap.slug },
+      select: { id: true, externalAnilistId: true },
+    });
+    const sameEntity =
+      existingBySlug != null &&
+      (existingBySlug.id === snap.id ||
+        (snap.externalAnilistId != null &&
+          existingBySlug.externalAnilistId === snap.externalAnilistId));
+
+    const finalSlug =
+      existingBySlug && !sameEntity
+        ? await generateUniqueAnimeSlug(
+            this.prisma,
+            snap.title,
+            snap.year,
+            snap.externalAnilistId,
+            snap.id,
+          )
+        : snap.slug;
+
+    const payload = this.toPersistence({ ...snap, slug: finalSlug });
     const where = snap.externalAnilistId != null
       ? { externalAnilistId: snap.externalAnilistId }
       : { id: snap.id };
@@ -107,6 +138,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
 
   private toDomain(record: AnimeRecord): AnimeEntity {
     return AnimeEntity.create(record.id, {
+      slug: record.slug,
       title: record.title,
       titleJp: record.titleJp,
       titleEn: record.titleEn,
@@ -135,6 +167,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
 
   private toPersistence(snap: ReturnType<AnimeEntity["toSnapshot"]>) {
     const base = {
+      slug: snap.slug,
       title: snap.title,
       titleJp: snap.titleJp,
       titleEn: snap.titleEn,

@@ -12,11 +12,11 @@ export class GetAnimeDetailUseCase implements UseCase<string, AnimeEntity> {
     private readonly animeRepository: AnimeRepositoryPort,
   ) {}
 
-  async execute(id: string): Promise<AnimeEntity> {
-    const anime = await this.animeRepository.findById(id);
+  async execute(slug: string): Promise<AnimeEntity> {
+    const anime = await this.animeRepository.findBySlug(slug);
 
     if (!anime) {
-      throw new AnimeNotFoundException(id);
+      throw new AnimeNotFoundException(slug);
     }
 
     return anime;

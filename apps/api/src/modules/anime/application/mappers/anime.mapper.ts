@@ -9,6 +9,7 @@ export class AnimeMapper {
   static toCard(entity: AnimeEntity): AnimeCard {
     return {
       id: entity.id,
+      slug: entity.slug,
       title: entity.title,
       titleJp: entity.titleJp,
       coverUrl: entity.coverUrl,

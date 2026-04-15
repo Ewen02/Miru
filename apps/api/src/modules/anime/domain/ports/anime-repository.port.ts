@@ -13,5 +13,6 @@ export interface AnimeFilters {
 export interface AnimeRepositoryPort extends RepositoryPort<AnimeEntity> {
   findByFilters(filters: AnimeFilters, pagination: PaginatedQuery): Promise<PaginatedResult<AnimeEntity>>;
   findByAnilistId(anilistId: number): Promise<AnimeEntity | null>;
+  findBySlug(slug: string): Promise<AnimeEntity | null>;
   findTrending(limit: number): Promise<AnimeEntity[]>;
 }

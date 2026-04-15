@@ -33,7 +33,9 @@ export class ImportTrendingUseCase implements UseCase<ImportTrendingInput, Impor
 
       if (entities.length === 0) break;
 
-      await Promise.all(entities.map((entity) => this.repo.save(entity)));
+      for (const entity of entities) {
+        await this.repo.save(entity);
+      }
       imported += entities.length;
 
       this.logger.log(`Page ${page}/${pages}: ${entities.length} anime imported (total ${imported})`);

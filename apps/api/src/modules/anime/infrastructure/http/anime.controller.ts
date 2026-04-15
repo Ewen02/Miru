@@ -31,9 +31,9 @@ export class AnimeController {
     };
   }
 
-  @Get(":id")
-  async detail(@Param("id") id: string) {
-    const anime = await this.getAnimeDetail.execute(id);
+  @Get(":slug")
+  async detail(@Param("slug") slug: string) {
+    const anime = await this.getAnimeDetail.execute(slug);
     return AnimeMapper.toDetail(anime);
   }
 }

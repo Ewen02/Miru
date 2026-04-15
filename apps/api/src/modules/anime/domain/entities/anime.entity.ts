@@ -11,6 +11,7 @@ export interface EpisodeSummary {
 }
 
 interface AnimeProps {
+  slug: string;
   title: string;
   titleJp: string | null;
   titleEn: string | null;
@@ -31,6 +32,10 @@ interface AnimeProps {
 }
 
 export class AnimeEntity extends Entity<AnimeProps> {
+  get slug(): string {
+    return this.props.slug;
+  }
+
   get title(): string {
     return this.props.title;
   }

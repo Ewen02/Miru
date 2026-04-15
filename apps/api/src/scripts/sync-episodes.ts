@@ -5,6 +5,7 @@ import { ImportEpisodesUseCase } from "../modules/sync/application/use-cases/imp
 
 async function main() {
   const limit = process.env.LIMIT ? Number(process.env.LIMIT) : undefined;
+  const airingOnly = process.env.AIRING_ONLY === "true";
 
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ["log", "warn", "error"],
@@ -12,7 +13,7 @@ async function main() {
 
   try {
     const useCase = app.get(ImportEpisodesUseCase);
-    const result = await useCase.execute({ limit });
+    const result = await useCase.execute({ limit, airingOnly });
     console.log(
       `✓ Episodes sync done: ${result.episodesImported} episode(s) across ${result.animesProcessed} anime (skipped ${result.skipped})`,
     );

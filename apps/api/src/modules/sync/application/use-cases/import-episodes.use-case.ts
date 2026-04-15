@@ -6,6 +6,7 @@ import { ANIME_REPOSITORY, EPISODE_SYNC } from "@modules/anime/application/token
 
 interface ImportEpisodesInput {
   limit?: number;
+  airingOnly?: boolean;
 }
 
 interface ImportEpisodesOutput {
@@ -15,9 +16,7 @@ interface ImportEpisodesOutput {
 }
 
 @Injectable()
-export class ImportEpisodesUseCase
-  implements UseCase<ImportEpisodesInput, ImportEpisodesOutput>
-{
+export class ImportEpisodesUseCase implements UseCase<ImportEpisodesInput, ImportEpisodesOutput> {
   private readonly logger = new Logger(ImportEpisodesUseCase.name);
 
   constructor(
@@ -25,9 +24,11 @@ export class ImportEpisodesUseCase
     @Inject(EPISODE_SYNC) private readonly sync: EpisodeSyncPort,
   ) {}
 
-  async execute({ limit }: ImportEpisodesInput): Promise<ImportEpisodesOutput> {
-    const animes = await this.repo.findAllWithMalId(limit);
-    this.logger.log(`Found ${animes.length} anime with MAL id`);
+  async execute({ limit, airingOnly }: ImportEpisodesInput): Promise<ImportEpisodesOutput> {
+    const animes = await this.repo.findAllWithMalId({ limit, airingOnly });
+    this.logger.log(
+      `Found ${animes.length} anime with MAL id${airingOnly ? " (airing only)" : ""}`,
+    );
 
     let episodesImported = 0;
     let skipped = 0;
@@ -42,14 +43,10 @@ export class ImportEpisodesUseCase
         const episodes = await this.sync.fetchEpisodes(malId);
         await this.repo.saveEpisodes(anime.id, episodes);
         episodesImported += episodes.length;
-        this.logger.log(
-          `"${anime.title}" (MAL ${malId}) → ${episodes.length} episode(s)`,
-        );
+        this.logger.log(`"${anime.title}" (MAL ${malId}) → ${episodes.length} episode(s)`);
       } catch (err) {
         skipped += 1;
-        this.logger.warn(
-          `Failed for "${anime.title}" (MAL ${malId}): ${(err as Error).message}`,
-        );
+        this.logger.warn(`Failed for "${anime.title}" (MAL ${malId}): ${(err as Error).message}`);
       }
       await new Promise((r) => setTimeout(r, 700));
     }

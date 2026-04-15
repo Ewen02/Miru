@@ -89,11 +89,16 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     };
   }
 
-  async findAllWithMalId(limit?: number): Promise<AnimeEntity[]> {
+  async findAllWithMalId(
+    options: { limit?: number; airingOnly?: boolean } = {},
+  ): Promise<AnimeEntity[]> {
+    const where: Prisma.AnimeWhereInput = { externalMalId: { not: null } };
+    if (options.airingOnly) where.status = AnimeStatus.AIRING;
+
     const records = await this.prisma.anime.findMany({
-      where: { externalMalId: { not: null } },
+      where,
       include: INCLUDE,
-      take: limit,
+      take: options.limit,
       orderBy: { averageRating: "desc" },
     });
     return records.map((r) => this.toDomain(r));
@@ -159,9 +164,10 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
         : snap.slug;
 
     const payload = this.toPersistence({ ...snap, slug: finalSlug });
-    const where = snap.externalAnilistId != null
-      ? { externalAnilistId: snap.externalAnilistId }
-      : { id: snap.id };
+    const where =
+      snap.externalAnilistId != null
+        ? { externalAnilistId: snap.externalAnilistId }
+        : { id: snap.id };
 
     const saved = await this.prisma.anime.upsert({
       where,
@@ -175,10 +181,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     }
   }
 
-  private async syncCharacters(
-    animeId: string,
-    characters: CharacterSummary[],
-  ): Promise<void> {
+  private async syncCharacters(animeId: string, characters: CharacterSummary[]): Promise<void> {
     for (const c of characters) {
       const character = await this.prisma.character.upsert({
         where: { externalAnilistId: c.externalAnilistId },
@@ -296,27 +299,29 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       externalMalId: snap.externalMalId,
     };
 
-    const studio = snap.studioName && snap.studioSlug
-      ? {
-          studio: {
-            connectOrCreate: {
-              where: { slug: snap.studioSlug },
-              create: { name: snap.studioName, slug: snap.studioSlug },
+    const studio =
+      snap.studioName && snap.studioSlug
+        ? {
+            studio: {
+              connectOrCreate: {
+                where: { slug: snap.studioSlug },
+                create: { name: snap.studioName, slug: snap.studioSlug },
+              },
             },
-          },
-        }
-      : {};
+          }
+        : {};
 
-    const genres = snap.genres.length > 0
-      ? {
-          genres: {
-            connectOrCreate: snap.genres.map((name) => {
-              const slug = slugify(name);
-              return { where: { slug }, create: { name, slug } };
-            }),
-          },
-        }
-      : {};
+    const genres =
+      snap.genres.length > 0
+        ? {
+            genres: {
+              connectOrCreate: snap.genres.map((name) => {
+                const slug = slugify(name);
+                return { where: { slug }, create: { name, slug } };
+              }),
+            },
+          }
+        : {};
 
     return { ...base, ...studio, ...genres };
   }

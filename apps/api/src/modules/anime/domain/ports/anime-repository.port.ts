@@ -12,10 +12,13 @@ export interface AnimeFilters {
 }
 
 export interface AnimeRepositoryPort extends RepositoryPort<AnimeEntity> {
-  findByFilters(filters: AnimeFilters, pagination: PaginatedQuery): Promise<PaginatedResult<AnimeEntity>>;
+  findByFilters(
+    filters: AnimeFilters,
+    pagination: PaginatedQuery,
+  ): Promise<PaginatedResult<AnimeEntity>>;
   findByAnilistId(anilistId: number): Promise<AnimeEntity | null>;
   findBySlug(slug: string): Promise<AnimeEntity | null>;
   findTrending(limit: number): Promise<AnimeEntity[]>;
-  findAllWithMalId(limit?: number): Promise<AnimeEntity[]>;
+  findAllWithMalId(options?: { limit?: number; airingOnly?: boolean }): Promise<AnimeEntity[]>;
   saveEpisodes(animeId: string, episodes: EpisodeInput[]): Promise<void>;
 }

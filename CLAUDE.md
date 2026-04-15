@@ -66,4 +66,4 @@ Les guides de setup initial (longs, one-shot) sont dans [.claude/docs/](.claude/
 
 ## Env
 
-Variables dans `.env` (template : `.env.example`) : `DATABASE_URL`, `BETTER_AUTH_SECRET`, `NEXT_PUBLIC_API_URL`.
+Variables dans `.env` (template : `.env.example`) : `DATABASE_URL`, `BETTER_AUTH_SECRET`, `NEXT_PUBLIC_API_URL`, `ENABLE_SCHEDULER` (cron sync automatique, default `false`).

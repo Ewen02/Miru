@@ -1,6 +1,6 @@
-// Miru — schema Prisma minimal transitoire.
-// Permet au client de compiler avec le module anime hexagonal.
-// Le schema définitif (users, watchlist, reviews, characters, etc.) viendra à l'étape data modeling.
+// Miru — schema Prisma cœur (MVP explorer, sans auth).
+// Sources : AnimeEntity (domain) et AniListAnime (@miru/anilist).
+// Pas de User/Session/Watchlist/Review tant que l'auth n'est pas câblée.
 
 generator client {
   provider = "prisma-client-js"
@@ -12,24 +12,39 @@ datasource db {
 }
 
 model Anime {
-  id                 String   @id @default(cuid())
-  title              String
-  titleJp            String?
-  titleEn            String?
-  synopsis           String?
-  status             String
-  format             String
-  episodeCount       Int?
-  year               Int?
-  studioName         String?
-  coverUrl           String?
-  bannerUrl          String?
-  trailerUrl         String?
-  averageRating      Float?
-  externalAnilistId  Int?     @unique
-  genres             Genre[]  @relation("AnimeGenres")
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                String    @id @default(cuid())
+  externalAnilistId Int?      @unique
+  title             String
+  titleJp           String?
+  titleEn           String?
+  synopsis          String?   @db.Text
+  status            String
+  format            String
+  episodeCount      Int?
+  year              Int?
+  coverUrl          String?
+  bannerUrl         String?
+  trailerUrl        String?
+  averageRating     Float?
+
+  studioId          String?
+  studio            Studio?   @relation(fields: [studioId], references: [id])
+  genres            Genre[]   @relation("AnimeGenres")
+  episodes          Episode[]
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([status])
+  @@index([year])
+  @@index([averageRating])
+}
+
+model Studio {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  slug   String  @unique
+  animes Anime[]
 }
 
 model Genre {
@@ -37,4 +52,20 @@ model Genre {
   name   String  @unique
   slug   String  @unique
   animes Anime[] @relation("AnimeGenres")
+}
+
+model Episode {
+  id        String    @id @default(cuid())
+  animeId   String
+  anime     Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  number    Int
+  title     String?
+  thumbnail String?
+  url       String?
+  site      String?
+  duration  Int?
+  airedAt   DateTime?
+
+  @@unique([animeId, number])
+  @@index([animeId])
 }

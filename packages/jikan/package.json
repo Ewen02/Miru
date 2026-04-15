@@ -1,0 +1,17 @@
+{
+  "name": "@miru/jikan",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@miru/config": "workspace:*",
+    "@types/node": "^20",
+    "typescript": "^5"
+  }
+}

@@ -25,8 +25,8 @@ export async function fetchAnimeCatalog(params?: {
   return res.json() as Promise<Paginated<AnimeCard>>;
 }
 
-export async function fetchAnimeDetail(id: string): Promise<AnimeDetail | null> {
-  const url = new URL(`/animes/${encodeURIComponent(id)}`, API_URL);
+export async function fetchAnimeDetail(slug: string): Promise<AnimeDetail | null> {
+  const url = new URL(`/animes/${encodeURIComponent(slug)}`, API_URL);
   const res = await fetch(url, { next: { revalidate: 60 } });
   if (res.status === 404) return null;
   if (!res.ok) {

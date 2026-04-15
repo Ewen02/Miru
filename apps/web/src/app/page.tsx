@@ -31,7 +31,7 @@ export default async function CatalogPage() {
           {catalog.data.map((anime) => (
             <Link
               key={anime.id}
-              href={`/anime/${anime.id}`}
+              href={`/anime/${anime.slug}`}
               className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
             >
               <AnimeCard

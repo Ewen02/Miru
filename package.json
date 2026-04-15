@@ -2,7 +2,11 @@
   "name": "miru",
   "private": true,
   "scripts": {
+    "predev": "docker compose up -d --wait && pnpm --filter @miru/db exec prisma db push --skip-generate && pnpm turbo build --filter=@miru/types --filter=@miru/anilist --filter=@miru/db",
     "dev": "turbo dev",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d --wait && pnpm --filter @miru/db exec prisma db push",
     "build": "turbo build",
     "lint": "turbo lint",
     "type-check": "turbo type-check",

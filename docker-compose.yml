@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: miru-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: miru
+      POSTGRES_PASSWORD: miru
+      POSTGRES_DB: miru
+    ports:
+      - "5433:5432"
+    volumes:
+      - miru-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miru -d miru"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  miru-postgres-data:

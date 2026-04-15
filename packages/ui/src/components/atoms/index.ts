@@ -1,3 +1,3 @@
-// Atoms — éléments indivisibles : Text, Button, Badge, Icon, Input, etc.
-// Ajouter les exports au fur et à mesure.
-export {};
+// Atoms — éléments indivisibles : Text, Button, Badge, Icon, Input, Spinner.
+export { Input } from "./input";
+export { Button } from "./button";

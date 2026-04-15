@@ -54,8 +54,14 @@ export interface EpisodeItem {
   id: string;
   number: number;
   title: string | null;
+  titleJp: string | null;
+  titleRomaji: string | null;
   duration: number | null;
   airedAt: Date | null;
+  filler: boolean;
+  recap: boolean;
+  thumbnail: string | null;
+  url: string | null;
 }
 
 export interface AnimeDetail extends AnimeCard {

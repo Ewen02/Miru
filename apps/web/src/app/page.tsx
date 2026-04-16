@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { AnimeCard, Pagination } from "@miru/ui";
+import { AnimeCard, CatalogToolbar, Pagination } from "@miru/ui";
 import { fetchAnimeCatalog, fetchGenres, type CatalogFilters } from "@/lib/api";
-import { CatalogToolbar } from "./_components/catalog-toolbar";
 
 interface CatalogPageProps {
   searchParams: Promise<{

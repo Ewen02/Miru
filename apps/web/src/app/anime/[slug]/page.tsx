@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { AnimeDetailTemplate, AnimeHero, CharacterCard, EpisodeRow } from "@miru/ui";
-import { fetchAnimeCharacters, fetchAnimeDetail } from "@/lib/api";
+import { fetchAnimeDetail } from "@/lib/api";
 import type { CharacterCard as CharacterCardDTO } from "@miru/types";
 
 interface AnimeDetailPageProps {
@@ -37,10 +37,7 @@ export async function generateMetadata({ params }: AnimeDetailPageProps): Promis
 
 export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) {
   const { slug } = await params;
-  const [anime, characters] = await Promise.all([
-    fetchAnimeDetail(slug),
-    fetchAnimeCharacters(slug),
-  ]);
+  const anime = await fetchAnimeDetail(slug);
   if (!anime) notFound();
 
   return (
@@ -74,7 +71,11 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
         )
       }
       info={<AnimeInfoList anime={anime} />}
-      characters={characters.length > 0 ? <CharactersSection characters={characters} /> : undefined}
+      characters={
+        anime.characters.length > 0 ? (
+          <CharactersSection characters={anime.characters} />
+        ) : undefined
+      }
       episodes={<EpisodesSection episodes={anime.episodes} />}
     />
   );

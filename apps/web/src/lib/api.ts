@@ -1,4 +1,4 @@
-import type { AnimeCard, AnimeDetail, CharacterCard, GenreCard } from "@miru/types";
+import type { AnimeCard, AnimeDetail, GenreCard } from "@miru/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -49,16 +49,6 @@ export async function fetchAnimeDetail(slug: string): Promise<AnimeDetail | null
     throw new Error(`Miru API ${res.status}: ${await res.text()}`);
   }
   return res.json() as Promise<AnimeDetail>;
-}
-
-export async function fetchAnimeCharacters(slug: string): Promise<CharacterCard[]> {
-  const url = new URL(`/animes/${encodeURIComponent(slug)}/characters`, API_URL);
-  const res = await fetch(url, { next: { revalidate: 60 } });
-  if (res.status === 404) return [];
-  if (!res.ok) {
-    throw new Error(`Miru API ${res.status}: ${await res.text()}`);
-  }
-  return res.json() as Promise<CharacterCard[]>;
 }
 
 export async function fetchGenres(): Promise<GenreCard[]> {

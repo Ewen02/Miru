@@ -180,6 +180,13 @@ importers:
         version: 5.9.3
 
   packages/anilist:
+    dependencies:
+      '@miru/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      zod:
+        specifier: ^4
+        version: 4.3.6
     devDependencies:
       '@miru/config':
         specifier: workspace:*
@@ -215,7 +222,26 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  packages/http-client:
+    devDependencies:
+      '@miru/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.39
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
   packages/jikan:
+    dependencies:
+      '@miru/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      zod:
+        specifier: ^4
+        version: 4.3.6
     devDependencies:
       '@miru/config':
         specifier: workspace:*
@@ -241,6 +267,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@miru/types':
+        specifier: workspace:*
+        version: link:../types
       clsx:
         specifier: ^2
         version: 2.1.1
@@ -3945,6 +3974,9 @@ packages:
   yoctocolors-cjs@2.1.3:
     resolution: {integrity: sha512-U/PBtDf35ff0D8X8D0jfdzHYEPFxAI7jJlxZXwCSez5M3190m+QobIfh+sWDWSHMCWWJN2AWamkegn6vr6YBTw==}
     engines: {node: '>=18'}
+
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
 snapshots:
 
@@ -7878,3 +7910,5 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yoctocolors-cjs@2.1.3: {}
+
+  zod@4.3.6: {}

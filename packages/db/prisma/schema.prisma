@@ -12,35 +12,35 @@ datasource db {
 }
 
 model Anime {
-  id                String    @id @default(cuid())
-  externalAnilistId Int?      @unique
-  externalMalId     Int?      @unique
-  slug              String    @unique
+  id                String  @id @default(cuid())
+  externalAnilistId Int?    @unique
+  externalMalId     Int?    @unique
+  slug              String  @unique
   title             String
   titleJp           String?
   titleEn           String?
-  synopsis          String?   @db.Text
+  synopsis          String? @db.Text
   status            String
   format            String
   episodeCount      Int?
   year              Int?
   coverUrl          String?
   bannerUrl         String?
-  trailerUrl        String?
   averageRating     Float?
 
-  studioId          String?
-  studio            Studio?   @relation(fields: [studioId], references: [id])
-  genres            Genre[]   @relation("AnimeGenres")
-  episodes          Episode[]
-  characters        AnimeCharacter[]
+  studioId   String?
+  studio     Studio?          @relation(fields: [studioId], references: [id])
+  genres     Genre[]          @relation("AnimeGenres")
+  episodes   Episode[]
+  characters AnimeCharacter[]
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([year])
   @@index([averageRating])
+  @@index([year, averageRating])
 }
 
 model Studio {
@@ -58,20 +58,20 @@ model Genre {
 }
 
 model Episode {
-  id        String    @id @default(cuid())
-  animeId   String
-  anime     Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  id          String    @id @default(cuid())
+  animeId     String
+  anime       Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
   number      Int
   title       String?
   titleJp     String?
   titleRomaji String?
-  filler      Boolean  @default(false)
-  recap       Boolean  @default(false)
-  thumbnail String?
-  url       String?
-  site      String?
-  duration  Int?
-  airedAt   DateTime?
+  filler      Boolean   @default(false)
+  recap       Boolean   @default(false)
+  thumbnail   String?
+  url         String?
+  site        String?
+  duration    Int?
+  airedAt     DateTime?
 
   @@unique([animeId, number])
   @@index([animeId])
@@ -89,10 +89,13 @@ model Character {
 }
 
 model VoiceActor {
-  id        String           @id @default(cuid())
-  name      String           @unique
-  animes    AnimeCharacter[]
-  createdAt DateTime         @default(now())
+  id                String           @id @default(cuid())
+  externalAnilistId Int?             @unique
+  name              String
+  animes            AnimeCharacter[]
+  createdAt         DateTime         @default(now())
+
+  @@index([name])
 }
 
 model AnimeCharacter {

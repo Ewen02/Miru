@@ -73,8 +73,8 @@ export interface AnimeDetail extends AnimeCard {
   titleEn: string | null;
   synopsis: string | null;
   episodeCount: number | null;
-  trailerUrl: string | null;
   episodes: EpisodeItem[];
+  characters: CharacterCard[];
 }
 
 export interface CharacterCard {

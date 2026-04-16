@@ -3,6 +3,7 @@ import { UseCase } from "@shared/domain/use-case.base";
 import { AnimeRepositoryPort } from "@modules/anime/domain/ports/anime-repository.port";
 import { EpisodeSyncPort } from "@modules/anime/domain/ports/episode-sync.port";
 import { ANIME_REPOSITORY, EPISODE_SYNC } from "@modules/anime/application/tokens";
+import { EnrichEpisodesUseCase } from "./enrich-episodes.use-case";
 
 interface ImportEpisodesInput {
   limit?: number;
@@ -12,6 +13,7 @@ interface ImportEpisodesInput {
 interface ImportEpisodesOutput {
   animesProcessed: number;
   episodesImported: number;
+  episodesEnriched: number;
   skipped: number;
 }
 
@@ -22,6 +24,7 @@ export class ImportEpisodesUseCase implements UseCase<ImportEpisodesInput, Impor
   constructor(
     @Inject(ANIME_REPOSITORY) private readonly repo: AnimeRepositoryPort,
     @Inject(EPISODE_SYNC) private readonly sync: EpisodeSyncPort,
+    private readonly enrich: EnrichEpisodesUseCase,
   ) {}
 
   async execute({ limit, airingOnly }: ImportEpisodesInput): Promise<ImportEpisodesOutput> {
@@ -48,12 +51,14 @@ export class ImportEpisodesUseCase implements UseCase<ImportEpisodesInput, Impor
         skipped += 1;
         this.logger.warn(`Failed for "${anime.title}" (MAL ${malId}): ${(err as Error).message}`);
       }
-      await new Promise((r) => setTimeout(r, 700));
     }
+
+    const enrichResult = await this.enrich.execute({ limit, airingOnly });
 
     return {
       animesProcessed: animes.length - skipped,
       episodesImported,
+      episodesEnriched: enrichResult.episodesEnriched,
       skipped,
     };
   }

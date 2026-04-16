@@ -1,14 +1,14 @@
 import { Controller, Get } from "@nestjs/common";
+import type { GenreCard } from "@miru/types";
 import { ListGenresUseCase } from "../../application/use-cases/list-genres.use-case";
-import { GenreMapper } from "../../application/mappers/genre.mapper";
 
 @Controller("genres")
 export class GenreController {
   constructor(private readonly listGenres: ListGenresUseCase) {}
 
   @Get()
-  async list() {
+  async list(): Promise<GenreCard[]> {
     const genres = await this.listGenres.execute();
-    return GenreMapper.toCardList(genres);
+    return genres.map((g) => ({ slug: g.slug, name: g.name }));
   }
 }

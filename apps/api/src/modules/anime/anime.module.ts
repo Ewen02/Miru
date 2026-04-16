@@ -1,10 +1,18 @@
 import { Module } from "@nestjs/common";
+import { AniListClient } from "@miru/anilist";
+import { JikanClient } from "@miru/jikan";
 
 // Application
 import { GetAnimeCatalogUseCase } from "./application/use-cases/get-anime-catalog.use-case";
 import { GetAnimeDetailUseCase } from "./application/use-cases/get-anime-detail.use-case";
 import { GetAnimeCharactersUseCase } from "./application/use-cases/get-anime-characters.use-case";
-import { ANIME_REPOSITORY, ANIME_SYNC, EPISODE_SYNC } from "./application/tokens";
+import {
+  ANILIST_CLIENT,
+  ANIME_REPOSITORY,
+  ANIME_SYNC,
+  EPISODE_SYNC,
+  JIKAN_CLIENT,
+} from "./application/tokens";
 
 // Infrastructure
 import { AnimeController } from "./infrastructure/http/anime.controller";
@@ -22,6 +30,8 @@ import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
     GetAnimeCatalogUseCase,
     GetAnimeDetailUseCase,
     GetAnimeCharactersUseCase,
+    { provide: ANILIST_CLIENT, useFactory: () => new AniListClient() },
+    { provide: JIKAN_CLIENT, useFactory: () => new JikanClient() },
     { provide: ANIME_REPOSITORY, useClass: PrismaAnimeRepository },
     { provide: ANIME_SYNC, useClass: AniListSyncAdapter },
     { provide: EPISODE_SYNC, useClass: JikanEpisodeAdapter },

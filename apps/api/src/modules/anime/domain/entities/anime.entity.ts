@@ -9,7 +9,8 @@ export interface CharacterSummary {
   nameJp: string | null;
   imageUrl: string | null;
   role: CharacterRole;
-  voiceActor: string | null;
+  voiceActorAnilistId: number | null;
+  voiceActorName: string | null;
   order: number;
 }
 
@@ -41,7 +42,6 @@ interface AnimeProps {
   studioSlug: string | null;
   coverUrl: string | null;
   bannerUrl: string | null;
-  trailerUrl: string | null;
   averageRating: number | null;
   externalAnilistId: number | null;
   externalMalId: number | null;
@@ -105,10 +105,6 @@ export class AnimeEntity extends Entity<AnimeProps> {
 
   get bannerUrl(): string | null {
     return this.props.bannerUrl;
-  }
-
-  get trailerUrl(): string | null {
-    return this.props.trailerUrl;
   }
 
   get year(): number | null {

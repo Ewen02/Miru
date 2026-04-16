@@ -7,3 +7,5 @@
 export const ANIME_REPOSITORY = Symbol("ANIME_REPOSITORY");
 export const ANIME_SYNC = Symbol("ANIME_SYNC");
 export const EPISODE_SYNC = Symbol("EPISODE_SYNC");
+export const ANILIST_CLIENT = Symbol("ANILIST_CLIENT");
+export const JIKAN_CLIENT = Symbol("JIKAN_CLIENT");

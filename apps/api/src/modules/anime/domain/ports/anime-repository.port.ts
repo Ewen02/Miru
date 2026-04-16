@@ -20,5 +20,15 @@ export interface AnimeRepositoryPort extends RepositoryPort<AnimeEntity> {
   findBySlug(slug: string): Promise<AnimeEntity | null>;
   findTrending(limit: number): Promise<AnimeEntity[]>;
   findAllWithMalId(options?: { limit?: number; airingOnly?: boolean }): Promise<AnimeEntity[]>;
+  findAllWithAnilistId(options?: { limit?: number; airingOnly?: boolean }): Promise<AnimeEntity[]>;
   saveEpisodes(animeId: string, episodes: EpisodeInput[]): Promise<void>;
+  enrichEpisodes(
+    animeId: string,
+    updates: Array<{
+      number: number;
+      thumbnail: string | null;
+      url: string | null;
+      site: string | null;
+    }>,
+  ): Promise<number>;
 }

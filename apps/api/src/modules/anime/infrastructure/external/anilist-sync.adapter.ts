@@ -1,16 +1,18 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Inject, Logger } from "@nestjs/common";
 import { AniListClient } from "@miru/anilist";
 import type { AniListAnime } from "@miru/anilist";
 import { AnimeStatus, AnimeFormat, CharacterRole } from "@miru/types";
 import { slugify } from "@shared/utils/slugify";
 import { cleanSynopsis } from "@shared/utils/clean-synopsis";
-import { AnimeSyncPort } from "../../domain/ports/anime-sync.port";
+import { AnimeSyncPort, StreamingEpisodeInput } from "../../domain/ports/anime-sync.port";
 import { AnimeEntity, CharacterSummary } from "../../domain/entities/anime.entity";
+import { ANILIST_CLIENT } from "../../application/tokens";
 
 @Injectable()
 export class AniListSyncAdapter implements AnimeSyncPort {
   private readonly logger = new Logger(AniListSyncAdapter.name);
-  private readonly client = new AniListClient();
+
+  constructor(@Inject(ANILIST_CLIENT) private readonly client: AniListClient) {}
 
   async fetchTrending(page: number, perPage: number): Promise<AnimeEntity[]> {
     const list = await this.client.getTrending(page, perPage);
@@ -32,36 +34,67 @@ export class AniListSyncAdapter implements AnimeSyncPort {
     return list.map((a) => this.toDomain(a));
   }
 
+  async fetchStreamingEpisodes(externalId: number): Promise<StreamingEpisodeInput[]> {
+    try {
+      const a = await this.client.getById(externalId);
+      return (a.streamingEpisodes ?? [])
+        .map((se, idx) => {
+          const number = this.parseEpisodeNumber(se.title) ?? idx + 1;
+          return {
+            number,
+            thumbnail: se.thumbnail ?? null,
+            url: se.url ?? null,
+            site: se.site ?? null,
+          };
+        })
+        .filter((se) => se.thumbnail != null || se.url != null);
+    } catch (err) {
+      this.logger.warn(`fetchStreamingEpisodes(${externalId}) failed: ${(err as Error).message}`);
+      return [];
+    }
+  }
+
+  private parseEpisodeNumber(title: string | null | undefined): number | null {
+    if (!title) return null;
+    const match = title.match(/(?:episode|ep|第)\s*(\d+)/i);
+    if (match) return Number(match[1]);
+    const loose = title.match(/^\s*(\d+)/);
+    return loose ? Number(loose[1]) : null;
+  }
+
   private toDomain(a: AniListAnime): AnimeEntity {
     const studioName = a.studios.nodes[0]?.name ?? null;
     const title = a.title.romaji ?? a.title.english ?? a.title.native ?? "Untitled";
 
-    const characters: CharacterSummary[] = (a.characters?.edges ?? []).map((edge, idx) => ({
-      id: null,
-      externalAnilistId: edge.node.id,
-      name: edge.node.name.full,
-      nameJp: edge.node.name.native,
-      imageUrl: edge.node.image.large,
-      role: this.mapRole(edge.role),
-      voiceActor: edge.voiceActors[0]?.name.full ?? null,
-      order: idx,
-    }));
+    const characters: CharacterSummary[] = (a.characters?.edges ?? []).map((edge, idx) => {
+      const va = edge.voiceActors[0] ?? null;
+      return {
+        id: null,
+        externalAnilistId: edge.node.id,
+        name: edge.node.name.full,
+        nameJp: edge.node.name.native ?? null,
+        imageUrl: edge.node.image.large ?? null,
+        role: this.mapRole(edge.role),
+        voiceActorAnilistId: va?.id ?? null,
+        voiceActorName: va?.name.full ?? null,
+        order: idx,
+      };
+    });
 
     return AnimeEntity.create(`anilist-${a.id}`, {
       slug: slugify(title) || `anilist-${a.id}`,
       title,
       titleJp: a.title.native,
       titleEn: a.title.english,
-      synopsis: cleanSynopsis(a.description),
-      status: this.mapStatus(a.status),
-      format: this.mapFormat(a.format),
-      episodeCount: a.episodes,
-      year: a.seasonYear,
+      synopsis: cleanSynopsis(a.description ?? null),
+      status: this.mapStatus(a.status ?? null),
+      format: this.mapFormat(a.format ?? null),
+      episodeCount: a.episodes ?? null,
+      year: a.seasonYear ?? null,
       studioName,
       studioSlug: studioName ? slugify(studioName) : null,
       coverUrl: a.coverImage.extraLarge ?? a.coverImage.large ?? null,
-      bannerUrl: a.bannerImage,
-      trailerUrl: null,
+      bannerUrl: a.bannerImage ?? null,
       averageRating: a.averageScore != null ? a.averageScore / 10 : null,
       externalAnilistId: a.id,
       externalMalId: a.idMal,

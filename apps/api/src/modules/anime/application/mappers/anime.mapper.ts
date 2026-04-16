@@ -36,7 +36,7 @@ export class AnimeMapper {
         nameJp: c.nameJp,
         imageUrl: c.imageUrl,
         role: c.role,
-        voiceActor: c.voiceActor,
+        voiceActor: c.voiceActorName,
       }));
   }
 
@@ -46,7 +46,6 @@ export class AnimeMapper {
       titleEn: entity.titleEn,
       synopsis: entity.synopsis,
       episodeCount: entity.episodeCount,
-      trailerUrl: entity.trailerUrl,
       episodes: entity.episodes.map((e) => ({
         id: e.id,
         number: e.number,
@@ -60,6 +59,7 @@ export class AnimeMapper {
         thumbnail: e.thumbnail,
         url: e.url,
       })),
+      characters: AnimeMapper.toCharacterCards(entity.characters),
     };
   }
 }

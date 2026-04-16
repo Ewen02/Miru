@@ -19,7 +19,7 @@ export const MEDIA_FRAGMENT = `
       edges {
         role
         node { id name { full native } image { large } }
-        voiceActors(language: JAPANESE) { name { full } }
+        voiceActors(language: JAPANESE) { id name { full } }
       }
     }
     streamingEpisodes { title thumbnail url site }

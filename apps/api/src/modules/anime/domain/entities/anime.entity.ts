@@ -28,6 +28,17 @@ export interface EpisodeSummary {
   url: string | null;
 }
 
+export type RelationType = "SEQUEL" | "PREQUEL" | "SIDE_STORY" | "SPIN_OFF";
+
+export interface AnimeRelationSummary {
+  relatedExternalAnilistId: number;
+  relationType: RelationType;
+  title: string;
+  coverUrl: string | null;
+  format: string | null;
+  year: number | null;
+}
+
 interface AnimeProps {
   slug: string;
   title: string;
@@ -42,12 +53,14 @@ interface AnimeProps {
   studioSlug: string | null;
   coverUrl: string | null;
   bannerUrl: string | null;
+  accentHex: string | null;
   averageRating: number | null;
   externalAnilistId: number | null;
   externalMalId: number | null;
   genres: string[];
   episodes: EpisodeSummary[];
   characters: CharacterSummary[];
+  relations: AnimeRelationSummary[];
 }
 
 export class AnimeEntity extends Entity<AnimeProps> {
@@ -95,6 +108,10 @@ export class AnimeEntity extends Entity<AnimeProps> {
     return [...this.props.characters];
   }
 
+  get relations(): AnimeRelationSummary[] {
+    return [...this.props.relations];
+  }
+
   get averageRating(): number | null {
     return this.props.averageRating;
   }
@@ -105,6 +122,10 @@ export class AnimeEntity extends Entity<AnimeProps> {
 
   get bannerUrl(): string | null {
     return this.props.bannerUrl;
+  }
+
+  get accentHex(): string | null {
+    return this.props.accentHex;
   }
 
   get year(): number | null {

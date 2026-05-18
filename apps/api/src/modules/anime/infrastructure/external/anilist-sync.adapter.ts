@@ -1,11 +1,28 @@
 import { Injectable, Inject, Logger } from "@nestjs/common";
 import { AniListClient } from "@miru/anilist";
 import type { AniListAnime } from "@miru/anilist";
+import { extractAccentHex } from "@miru/http-client";
 import { AnimeStatus, AnimeFormat, CharacterRole } from "@miru/types";
 import { slugify } from "@shared/utils/slugify";
 import { cleanSynopsis } from "@shared/utils/clean-synopsis";
-import { AnimeSyncPort, StreamingEpisodeInput } from "../../domain/ports/anime-sync.port";
-import { AnimeEntity, CharacterSummary } from "../../domain/entities/anime.entity";
+import { AnimeSyncPort, MediaSeason, StreamingEpisodeInput } from "../../domain/ports/anime-sync.port";
+import {
+  AnimeEntity,
+  AnimeRelationSummary,
+  CharacterSummary,
+  RelationType,
+} from "../../domain/entities/anime.entity";
+
+const ALLOWED_RELATION_TYPES = new Set<RelationType>([
+  "SEQUEL",
+  "PREQUEL",
+  "SIDE_STORY",
+  "SPIN_OFF",
+]);
+
+function isAllowedRelationType(value: string): value is RelationType {
+  return (ALLOWED_RELATION_TYPES as Set<string>).has(value);
+}
 import { ANILIST_CLIENT } from "../../application/tokens";
 
 @Injectable()
@@ -16,13 +33,23 @@ export class AniListSyncAdapter implements AnimeSyncPort {
 
   async fetchTrending(page: number, perPage: number): Promise<AnimeEntity[]> {
     const list = await this.client.getTrending(page, perPage);
-    return list.map((a) => this.toDomain(a));
+    return Promise.all(list.map((a) => this.toDomain(a)));
+  }
+
+  async fetchBySeason(
+    season: MediaSeason,
+    seasonYear: number,
+    page: number,
+    perPage: number,
+  ): Promise<AnimeEntity[]> {
+    const list = await this.client.getBySeason(season, seasonYear, page, perPage);
+    return Promise.all(list.map((a) => this.toDomain(a)));
   }
 
   async fetchById(externalId: number): Promise<AnimeEntity | null> {
     try {
       const a = await this.client.getById(externalId);
-      return a ? this.toDomain(a) : null;
+      return a ? await this.toDomain(a) : null;
     } catch (err) {
       this.logger.warn(`fetchById(${externalId}) failed: ${(err as Error).message}`);
       return null;
@@ -31,7 +58,7 @@ export class AniListSyncAdapter implements AnimeSyncPort {
 
   async searchByTitle(query: string): Promise<AnimeEntity[]> {
     const list = await this.client.search(query);
-    return list.map((a) => this.toDomain(a));
+    return Promise.all(list.map((a) => this.toDomain(a)));
   }
 
   async fetchStreamingEpisodes(externalId: number): Promise<StreamingEpisodeInput[]> {
@@ -62,9 +89,26 @@ export class AniListSyncAdapter implements AnimeSyncPort {
     return loose ? Number(loose[1]) : null;
   }
 
-  private toDomain(a: AniListAnime): AnimeEntity {
+  private async toDomain(a: AniListAnime): Promise<AnimeEntity> {
     const studioName = a.studios.nodes[0]?.name ?? null;
     const title = a.title.romaji ?? a.title.english ?? a.title.native ?? "Untitled";
+    const coverUrl = a.coverImage.extraLarge ?? a.coverImage.large ?? null;
+    const accentHex = await extractAccentHex(coverUrl);
+
+    const relations: AnimeRelationSummary[] = (a.relations?.edges ?? [])
+      .filter((edge) => isAllowedRelationType(edge.relationType))
+      .map((edge) => {
+        const n = edge.node;
+        const title = n.title.romaji ?? n.title.english ?? n.title.native ?? `anilist-${n.id}`;
+        return {
+          relatedExternalAnilistId: n.id,
+          relationType: edge.relationType as RelationType,
+          title,
+          coverUrl: n.coverImage?.extraLarge ?? n.coverImage?.large ?? null,
+          format: n.format ?? null,
+          year: n.seasonYear ?? null,
+        };
+      });
 
     const characters: CharacterSummary[] = (a.characters?.edges ?? []).map((edge, idx) => {
       const va = edge.voiceActors[0] ?? null;
@@ -93,14 +137,16 @@ export class AniListSyncAdapter implements AnimeSyncPort {
       year: a.seasonYear ?? null,
       studioName,
       studioSlug: studioName ? slugify(studioName) : null,
-      coverUrl: a.coverImage.extraLarge ?? a.coverImage.large ?? null,
+      coverUrl,
       bannerUrl: a.bannerImage ?? null,
+      accentHex,
       averageRating: a.averageScore != null ? a.averageScore / 10 : null,
       externalAnilistId: a.id,
       externalMalId: a.idMal,
       genres: a.genres ?? [],
       episodes: [],
       characters,
+      relations,
     });
   }
 

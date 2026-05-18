@@ -5,6 +5,7 @@ import { JikanClient } from "@miru/jikan";
 // Application
 import { GetAnimeCatalogUseCase } from "./application/use-cases/get-anime-catalog.use-case";
 import { GetAnimeDetailUseCase } from "./application/use-cases/get-anime-detail.use-case";
+import { GetAnimeAccentUseCase } from "./application/use-cases/get-anime-accent.use-case";
 import { GetAnimeCharactersUseCase } from "./application/use-cases/get-anime-characters.use-case";
 import {
   ANILIST_CLIENT,
@@ -29,6 +30,7 @@ import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
   providers: [
     GetAnimeCatalogUseCase,
     GetAnimeDetailUseCase,
+    GetAnimeAccentUseCase,
     GetAnimeCharactersUseCase,
     { provide: ANILIST_CLIENT, useFactory: () => new AniListClient() },
     { provide: JIKAN_CLIENT, useFactory: () => new JikanClient() },

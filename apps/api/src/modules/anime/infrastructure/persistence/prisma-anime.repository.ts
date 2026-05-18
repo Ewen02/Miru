@@ -3,9 +3,18 @@ import type { Prisma } from "@miru/db";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { slugify } from "@shared/utils/slugify";
 import { generateUniqueAnimeSlug } from "@shared/infrastructure/prisma/generate-unique-slug";
-import { AnimeRepositoryPort, AnimeFilters } from "../../domain/ports/anime-repository.port";
+import {
+  AnimeAccentPreview,
+  AnimeFilters,
+  AnimeRepositoryPort,
+} from "../../domain/ports/anime-repository.port";
 import { EpisodeInput } from "../../domain/ports/episode-sync.port";
-import { AnimeEntity, CharacterSummary } from "../../domain/entities/anime.entity";
+import {
+  AnimeEntity,
+  AnimeRelationSummary,
+  CharacterSummary,
+  RelationType,
+} from "../../domain/entities/anime.entity";
 import { PaginatedResult, PaginatedQuery } from "@shared/domain/repository.port";
 import { AnimeStatus, AnimeFormat, CharacterRole } from "@miru/types";
 
@@ -29,6 +38,7 @@ const INCLUDE_FULL = {
     include: { character: true, voiceActor: true },
     orderBy: { order: "asc" },
   },
+  relations: true,
 } as const satisfies Prisma.AnimeInclude;
 
 type AnimeCardRecord = Prisma.AnimeGetPayload<{ include: typeof INCLUDE_CARD }>;
@@ -52,6 +62,13 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       include: INCLUDE_FULL,
     });
     return record ? this.toDomainFull(record) : null;
+  }
+
+  async findAccentPreviewBySlug(slug: string): Promise<AnimeAccentPreview | null> {
+    return this.prisma.anime.findUnique({
+      where: { slug },
+      select: { slug: true, title: true, accentHex: true },
+    });
   }
 
   async findByAnilistId(anilistId: number): Promise<AnimeEntity | null> {
@@ -211,7 +228,21 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
           )
         : snap.slug;
 
-    const payload = this.toPersistence({ ...snap, slug: finalSlug });
+    let safeMalId = snap.externalMalId;
+    if (safeMalId != null) {
+      const malConflict = await this.prisma.anime.findUnique({
+        where: { externalMalId: safeMalId },
+        select: { id: true, externalAnilistId: true },
+      });
+      const isSelf =
+        malConflict != null &&
+        (malConflict.id === snap.id ||
+          (snap.externalAnilistId != null &&
+            malConflict.externalAnilistId === snap.externalAnilistId));
+      if (malConflict != null && !isSelf) safeMalId = null;
+    }
+
+    const payload = this.toPersistence({ ...snap, slug: finalSlug, externalMalId: safeMalId });
     const where =
       snap.externalAnilistId != null
         ? { externalAnilistId: snap.externalAnilistId }
@@ -227,6 +258,40 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     if (snap.characters.length > 0) {
       await this.syncCharacters(saved.id, snap.characters);
     }
+
+    await this.syncRelations(saved.id, snap.relations);
+  }
+
+  private async syncRelations(animeId: string, relations: AnimeRelationSummary[]): Promise<void> {
+    const data = relations.map((r) => ({
+      animeId,
+      relatedExternalAnilistId: r.relatedExternalAnilistId,
+      relationType: r.relationType,
+      title: r.title,
+      coverUrl: r.coverUrl,
+      format: r.format,
+      year: r.year,
+    }));
+
+    await this.prisma.$transaction([
+      this.prisma.animeRelation.deleteMany({ where: { animeId } }),
+      ...(data.length > 0
+        ? [this.prisma.animeRelation.createMany({ data, skipDuplicates: true })]
+        : []),
+    ]);
+  }
+
+  async findSlugsByAnilistIds(anilistIds: number[]): Promise<Map<number, string>> {
+    if (anilistIds.length === 0) return new Map();
+    const records = await this.prisma.anime.findMany({
+      where: { externalAnilistId: { in: anilistIds } },
+      select: { externalAnilistId: true, slug: true },
+    });
+    const map = new Map<number, string>();
+    for (const r of records) {
+      if (r.externalAnilistId != null) map.set(r.externalAnilistId, r.slug);
+    }
+    return map;
   }
 
   private async syncCharacters(animeId: string, characters: CharacterSummary[]): Promise<void> {
@@ -305,16 +370,26 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       studioSlug: record.studio?.slug ?? null,
       coverUrl: record.coverUrl,
       bannerUrl: record.bannerUrl,
+      accentHex: record.accentHex,
       averageRating: record.averageRating,
       externalAnilistId: record.externalAnilistId,
       externalMalId: record.externalMalId,
       genres: record.genres.map((g) => g.slug),
       episodes: [],
       characters: [],
+      relations: [],
     });
   }
 
   private toDomainFull(record: AnimeFullRecord): AnimeEntity {
+    const relations: AnimeRelationSummary[] = record.relations.map((r) => ({
+      relatedExternalAnilistId: r.relatedExternalAnilistId,
+      relationType: r.relationType as RelationType,
+      title: r.title,
+      coverUrl: r.coverUrl,
+      format: r.format,
+      year: r.year,
+    }));
     return AnimeEntity.create(record.id, {
       slug: record.slug,
       title: record.title,
@@ -329,10 +404,12 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       studioSlug: record.studio?.slug ?? null,
       coverUrl: record.coverUrl,
       bannerUrl: record.bannerUrl,
+      accentHex: record.accentHex,
       averageRating: record.averageRating,
       externalAnilistId: record.externalAnilistId,
       externalMalId: record.externalMalId,
       genres: record.genres.map((g) => g.slug),
+      relations,
       episodes: record.episodes.map((e) => ({
         id: e.id,
         number: e.number,
@@ -373,6 +450,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       year: snap.year,
       coverUrl: snap.coverUrl,
       bannerUrl: snap.bannerUrl,
+      accentHex: snap.accentHex,
       averageRating: snap.averageRating,
       externalAnilistId: snap.externalAnilistId,
       externalMalId: snap.externalMalId,

@@ -33,7 +33,7 @@ export class SyncSchedulerService implements OnModuleInit {
   }
 
   /** Horaire : rafraîchit les épisodes des animes en cours de diffusion. */
-  @Cron(CronExpression.EVERY_HOUR, { name: "sync-episodes-airing" })
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: "sync-episodes-airing" })
   async handleEpisodesHourly(): Promise<void> {
     if (!this.enabled) return;
     this.logger.log("Cron tick: sync:episodes airingOnly");

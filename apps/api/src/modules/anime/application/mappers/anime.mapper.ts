@@ -1,5 +1,9 @@
-import { AnimeEntity, CharacterSummary } from "../../domain/entities/anime.entity";
-import { AnimeCard, AnimeDetail, CharacterCard } from "@miru/types";
+import {
+  AnimeEntity,
+  AnimeRelationSummary,
+  CharacterSummary,
+} from "../../domain/entities/anime.entity";
+import { AnimeCard, AnimeDetail, AnimeRelationCard, CharacterCard } from "@miru/types";
 
 /**
  * Mapper Entity → DTO de sortie.
@@ -14,6 +18,7 @@ export class AnimeMapper {
       titleJp: entity.titleJp,
       coverUrl: entity.coverUrl,
       bannerUrl: entity.bannerUrl,
+      accentHex: entity.accentHex,
       status: entity.status,
       format: entity.format,
       year: entity.year,
@@ -40,7 +45,24 @@ export class AnimeMapper {
       }));
   }
 
-  static toDetail(entity: AnimeEntity): AnimeDetail {
+  static toRelationCards(
+    relations: AnimeRelationSummary[],
+    slugByAnilistId: Map<number, string>,
+  ): AnimeRelationCard[] {
+    return relations.map((r) => ({
+      relationType: r.relationType,
+      title: r.title,
+      coverUrl: r.coverUrl,
+      format: r.format,
+      year: r.year,
+      slug: slugByAnilistId.get(r.relatedExternalAnilistId) ?? null,
+    }));
+  }
+
+  static toDetail(
+    entity: AnimeEntity,
+    slugByAnilistId: Map<number, string> = new Map(),
+  ): AnimeDetail {
     return {
       ...AnimeMapper.toCard(entity),
       titleEn: entity.titleEn,
@@ -60,6 +82,7 @@ export class AnimeMapper {
         url: e.url,
       })),
       characters: AnimeMapper.toCharacterCards(entity.characters),
+      relations: AnimeMapper.toRelationCards(entity.relations, slugByAnilistId),
     };
   }
 }

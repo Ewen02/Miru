@@ -20,11 +20,13 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "type-check": "tsc --noEmit",
     "sync:trending": "pnpm build && node dist/scripts/sync-trending.js",
-    "sync:episodes": "pnpm build && node dist/scripts/sync-episodes.js"
+    "sync:episodes": "pnpm build && node dist/scripts/sync-episodes.js",
+    "seed:seasons": "pnpm build && node dist/scripts/seed-seasons.js"
   },
   "dependencies": {
     "@miru/anilist": "workspace:*",
     "@miru/db": "workspace:*",
+    "@miru/http-client": "workspace:*",
     "@miru/jikan": "workspace:*",
     "@miru/types": "workspace:*",
     "@nestjs/common": "^11.0.1",

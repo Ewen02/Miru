@@ -30,7 +30,7 @@ export function CharacterCard({
   className,
 }: CharacterCardProps) {
   return (
-    <article className={cn("group w-char-card-w shrink-0 cursor-pointer", className)}>
+    <article className={cn("group w-char-card-w shrink-0", className)}>
       <div
         className={cn(
           "relative mb-2 h-char-card-h w-char-card-w overflow-hidden rounded-lg border border-border bg-bg-elevated",

@@ -145,7 +145,8 @@ export function StickyHeader({
           aria-label="Profil"
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-body text-[11px] font-semibold text-white"
           style={{
-            background: "linear-gradient(135deg, var(--color-accent) 0%, #3a1212 100%)",
+            background:
+              "linear-gradient(135deg, var(--color-accent) 0%, color-mix(in oklab, var(--color-accent) 30%, #08080c) 100%)",
           }}
         >
           ?

@@ -51,7 +51,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
   const [catalog, genres] = await Promise.all([
     fetchAnimeCatalog(filters).catch((err) => {
-      console.error(err);
+      if (process.env.NODE_ENV !== "production") console.error(err);
       return null;
     }),
     fetchGenres().catch(() => []),

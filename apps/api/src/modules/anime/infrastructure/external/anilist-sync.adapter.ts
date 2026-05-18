@@ -1,10 +1,10 @@
 import { Injectable, Inject, Logger } from "@nestjs/common";
 import { AniListClient } from "@miru/anilist";
 import type { AniListAnime } from "@miru/anilist";
-import { extractAccentHex } from "@miru/http-client";
 import { AnimeStatus, AnimeFormat, CharacterRole } from "@miru/types";
 import { slugify } from "@shared/utils/slugify";
 import { cleanSynopsis } from "@shared/utils/clean-synopsis";
+import { extractAccentHex } from "@shared/utils/extract-accent-hex";
 import { AnimeSyncPort, MediaSeason, StreamingEpisodeInput } from "../../domain/ports/anime-sync.port";
 import {
   AnimeEntity,

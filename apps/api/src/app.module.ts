@@ -2,7 +2,9 @@ import { Module } from "@nestjs/common";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ScheduleModule } from "@nestjs/schedule";
 import { AuthModule } from "@thallesp/nestjs-better-auth";
+import { LoggerModule } from "nestjs-pino";
 import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
+import { HealthController } from "@shared/infrastructure/http/health.controller";
 import { AnimeModule } from "@modules/anime/anime.module";
 import { GenreModule } from "@modules/genre/genre.module";
 import { PlatformModule } from "@modules/platform/platform.module";
@@ -12,8 +14,36 @@ import { UserModule } from "@modules/user/user.module";
 import { WatchlistModule } from "@modules/watchlist/watchlist.module";
 import { auth } from "./auth/auth";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 @Module({
   imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: process.env.LOG_LEVEL ?? (isDev ? "debug" : "info"),
+        transport: isDev
+          ? { target: "pino-pretty", options: { singleLine: true, translateTime: "HH:MM:ss" } }
+          : undefined,
+        // Drop noisy fields and redact cookies/authorization.
+        redact: {
+          paths: ["req.headers.cookie", "req.headers.authorization"],
+          censor: "[redacted]",
+        },
+        autoLogging: {
+          // Health and Better Auth chatter is not actionable.
+          ignore: (req) => {
+            const url = (req as { url?: string }).url ?? "";
+            return url.startsWith("/health") || url.startsWith("/api/auth");
+          },
+        },
+        customLogLevel: (_req, res, err) => {
+          const status = res.statusCode ?? 200;
+          if (err || status >= 500) return "error";
+          if (status >= 400) return "warn";
+          return "info";
+        },
+      },
+    }),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     AuthModule.forRoot({
@@ -31,5 +61,6 @@ import { auth } from "./auth/auth";
     WatchlistModule,
     ReviewModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

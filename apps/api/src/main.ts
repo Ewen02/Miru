@@ -1,5 +1,6 @@
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
+import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
 import { DomainExceptionFilter } from "@shared/infrastructure/filters/domain-exception.filter";
 
@@ -9,7 +10,12 @@ async function bootstrap() {
   // Better Auth needs to read the raw request body on /api/auth/*, so we
   // disable the global Nest body parser; @thallesp/nestjs-better-auth wires
   // a scoped JSON parser for the rest of the app.
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false,
+    bufferLogs: true,
+  });
+
+  app.useLogger(app.get(Logger));
 
   app.enableCors({
     origin: WEB_ORIGIN,

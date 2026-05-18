@@ -9,6 +9,9 @@
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
+  "dependencies": {
+    "sharp": "^0.34.0"
+  },
   "devDependencies": {
     "@miru/config": "workspace:*",
     "@types/node": "^20",

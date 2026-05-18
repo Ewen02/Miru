@@ -42,6 +42,7 @@ export interface AnimeCard {
   titleJp: string | null;
   coverUrl: string | null;
   bannerUrl: string | null;
+  accentHex: string | null;
   status: AnimeStatus;
   format: AnimeFormat;
   year: number | null;
@@ -75,6 +76,7 @@ export interface AnimeDetail extends AnimeCard {
   episodeCount: number | null;
   episodes: EpisodeItem[];
   characters: CharacterCard[];
+  relations: AnimeRelationCard[];
 }
 
 export interface CharacterCard {
@@ -84,6 +86,18 @@ export interface CharacterCard {
   imageUrl: string | null;
   role: CharacterRole;
   voiceActor: string | null;
+}
+
+export type RelationType = "SEQUEL" | "PREQUEL" | "SIDE_STORY" | "SPIN_OFF";
+
+export interface AnimeRelationCard {
+  relationType: RelationType;
+  title: string;
+  coverUrl: string | null;
+  format: string | null;
+  year: number | null;
+  /** Slug local si l'anime lié est en DB, null sinon (card non-cliquable). */
+  slug: string | null;
 }
 
 export interface UserAnimeEntry {

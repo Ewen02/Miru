@@ -26,6 +26,7 @@ model Anime {
   year              Int?
   coverUrl          String?
   bannerUrl         String?
+  accentHex         String? @db.VarChar(7)
   averageRating     Float?
 
   studioId   String?
@@ -33,6 +34,7 @@ model Anime {
   genres     Genre[]          @relation("AnimeGenres")
   episodes   Episode[]
   characters AnimeCharacter[]
+  relations  AnimeRelation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -111,4 +113,20 @@ model AnimeCharacter {
   @@id([animeId, characterId])
   @@index([animeId])
   @@index([characterId])
+}
+
+model AnimeRelation {
+  id                       String  @id @default(cuid())
+  animeId                  String
+  anime                    Anime   @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  relatedExternalAnilistId Int
+  relationType             String
+  title                    String
+  coverUrl                 String?
+  format                   String?
+  year                     Int?
+
+  @@unique([animeId, relatedExternalAnilistId])
+  @@index([animeId])
+  @@index([relatedExternalAnilistId])
 }

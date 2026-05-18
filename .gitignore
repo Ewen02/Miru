@@ -6,3 +6,7 @@ dist
 .env.local
 *.tsbuildinfo
 .DS_Store
+
+# Working notes / intermediate design docs (not part of the repo history)
+migration-design-system.md
+prompt-migration-design.md

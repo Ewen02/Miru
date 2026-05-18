@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { AppHeader } from "@/components/app-header";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://miru.app";
 const DESCRIPTION =
@@ -52,6 +53,7 @@ export default function RootLayout({
         />
       </head>
       <body className="flex min-h-full flex-col bg-bg-base font-body text-text-primary">
+        <AppHeader />
         <div className="flex-1">{children}</div>
         <footer className="border-t border-border-subtle px-6 py-6">
           <div className="mx-auto flex max-w-300 flex-wrap items-center justify-between gap-3 font-body text-xs text-text-tertiary">

@@ -12,7 +12,6 @@ import {
   RelationCard,
   SeasonSwitcher,
   Skeleton,
-  StickyHeader,
   type SeasonItem,
 } from "@miru/ui";
 import { fetchAnimeAccent, fetchAnimeDetail } from "@/lib/api";
@@ -96,16 +95,6 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
   return (
     <AnimeDetailTemplate
       accentHex={anime.accentHex}
-      stickyHeader={
-        <StickyHeader
-          animeContext={{
-            slug: anime.slug,
-            title: anime.title,
-            rating: anime.averageRating,
-            coverUrl: anime.coverUrl,
-          }}
-        />
-      }
       back={
         <Link
           href="/"

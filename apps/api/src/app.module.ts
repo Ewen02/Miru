@@ -7,6 +7,7 @@ import { AnimeModule } from "@modules/anime/anime.module";
 import { GenreModule } from "@modules/genre/genre.module";
 import { PlatformModule } from "@modules/platform/platform.module";
 import { SyncModule } from "@modules/sync/sync.module";
+import { UserModule } from "@modules/user/user.module";
 import { auth } from "./auth/auth";
 
 @Module({
@@ -24,6 +25,7 @@ import { auth } from "./auth/auth";
     GenreModule,
     PlatformModule,
     SyncModule,
+    UserModule,
   ],
 })
 export class AppModule {}

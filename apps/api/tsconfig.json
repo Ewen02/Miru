@@ -13,7 +13,8 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@shared/*": ["shared/*"],
-      "@modules/*": ["modules/*"]
+      "@modules/*": ["modules/*"],
+      "@auth/*": ["auth/*"]
     }
   },
   "include": ["src/**/*"]

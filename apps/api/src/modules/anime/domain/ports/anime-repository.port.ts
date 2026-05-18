@@ -41,4 +41,6 @@ export interface AnimeRepositoryPort extends RepositoryPort<AnimeEntity> {
       site: string | null;
     }>,
   ): Promise<number>;
+  /** Marks the anime as having failed its last sync attempt. */
+  markSyncFailed(animeId: string): Promise<void>;
 }

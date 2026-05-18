@@ -49,6 +49,7 @@ export class ImportEpisodesUseCase implements UseCase<ImportEpisodesInput, Impor
         this.logger.log(`"${anime.title}" (MAL ${malId}) → ${episodes.length} episode(s)`);
       } catch (err) {
         skipped += 1;
+        await this.repo.markSyncFailed(anime.id).catch(() => undefined);
         this.logger.warn(`Failed for "${anime.title}" (MAL ${malId}): ${(err as Error).message}`);
       }
     }

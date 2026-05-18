@@ -232,6 +232,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     }
 
     const payload = toPersistence({ ...snap, slug: finalSlug, externalMalId: safeMalId });
+    const now = new Date();
     const where =
       snap.externalAnilistId != null
         ? { externalAnilistId: snap.externalAnilistId }
@@ -239,8 +240,8 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
 
     const saved = await this.prisma.anime.upsert({
       where,
-      create: payload,
-      update: payload,
+      create: { ...payload, syncedAt: now },
+      update: { ...payload, syncedAt: now, syncFailedAt: null },
       select: { id: true },
     });
 
@@ -258,5 +259,12 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
 
   async delete(id: string): Promise<void> {
     await this.prisma.anime.delete({ where: { id } });
+  }
+
+  async markSyncFailed(animeId: string): Promise<void> {
+    await this.prisma.anime.update({
+      where: { id: animeId },
+      data: { syncFailedAt: new Date() },
+    });
   }
 }

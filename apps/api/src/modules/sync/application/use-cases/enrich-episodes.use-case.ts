@@ -48,6 +48,7 @@ export class EnrichEpisodesUseCase implements UseCase<EnrichEpisodesInput, Enric
         this.logger.log(`"${anime.title}" (AniList ${anilistId}) → ${updated} episode(s) enriched`);
       } catch (err) {
         skipped += 1;
+        await this.repo.markSyncFailed(anime.id).catch(() => undefined);
         this.logger.warn(
           `Enrich failed for "${anime.title}" (AniList ${anilistId}): ${(err as Error).message}`,
         );

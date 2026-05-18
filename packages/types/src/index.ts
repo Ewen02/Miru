@@ -138,3 +138,18 @@ export interface WatchlistItem extends WatchlistEntry {
     episodeCount: number | null;
   };
 }
+
+export interface ReviewItem {
+  id: string;
+  userId: string;
+  animeId: string;
+  rating: number;
+  body: string | null;
+  createdAt: string;
+  updatedAt: string;
+  author: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+}

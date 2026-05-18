@@ -17,8 +17,10 @@ import {
 } from "@miru/ui";
 import { fetchAnimeAccent, fetchAnimeDetail } from "@/lib/api";
 import { fetchUserWatchlist } from "@/lib/server-watchlist";
+import { fetchAnimeReviews } from "@/lib/server-reviews";
 import { getServerSession } from "@/lib/server-auth";
 import { WatchlistButton } from "@/components/watchlist-button";
+import { ReviewSection } from "@/components/review-section";
 import type {
   AnimeDetail,
   AnimeRelationCard as AnimeRelationCardDTO,
@@ -83,7 +85,10 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
   const [anime, session] = await Promise.all([fetchAnimeDetail(slug), getServerSession()]);
   if (!anime) notFound();
 
-  const watchlist = session ? await fetchUserWatchlist() : [];
+  const [watchlist, reviews] = await Promise.all([
+    session ? fetchUserWatchlist() : Promise.resolve([]),
+    fetchAnimeReviews(anime.id),
+  ]);
   const existingEntry = watchlist.find((item) => item.animeId === anime.id) ?? null;
 
   const seasons = buildSeasonList(anime);
@@ -148,6 +153,14 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
         anime.relations.length > 0 ? <RelationsSection relations={anime.relations} /> : undefined
       }
       relationsCount={anime.relations.length > 0 ? anime.relations.length : null}
+      reviews={
+        <ReviewSection
+          animeId={anime.id}
+          reviews={reviews}
+          currentUserId={session?.user.id ?? null}
+        />
+      }
+      reviewsCount={reviews.length > 0 ? reviews.length : null}
     />
   );
 }

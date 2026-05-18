@@ -16,6 +16,8 @@ interface AnimeDetailTemplateProps {
   relations?: ReactNode;
   relationsCount?: number | null;
   platforms?: ReactNode;
+  reviews?: ReactNode;
+  reviewsCount?: number | null;
   back?: ReactNode;
   className?: string;
 }
@@ -34,6 +36,8 @@ export function AnimeDetailTemplate({
   relations,
   relationsCount,
   platforms,
+  reviews,
+  reviewsCount,
   back,
   className,
 }: AnimeDetailTemplateProps) {
@@ -84,6 +88,13 @@ export function AnimeDetailTemplate({
           <section className="mt-10 md:mt-14">
             <SectionHeader label="Autres saisons" count={relationsCount ?? null} />
             {relations}
+          </section>
+        )}
+
+        {reviews && (
+          <section className="mt-10 md:mt-14">
+            <SectionHeader label="Avis" count={reviewsCount ?? null} />
+            {reviews}
           </section>
         )}
       </main>

@@ -53,12 +53,20 @@ export class ImportEpisodesUseCase implements UseCase<ImportEpisodesInput, Impor
       }
     }
 
-    const enrichResult = await this.enrich.execute({ limit, airingOnly });
+    let episodesEnriched = 0;
+    try {
+      const enrichResult = await this.enrich.execute({ limit, airingOnly });
+      episodesEnriched = enrichResult.episodesEnriched;
+    } catch (err) {
+      // Enrichment is a best-effort second pass — don't lose the imported
+      // episodes if it fails (e.g. AniList throttled or a single anime errored).
+      this.logger.warn(`Enrich step failed, continuing: ${(err as Error).message}`);
+    }
 
     return {
       animesProcessed: animes.length - skipped,
       episodesImported,
-      episodesEnriched: enrichResult.episodesEnriched,
+      episodesEnriched,
       skipped,
     };
   }

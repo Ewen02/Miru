@@ -42,9 +42,7 @@ export class ThrottledRetryClient {
       const res = await fetch(input, init);
 
       if (this.retryStatuses.has(res.status) && attempt < this.maxRetries) {
-        const retryAfter = Number(res.headers.get("retry-after"));
-        const waitMs =
-          Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 2000 * 2 ** attempt;
+        const waitMs = parseRetryAfter(res.headers.get("retry-after")) ?? 2000 * 2 ** attempt;
         await sleep(waitMs);
         attempt += 1;
         continue;
@@ -53,4 +51,24 @@ export class ThrottledRetryClient {
       return res;
     }
   }
+}
+
+/**
+ * Parse the Retry-After header per RFC 7231 §7.1.3: it can be either a delta in
+ * seconds (`"120"`) or an HTTP-date (`"Wed, 21 Oct 2015 07:28:00 GMT"`).
+ * Returns the wait in milliseconds, or null if the header is missing/invalid.
+ */
+function parseRetryAfter(raw: string | null): number | null {
+  if (!raw) return null;
+
+  const asNumber = Number(raw);
+  if (Number.isFinite(asNumber) && asNumber > 0) return asNumber * 1000;
+
+  const asDate = Date.parse(raw);
+  if (Number.isFinite(asDate)) {
+    const delta = asDate - Date.now();
+    return delta > 0 ? delta : null;
+  }
+
+  return null;
 }

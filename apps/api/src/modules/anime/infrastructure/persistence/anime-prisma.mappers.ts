@@ -18,7 +18,7 @@ export const INCLUDE_CARD = {
 
 /**
  * Profil complet pour la fiche anime.
- * Ajoute episodes + characters (avec character + voiceActor) + relations.
+ * Ajoute episodes + characters (avec character + voiceActor) + relations + platforms.
  */
 export const INCLUDE_FULL = {
   ...INCLUDE_CARD,
@@ -28,6 +28,10 @@ export const INCLUDE_FULL = {
     orderBy: { order: "asc" },
   },
   relations: true,
+  platforms: {
+    include: { platform: true },
+    orderBy: { platform: { name: "asc" } },
+  },
 } as const satisfies Prisma.AnimeInclude;
 
 export type AnimeCardRecord = Prisma.AnimeGetPayload<{ include: typeof INCLUDE_CARD }>;
@@ -56,6 +60,7 @@ export function toDomainCard(record: AnimeCardRecord): AnimeEntity {
     episodes: [],
     characters: [],
     relations: [],
+    platforms: [],
   });
 }
 
@@ -111,6 +116,13 @@ export function toDomainFull(record: AnimeFullRecord): AnimeEntity {
       voiceActorAnilistId: ac.voiceActor?.externalAnilistId ?? null,
       voiceActorName: ac.voiceActor?.name ?? null,
       order: ac.order,
+    })),
+    platforms: record.platforms.map((p) => ({
+      slug: p.platform.slug,
+      name: p.platform.name,
+      iconUrl: p.platform.iconUrl,
+      color: p.platform.color,
+      url: p.url,
     })),
   });
 }

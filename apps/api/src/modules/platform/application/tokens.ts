@@ -1,0 +1,1 @@
+export const PLATFORM_REPOSITORY = Symbol("PLATFORM_REPOSITORY");

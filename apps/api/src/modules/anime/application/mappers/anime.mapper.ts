@@ -1,9 +1,16 @@
 import {
   AnimeEntity,
+  AnimePlatformSummary,
   AnimeRelationSummary,
   CharacterSummary,
 } from "../../domain/entities/anime.entity";
-import { AnimeCard, AnimeDetail, AnimeRelationCard, CharacterCard } from "@miru/types";
+import {
+  AnimeCard,
+  AnimeDetail,
+  AnimeRelationCard,
+  CharacterCard,
+  PlatformLink,
+} from "@miru/types";
 
 /**
  * Mapper Entity → DTO de sortie.
@@ -59,6 +66,16 @@ export class AnimeMapper {
     }));
   }
 
+  static toPlatformLinks(platforms: AnimePlatformSummary[]): PlatformLink[] {
+    return platforms.map((p) => ({
+      slug: p.slug,
+      name: p.name,
+      iconUrl: p.iconUrl,
+      color: p.color,
+      url: p.url,
+    }));
+  }
+
   static toDetail(
     entity: AnimeEntity,
     slugByAnilistId: Map<number, string> = new Map(),
@@ -83,6 +100,7 @@ export class AnimeMapper {
       })),
       characters: AnimeMapper.toCharacterCards(entity.characters),
       relations: AnimeMapper.toRelationCards(entity.relations, slugByAnilistId),
+      platforms: AnimeMapper.toPlatformLinks(entity.platforms),
     };
   }
 }

@@ -147,6 +147,7 @@ export class AniListSyncAdapter implements AnimeSyncPort {
       episodes: [],
       characters,
       relations,
+      platforms: [],
     });
   }
 

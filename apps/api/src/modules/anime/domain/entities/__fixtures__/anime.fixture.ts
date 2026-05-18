@@ -1,6 +1,7 @@
 import { AnimeStatus, AnimeFormat } from "@miru/types";
 import {
   AnimeEntity,
+  AnimePlatformSummary,
   AnimeRelationSummary,
   CharacterSummary,
   EpisodeSummary,
@@ -16,6 +17,7 @@ interface OverrideProps {
   relations?: AnimeRelationSummary[];
   characters?: CharacterSummary[];
   episodes?: EpisodeSummary[];
+  platforms?: AnimePlatformSummary[];
   averageRating?: number | null;
 }
 
@@ -47,5 +49,6 @@ export function makeAnimeEntity(overrides: OverrideProps = {}): AnimeEntity {
     episodes: overrides.episodes ?? [],
     characters: overrides.characters ?? [],
     relations: overrides.relations ?? [],
+    platforms: overrides.platforms ?? [],
   });
 }

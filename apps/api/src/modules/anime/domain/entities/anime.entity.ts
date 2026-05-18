@@ -39,6 +39,14 @@ export interface AnimeRelationSummary {
   year: number | null;
 }
 
+export interface AnimePlatformSummary {
+  slug: string;
+  name: string;
+  iconUrl: string | null;
+  color: string | null;
+  url: string;
+}
+
 interface AnimeProps {
   slug: string;
   title: string;
@@ -61,6 +69,7 @@ interface AnimeProps {
   episodes: EpisodeSummary[];
   characters: CharacterSummary[];
   relations: AnimeRelationSummary[];
+  platforms: AnimePlatformSummary[];
 }
 
 export class AnimeEntity extends Entity<AnimeProps> {
@@ -110,6 +119,10 @@ export class AnimeEntity extends Entity<AnimeProps> {
 
   get relations(): AnimeRelationSummary[] {
     return [...this.props.relations];
+  }
+
+  get platforms(): AnimePlatformSummary[] {
+    return [...this.props.platforms];
   }
 
   get averageRating(): number | null {

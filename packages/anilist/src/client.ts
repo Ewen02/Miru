@@ -1,5 +1,10 @@
 import { ThrottledRetryClient } from "@miru/http-client";
-import { ANIME_DETAIL_QUERY, ANIME_SEARCH_QUERY, TRENDING_QUERY } from "./queries.js";
+import {
+  ANIME_DETAIL_QUERY,
+  ANIME_SEARCH_QUERY,
+  SEASON_QUERY,
+  TRENDING_QUERY,
+} from "./queries.js";
 import { AniListAnimeSchema, type AniListAnime } from "./types.js";
 
 const ANILIST_API = "https://graphql.anilist.co";
@@ -18,6 +23,21 @@ export class AniListClient extends ThrottledRetryClient {
 
   async getTrending(page = 1, perPage = 20): Promise<AniListAnime[]> {
     const data = await this.graphql<{ Page: { media: unknown[] } }>(TRENDING_QUERY, {
+      page,
+      perPage,
+    });
+    return this.parseMany(data.Page.media);
+  }
+
+  async getBySeason(
+    season: "WINTER" | "SPRING" | "SUMMER" | "FALL",
+    seasonYear: number,
+    page = 1,
+    perPage = 50,
+  ): Promise<AniListAnime[]> {
+    const data = await this.graphql<{ Page: { media: unknown[] } }>(SEASON_QUERY, {
+      season,
+      seasonYear,
       page,
       perPage,
     });

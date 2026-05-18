@@ -23,6 +23,18 @@ export const MEDIA_FRAGMENT = `
       }
     }
     streamingEpisodes { title thumbnail url site }
+    relations {
+      edges {
+        relationType(version: 2)
+        node {
+          id
+          title { romaji english native }
+          format
+          seasonYear
+          coverImage { large extraLarge }
+        }
+      }
+    }
   }
 `;
 
@@ -30,6 +42,17 @@ export const TRENDING_QUERY = `
   query Trending($page: Int, $perPage: Int) {
     Page(page: $page, perPage: $perPage) {
       media(sort: TRENDING_DESC, type: ANIME) { ...MediaFragment }
+    }
+  }
+  ${MEDIA_FRAGMENT}
+`;
+
+export const SEASON_QUERY = `
+  query Season($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int) {
+    Page(page: $page, perPage: $perPage) {
+      media(season: $season, seasonYear: $seasonYear, type: ANIME, sort: POPULARITY_DESC) {
+        ...MediaFragment
+      }
     }
   }
   ${MEDIA_FRAGMENT}

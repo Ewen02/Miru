@@ -69,6 +69,33 @@ export const AniListAnimeSchema = z.object({
     )
     .nullable()
     .default([]),
+  relations: z
+    .object({
+      edges: z
+        .array(
+          z.object({
+            relationType: z.string(),
+            node: z.object({
+              id: z.number().int(),
+              title: z.object({
+                romaji: z.string().nullable().optional(),
+                english: z.string().nullable().optional(),
+                native: z.string().nullable().optional(),
+              }),
+              format: z.string().nullable().optional(),
+              seasonYear: z.number().int().nullable().optional(),
+              coverImage: z
+                .object({
+                  large: z.string().nullable().optional(),
+                  extraLarge: z.string().nullable().optional(),
+                })
+                .optional(),
+            }),
+          }),
+        )
+        .default([]),
+    })
+    .default({ edges: [] }),
 });
 
 export type AniListAnime = z.infer<typeof AniListAnimeSchema>;

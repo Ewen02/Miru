@@ -10,3 +10,6 @@ dist
 # Working notes / intermediate design docs (not part of the repo history)
 migration-design-system.md
 prompt-migration-design.md
+
+# Claude Design mockup output — reference material, not source code
+Miru/

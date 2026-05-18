@@ -24,11 +24,19 @@
   --color-text-primary: rgba(255, 255, 255, 0.95);
   --color-text-secondary: rgba(255, 255, 255, 0.55);
   --color-text-tertiary: rgba(255, 255, 255, 0.32);
+  --color-text-quaternary: rgba(255, 255, 255, 0.18);
 
   /* Status */
   --color-success: #3ecf8e;
   --color-warning: #f5a623;
+  --color-warn: #f0b429;
   --color-error: #ef4444;
+  --color-error-muted: rgba(239, 68, 68, 0.12);
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
 
   /* Font families */
   --font-display: "Clash Display", sans-serif;
@@ -60,6 +68,7 @@
   --color-accent: var(--accent-override, #c8a2ff);
   --color-accent-muted: color-mix(in srgb, var(--color-accent) 14%, transparent);
   --color-accent-subtle: color-mix(in srgb, var(--color-accent) 6%, transparent);
+  --color-accent-strong: color-mix(in srgb, var(--color-accent) 35%, transparent);
 
   /* Shadcn tokens — mappés sur la palette Miru dark-only */
   --color-background: var(--color-bg-base);

@@ -1,16 +1,23 @@
-import { ThrottledRetryClient } from "@miru/http-client";
+import { MemoCache, ThrottledRetryClient } from "@miru/http-client";
 import { JikanEpisodeSchema, type JikanEpisode } from "./types.js";
 
 const JIKAN_API = "https://api.jikan.moe/v4";
 // Jikan doc: 3 req/s, 60 req/min. 600ms (~1.6 req/s) garde une marge.
 const JIKAN_THROTTLE_MS = 600;
+const EPISODES_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
 export class JikanClient extends ThrottledRetryClient {
+  private readonly episodesCache = new MemoCache<JikanEpisode[]>(EPISODES_CACHE_TTL_MS);
+
   constructor() {
     super({ throttleMs: JIKAN_THROTTLE_MS });
   }
 
   async fetchEpisodes(malId: number): Promise<JikanEpisode[]> {
+    return this.episodesCache.getOrSet(String(malId), () => this.fetchEpisodesUncached(malId));
+  }
+
+  private async fetchEpisodesUncached(malId: number): Promise<JikanEpisode[]> {
     const all: JikanEpisode[] = [];
     let page = 1;
 

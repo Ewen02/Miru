@@ -1,4 +1,4 @@
-import { ThrottledRetryClient } from "@miru/http-client";
+import { MemoCache, ThrottledRetryClient } from "@miru/http-client";
 import {
   ANIME_DETAIL_QUERY,
   ANIME_SEARCH_QUERY,
@@ -10,6 +10,8 @@ import { AniListAnimeSchema, type AniListAnime } from "./types.js";
 const ANILIST_API = "https://graphql.anilist.co";
 // AniList rate-limit: 90 req/min = ~667ms min per req. 750ms garde une marge.
 const ANILIST_THROTTLE_MS = 750;
+const TRENDING_CACHE_TTL_MS = 60 * 60 * 1000;
+const DETAIL_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 interface GraphQLResponse<T> {
   data?: T;
@@ -17,16 +19,21 @@ interface GraphQLResponse<T> {
 }
 
 export class AniListClient extends ThrottledRetryClient {
+  private readonly trendingCache = new MemoCache<AniListAnime[]>(TRENDING_CACHE_TTL_MS);
+  private readonly detailCache = new MemoCache<AniListAnime>(DETAIL_CACHE_TTL_MS);
+
   constructor() {
     super({ throttleMs: ANILIST_THROTTLE_MS });
   }
 
   async getTrending(page = 1, perPage = 20): Promise<AniListAnime[]> {
-    const data = await this.graphql<{ Page: { media: unknown[] } }>(TRENDING_QUERY, {
-      page,
-      perPage,
+    return this.trendingCache.getOrSet(`${page}:${perPage}`, async () => {
+      const data = await this.graphql<{ Page: { media: unknown[] } }>(TRENDING_QUERY, {
+        page,
+        perPage,
+      });
+      return this.parseMany(data.Page.media);
     });
-    return this.parseMany(data.Page.media);
   }
 
   async getBySeason(
@@ -54,8 +61,10 @@ export class AniListClient extends ThrottledRetryClient {
   }
 
   async getById(id: number): Promise<AniListAnime> {
-    const data = await this.graphql<{ Media: unknown }>(ANIME_DETAIL_QUERY, { id });
-    return AniListAnimeSchema.parse(data.Media);
+    return this.detailCache.getOrSet(String(id), async () => {
+      const data = await this.graphql<{ Media: unknown }>(ANIME_DETAIL_QUERY, { id });
+      return AniListAnimeSchema.parse(data.Media);
+    });
   }
 
   private parseMany(list: unknown[]): AniListAnime[] {

@@ -1,4 +1,5 @@
 import { Injectable, Inject, Logger } from "@nestjs/common";
+import { AniListUnavailableError } from "@miru/anilist";
 import { UseCase } from "@shared/domain/use-case.base";
 import { AnimeRepositoryPort } from "@modules/anime/domain/ports/anime-repository.port";
 import { AnimeSyncPort } from "@modules/anime/domain/ports/anime-sync.port";
@@ -13,6 +14,8 @@ interface EnrichEpisodesOutput {
   animesProcessed: number;
   episodesEnriched: number;
   skipped: number;
+  /** True when the batch aborted early because AniList went down. */
+  aborted?: boolean;
 }
 
 @Injectable()
@@ -47,6 +50,21 @@ export class EnrichEpisodesUseCase implements UseCase<EnrichEpisodesInput, Enric
         episodesEnriched += updated;
         this.logger.log(`"${anime.title}" (AniList ${anilistId}) → ${updated} episode(s) enriched`);
       } catch (err) {
+        if (err instanceof AniListUnavailableError) {
+          // AniList is down — bail out of the batch entirely. Retrying every
+          // anime against an unavailable endpoint just spams the logs and
+          // delays the rest of the scheduler.
+          const remaining = animes.length - skipped - episodesEnriched;
+          this.logger.warn(
+            `AniList unavailable, aborting enrich batch (${remaining} anime skipped, retry in ~${Math.round(err.retryAfterMs / 1000)}s)`,
+          );
+          return {
+            animesProcessed: animes.length - skipped - remaining,
+            episodesEnriched,
+            skipped: skipped + remaining,
+            aborted: true,
+          };
+        }
         skipped += 1;
         await this.repo.markSyncFailed(anime.id).catch(() => undefined);
         this.logger.warn(

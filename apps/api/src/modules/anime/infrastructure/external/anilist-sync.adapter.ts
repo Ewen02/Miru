@@ -1,5 +1,5 @@
 import { Injectable, Inject, Logger } from "@nestjs/common";
-import { AniListClient } from "@miru/anilist";
+import { AniListClient, AniListUnavailableError } from "@miru/anilist";
 import type { AniListAnime } from "@miru/anilist";
 import { AnimeStatus, AnimeFormat, CharacterRole } from "@miru/types";
 import { slugify } from "@shared/utils/slugify";
@@ -77,6 +77,11 @@ export class AniListSyncAdapter implements AnimeSyncPort {
         })
         .filter((se) => se.thumbnail != null || se.url != null);
     } catch (err) {
+      // Outage: surface to the caller so it can abort the batch. Per-anime
+      // failures (parse error, missing data) still swallow to []. We only
+      // log here in the swallow path, not on the rethrow — the batch logs
+      // the outage once at its level.
+      if (err instanceof AniListUnavailableError) throw err;
       this.logger.warn(`fetchStreamingEpisodes(${externalId}) failed: ${(err as Error).message}`);
       return [];
     }

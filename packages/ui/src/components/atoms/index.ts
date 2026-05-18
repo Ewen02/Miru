@@ -1,4 +1,2 @@
-// Atoms — éléments indivisibles : Text, Button, Badge, Icon, Input, Spinner, Shimmer.
-export { Input } from "./input";
-export { Button } from "./button";
-export { Shimmer } from "./shimmer";
+// Atoms Miru custom. Les primitives UI (Button/Input/Skeleton/Badge/…) vivent dans ../ui/.
+export { Logo } from "./logo";

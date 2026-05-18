@@ -26,57 +26,65 @@ export function AnimeHero({
   studioName,
   className,
 }: AnimeHeroProps) {
+  const metaParts = [format, status, year?.toString(), studioName].filter(Boolean) as string[];
+
   return (
     <header className={cn("relative w-full", className)}>
-      <div className="relative h-80 w-full overflow-hidden bg-bg-elevated sm:h-100">
+      {/* Banner fixe 280px, gradient accent → bg-base */}
+      <div className="relative h-hero-banner-h w-full overflow-hidden bg-bg-elevated">
         {bannerUrl ? (
           <Image src={bannerUrl} alt="" fill priority sizes="100vw" className="object-cover" />
-        ) : null}
-        <div className="absolute inset-0 bg-linear-to-b from-bg-base/40 via-bg-base/60 to-bg-base" />
+        ) : (
+          <div
+            className="h-full w-full"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--color-accent) 0%, #2a0e0e 60%, #08080c 100%)",
+            }}
+          />
+        )}
+        <div className="absolute inset-0 bg-linear-to-b from-transparent to-bg-base" />
       </div>
 
-      <div className="relative mx-auto -mt-32 flex max-w-300 flex-col gap-6 px-6 sm:flex-row sm:items-end">
-        <div className="relative aspect-3/4 w-40 shrink-0 overflow-hidden rounded-lg border border-border bg-bg-surface sm:w-48">
+      {/* Cover + info, overlap fixe -100px */}
+      <div className="relative -mt-hero-overlap flex gap-5 px-5">
+        <div
+          className="relative h-cover-h w-cover-w shrink-0 overflow-hidden rounded-lg border-2 border-border bg-bg-surface"
+          style={{ boxShadow: "0 12px 32px rgba(0,0,0,0.5)" }}
+        >
           {coverUrl ? (
-            <Image
-              src={coverUrl}
-              alt={title}
-              fill
-              sizes="(max-width: 640px) 160px, 192px"
-              className="object-cover"
+            <Image src={coverUrl} alt={title} fill sizes="128px" className="object-cover" />
+          ) : (
+            <div
+              className="h-full w-full"
+              style={{
+                background: "linear-gradient(145deg, var(--color-accent) 0%, rgba(0,0,0,0.4) 100%)",
+              }}
             />
-          ) : null}
+          )}
         </div>
 
-        <div className="flex flex-1 flex-col gap-3 pb-2">
-          <div className="flex flex-wrap items-center gap-2 font-mono text-xs uppercase tracking-wide text-text-tertiary">
-            <span>{format}</span>
-            <span aria-hidden>·</span>
-            <span>{status}</span>
-            {year != null && (
-              <>
-                <span aria-hidden>·</span>
-                <span>{year}</span>
-              </>
-            )}
-            {studioName && (
-              <>
-                <span aria-hidden>·</span>
-                <span className="text-text-secondary">{studioName}</span>
-              </>
-            )}
-          </div>
+        <div className="flex min-w-0 flex-1 flex-col justify-end gap-1 pb-1">
+          {metaParts.length > 0 && (
+            <div className="font-body text-[10px] font-medium uppercase tracking-[0.15em] text-text-tertiary">
+              {metaParts.join(" · ")}
+            </div>
+          )}
 
-          <h1 className="font-display text-3xl font-semibold text-text-primary sm:text-4xl">
+          <h1 className="font-display text-[32px] font-bold leading-[1.05] tracking-[-0.02em] text-text-primary">
             {title}
           </h1>
-          {titleJp && <p className="font-body text-sm text-text-tertiary">{titleJp}</p>}
+          {titleJp && <p className="font-body text-sm text-text-secondary">{titleJp}</p>}
 
           {rating != null && (
-            <div className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md border border-border bg-bg-surface px-2.5 py-1 font-mono text-sm text-text-secondary">
-              <span className="text-accent">★</span>
-              <span>{rating.toFixed(1)}</span>
-              <span className="text-text-tertiary">/ 10</span>
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <span
+                className="font-display text-[26px] font-bold leading-none"
+                style={{ color: "var(--color-accent)" }}
+              >
+                {rating.toFixed(1)}
+              </span>
+              <span className="font-body text-xs text-text-tertiary">/ 10</span>
             </div>
           )}
         </div>

@@ -5,14 +5,14 @@ Design system de Miru. Le setup du package est archivé dans [.claude/docs/ui-se
 ## Philosophie
 
 - **Le contenu est le design.** Les visuels anime portent l'identité, le système est un cadre neutre.
-- **Adaptive theming.** Pas de couleur d'accent fixe — la teinte est extraite du cover art.
+- **Adaptive theming.** Pas de couleur d'accent fixe — la teinte est pre-computée côté API (sharp) et injectée via CSS var cascade (`--accent-override`) + pattern Tailwind v4 `@theme inline`.
 - **Opacité > couleurs multiples.** Un seul blanc modulé en opacité sur fond sombre.
-- **Pas de composants shadcn tels quels.** Tout est custom ou lourdement modifié.
+- **Shadcn comme foundation.** Les primitives (Button, Input, Badge, Skeleton, Avatar, Dialog, Sheet, Command, Progress, Tooltip, Separator, ScrollArea) vivent dans [src/components/ui/](src/components/ui/) via `shadcn@latest add`. Elles peuvent être modifiées pour coller à nos tokens — **elles ne sont jamais exposées telles quelles dans une page**, elles sont consommées via nos molecules/organisms métier.
 - **Dark-only au MVP.**
 
 ## Tokens disponibles
 
-Source : [src/tokens/](src/tokens/). Utiliser via les classes Tailwind générées depuis `apps/web/src/app/globals.css` (`@theme`).
+Source unique : [apps/web/src/app/globals.css](../../apps/web/src/app/globals.css) (3 couches — primitives `@theme`, sémantique `@theme inline`, composants). Pas de tokens TypeScript à côté — tout vit en CSS.
 
 ### Couleurs
 
@@ -22,7 +22,7 @@ Source : [src/tokens/](src/tokens/). Utiliser via les classes Tailwind généré
   - `text-text-primary` (95%)
   - `text-text-secondary` (55%)
   - `text-text-tertiary` (32%)
-- **Accent** : `text-accent`, `bg-accent-muted`, `bg-accent-subtle` — overridés dynamiquement par `useAdaptiveColor`
+- **Accent** : `text-accent`, `bg-accent`, `bg-accent-muted`, `bg-accent-subtle` — overridés dynamiquement par `<div style={{ '--accent-override': anime.accentHex }}>` en tête de page fiche (pattern `@theme inline`)
 - **Status** : `success` (#3ecf8e), `warning` (#f5a623), `error` (#ef4444)
 
 ### Typographie
@@ -35,14 +35,13 @@ Source : [src/tokens/](src/tokens/). Utiliser via les classes Tailwind généré
 
 Fonts à charger dans `apps/web/src/app/layout.tsx` depuis Fontshare (Clash+General) et Google Fonts (JetBrains).
 
-Type scale : voir [src/tokens/typography.ts](src/tokens/typography.ts) (`hero`, `h1`→`h3`, `body`, `bodySmall`, `label`, `sectionLabel`, `meta`, `data`).
-
 ### Radius
 
 - `rounded-sm` (6px) — tags, pills
-- `rounded-md` (10px) — inputs, buttons
-- `rounded-lg` (12px) — cards
-- `rounded-xl` (14px) — containers, modals
+- `rounded-md` (8px) — boutons compacts
+- `rounded-lg` (10px) — inputs, episode rows
+- `rounded-xl` (12px) — cards principales, action bar
+- `rounded-2xl` (14px) — containers parents (episodes list)
 - `rounded-full` — **avatars uniquement**
 
 ### Spacing
@@ -57,26 +56,30 @@ Type scale : voir [src/tokens/typography.ts](src/tokens/typography.ts) (`hero`, 
 ## Utilitaires
 
 - `cn(...inputs)` — merge clsx + tailwind-merge ([src/utils/cn.ts](src/utils/cn.ts))
-- `useAdaptiveColor(imageUrl)` — extrait la couleur dominante du cover art ([src/hooks/use-adaptive-color.ts](src/hooks/use-adaptive-color.ts))
+- L'adaptive color est pre-computée côté API (`extractAccentHex` via `sharp` → `Anime.accentHex`) et injectée dans la page via `<div style={{ '--accent-override': anime.accentHex }}>`. Pas de hook client.
 
 ## Atomic design — organisation des composants
 
-`packages/ui/src/components/` suit la hiérarchie atomic design :
+`packages/ui/src/components/` suit la hiérarchie atomic design + une couche `ui/` pour les primitives shadcn :
 
 ```
 components/
-├── atoms/          → éléments indivisibles (Text, Button, Badge, Icon, Input, Spinner)
-├── molecules/      → combinaisons d'atoms (SearchInput, FilterChip, RatingDisplay, PlatformBadge)
-├── organisms/      → sections composites avec sens métier (AnimeCard, AnimeHero, EpisodeRow, CharacterCard)
+├── ui/             → primitives shadcn (button, input, badge, skeleton, avatar, dialog, ...) — foundation, customisables
+├── atoms/          → atomes custom Miru qui ne viennent pas de shadcn (Logo, icônes métier)
+├── molecules/      → combinaisons d'atoms/ui (SearchInput, FilterChip, RelationCard, SeasonSwitcher)
+├── organisms/      → sections composites avec sens métier (AnimeCard, AnimeHero, EpisodeRow, CharacterCard, ActionBar, StickyHeader)
 ├── templates/      → layouts de page sans données (CatalogTemplate, AnimeDetailTemplate)
 └── (pages)         → instanciées côté apps/web/ — JAMAIS dans @miru/ui
 ```
 
+Ajouter une primitive : `cd packages/ui && pnpm dlx shadcn@latest add <name>`. Le fichier arrive dans `src/components/ui/`. Si les imports pointent vers `@miru/ui/...`, les remplacer par des chemins relatifs (`./button`, `../../utils/cn`).
+
 ### Règle de dépendance
 
-`atoms` → indépendants.
-`molecules` → peuvent importer `atoms`.
-`organisms` → peuvent importer `atoms` + `molecules`.
+`ui/` (shadcn) → primitives pures, ne dépendent que de `radix-ui` + `cn`.
+`atoms` → peuvent importer `ui/` (wrapper custom d'une primitive).
+`molecules` → peuvent importer `ui/` + `atoms`.
+`organisms` → peuvent importer `ui/` + `atoms` + `molecules`.
 `templates` → peuvent importer tous les niveaux inférieurs.
 
 Jamais de remontée inverse (un atom n'importe pas une molecule).
@@ -131,9 +134,10 @@ Exporter depuis le barrel de niveau : `src/components/organisms/index.ts` réexp
 
 ## Composants P0 (MVP) par niveau
 
-**Atoms** : `Text`, `Button`, `Badge`, `Icon`, `Input`, `Spinner`
-**Molecules** : `SearchInput`, `FilterChip`, `RatingDisplay`, `PlatformBadge`, `WatchlistButton`, `StatusSelector`
-**Organisms** : `AnimeCard` ✓, `AnimeHero`, `EpisodeRow`, `CharacterCard`, `Toast`, `Shimmer`
+**UI (shadcn)** : `Button`, `Input`, `Badge`, `Skeleton`, `Avatar`, `Dialog`, `Sheet`, `Command`, `Progress`, `Tooltip`, `Separator`, `ScrollArea`
+**Atoms** : `Logo`
+**Molecules** : `SearchInput`, `FilterChip`, `RelationCard`, `SeasonSwitcher`, `SectionHeader`
+**Organisms** : `AnimeCard` ✓, `AnimeHero`, `EpisodeRow`, `CharacterCard`, `ActionBar`, `StickyHeader`
 **Templates** : `CatalogTemplate`, `AnimeDetailTemplate`
 
 ## Règles dures
@@ -152,7 +156,7 @@ Exporter depuis le barrel de niveau : `src/components/organisms/index.ts` réexp
 - Shadows sur les cards (borders subtiles à la place)
 - Mode clair
 - Icônes Lucide partout (seulement si elles ajoutent du sens)
-- Composants shadcn non customisés
+- Exposer une primitive shadcn brute (`<Button>` direct) dans une page — toujours la consommer via un organism/molecule métier
 - `Inter` / `Roboto` / `Arial`
 - `rounded-full` hors avatars
 - `default export`

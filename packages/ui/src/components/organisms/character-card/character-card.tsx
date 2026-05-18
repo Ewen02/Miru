@@ -10,6 +10,17 @@ interface CharacterCardProps {
   className?: string;
 }
 
+function roleBadge(role: string): string {
+  switch (role) {
+    case "MAIN":
+      return "MAIN";
+    case "SUPPORTING":
+      return "SUPP";
+    default:
+      return "BG";
+  }
+}
+
 export function CharacterCard({
   name,
   nameJp,
@@ -19,46 +30,53 @@ export function CharacterCard({
   className,
 }: CharacterCardProps) {
   return (
-    <article
-      className={cn(
-        "group flex flex-col overflow-hidden rounded-lg border border-border-subtle bg-bg-surface",
-        "transition-colors duration-200 hover:border-border",
-        className,
-      )}
-    >
-      <div className="relative aspect-3/4 w-full overflow-hidden bg-bg-elevated">
+    <article className={cn("group w-char-card-w shrink-0 cursor-pointer", className)}>
+      <div
+        className={cn(
+          "relative mb-2 h-char-card-h w-char-card-w overflow-hidden rounded-lg border border-border bg-bg-elevated",
+          "transition-transform duration-200 ease-out group-hover:-translate-y-0.5",
+        )}
+      >
         {imageUrl ? (
           <Image
             src={imageUrl}
             alt={name}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+            sizes="100px"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-text-tertiary">
-            <svg aria-hidden viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8">
+            <svg aria-hidden viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
               <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
             </svg>
           </div>
         )}
         <span
           className={cn(
-            "absolute left-2 top-2 rounded-sm bg-bg-base/70 px-1.5 py-0.5",
-            "font-mono text-[10px] uppercase tracking-wide text-text-secondary backdrop-blur-sm",
+            "absolute right-1.5 top-1.5 rounded-sm bg-black/50 px-1.5 py-0.5",
+            "font-body text-[8px] font-medium uppercase tracking-wide text-white/70 backdrop-blur-sm",
           )}
         >
-          {role}
+          {roleBadge(role)}
         </span>
       </div>
-
-      <div className="flex flex-col gap-1 p-3">
-        <p className="truncate font-body text-sm text-text-primary">{name}</p>
-        {nameJp && <p className="truncate font-body text-xs text-text-tertiary">{nameJp}</p>}
-        {voiceActor && (
-          <p className="mt-1 truncate font-mono text-xs text-text-tertiary">CV · {voiceActor}</p>
-        )}
-      </div>
+      <p
+        className="mb-0.5 truncate font-display text-xs font-semibold text-text-primary"
+        title={name}
+      >
+        {name}
+      </p>
+      {nameJp && (
+        <p className="truncate font-body text-[10px] text-text-tertiary" title={nameJp}>
+          {nameJp}
+        </p>
+      )}
+      {voiceActor && (
+        <p className="truncate font-body text-[10px] text-text-tertiary" title={voiceActor}>
+          {voiceActor}
+        </p>
+      )}
     </article>
   );
 }

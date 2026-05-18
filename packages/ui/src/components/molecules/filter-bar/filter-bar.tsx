@@ -1,7 +1,7 @@
 import type { ChangeEvent } from "react";
 import { FilterChip } from "../filter-chip";
-import { Button } from "../../atoms/button";
-import { Input } from "../../atoms/input";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
 import { cn } from "../../../utils/cn";
 
 const STATUSES = ["AIRING", "FINISHED", "ANNOUNCED", "HIATUS"] as const;
@@ -65,7 +65,7 @@ export function FilterBar({
           value={year}
           placeholder="2024"
           onChange={(e: ChangeEvent<HTMLInputElement>) => onYearChange(e.target.value)}
-          wrapperClassName="w-28"
+          className="w-28"
         />
       </FilterGroup>
 

@@ -1,62 +1,83 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "../../../utils/cn";
+import { SectionHeader } from "../../molecules/section-header";
 
 interface AnimeDetailTemplateProps {
+  accentHex?: string | null;
+  stickyHeader?: ReactNode;
   hero: ReactNode;
+  seasonSwitcher?: ReactNode;
+  actionBar?: ReactNode;
   synopsis: ReactNode;
-  info: ReactNode;
   episodes: ReactNode;
+  episodesCount?: number | null;
   characters?: ReactNode;
+  charactersCount?: number | null;
+  relations?: ReactNode;
+  relationsCount?: number | null;
   back?: ReactNode;
   className?: string;
 }
 
 export function AnimeDetailTemplate({
+  accentHex,
+  stickyHeader,
   hero,
+  seasonSwitcher,
+  actionBar,
   synopsis,
-  info,
   episodes,
+  episodesCount,
   characters,
+  charactersCount,
+  relations,
+  relationsCount,
   back,
   className,
 }: AnimeDetailTemplateProps) {
+  const hex = accentHex ?? "#c8a2ff";
+  const accentStyle = {
+    "--accent-override": hex,
+    "--color-accent": hex,
+    "--color-accent-muted": `color-mix(in srgb, ${hex} 14%, transparent)`,
+    "--color-accent-subtle": `color-mix(in srgb, ${hex} 6%, transparent)`,
+  } as CSSProperties;
   return (
-    <main className={cn("flex flex-col gap-14 pb-24", className)}>
-      {back && <div className="mx-auto w-full max-w-300 px-6 pt-6">{back}</div>}
+    <div style={accentStyle}>
+      {stickyHeader}
+      <main className={cn("pb-24", className)}>
+        {back && <div className="px-5 pt-4">{back}</div>}
 
-      {hero}
+        {hero}
 
-      <section className="mx-auto grid w-full max-w-300 gap-10 px-6 md:grid-cols-[1fr_280px]">
-        <div className="flex flex-col gap-4">
-          <h2 className="font-display text-sm uppercase tracking-wide text-text-tertiary">
-            Synopsis
-          </h2>
-          <div className="max-w-[720px] font-body text-sm leading-relaxed text-text-secondary">
-            {synopsis}
-          </div>
-        </div>
+        {seasonSwitcher}
 
-        <aside className="flex flex-col gap-4">
-          <h2 className="font-display text-sm uppercase tracking-wide text-text-tertiary">Infos</h2>
-          <div className="flex flex-col gap-2">{info}</div>
-        </aside>
-      </section>
+        {actionBar}
 
-      {characters && (
-        <section className="mx-auto flex w-full max-w-300 flex-col gap-4 px-6">
-          <h2 className="font-display text-sm uppercase tracking-wide text-text-tertiary">
-            Personnages
-          </h2>
-          {characters}
+        <section className="mt-10 md:mt-14">
+          <SectionHeader label="Épisodes" count={episodesCount ?? null} />
+          {episodes}
         </section>
-      )}
 
-      <section className="mx-auto flex w-full max-w-300 flex-col gap-4 px-6">
-        <h2 className="font-display text-sm uppercase tracking-wide text-text-tertiary">
-          Épisodes
-        </h2>
-        <div className="flex flex-col gap-2">{episodes}</div>
-      </section>
-    </main>
+        <section className="mt-10 md:mt-14">
+          <SectionHeader label="Synopsis" />
+          {synopsis}
+        </section>
+
+        {characters && (
+          <section className="mt-10 md:mt-14">
+            <SectionHeader label="Personnages" count={charactersCount ?? null} />
+            {characters}
+          </section>
+        )}
+
+        {relations && (
+          <section className="mt-10 md:mt-14">
+            <SectionHeader label="Autres saisons" count={relationsCount ?? null} />
+            {relations}
+          </section>
+        )}
+      </main>
+    </div>
   );
 }

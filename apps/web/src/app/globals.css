@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
+@source "../../../../packages/ui/src";
+
 /*
- * Miru Design Tokens — CSS Custom Properties
- * Source of truth pour tout le theming.
+ * Miru Design Tokens — 3 layers
+ * Layer 1 (@theme)        : primitives statiques
+ * Layer 2 (@theme inline) : sémantique overridable via --accent-override cascade
+ * Layer 3 (components)    : classes Tailwind qui consomment Layer 1/2
  */
 
 @theme {
@@ -10,6 +14,7 @@
   --color-bg-base: #08080c;
   --color-bg-surface: #111118;
   --color-bg-elevated: #1a1a24;
+  --color-bg-overlay: rgba(8, 8, 12, 0.85);
 
   /* Borders */
   --color-border: #1e1e2a;
@@ -19,11 +24,6 @@
   --color-text-primary: rgba(255, 255, 255, 0.95);
   --color-text-secondary: rgba(255, 255, 255, 0.55);
   --color-text-tertiary: rgba(255, 255, 255, 0.32);
-
-  /* Accent — dynamique, overridé par anime */
-  --color-accent: #c8a2ff;
-  --color-accent-muted: rgba(200, 162, 255, 0.12);
-  --color-accent-subtle: rgba(200, 162, 255, 0.06);
 
   /* Status */
   --color-success: #3ecf8e;
@@ -37,9 +37,55 @@
 
   /* Radius */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 12px;
-  --radius-xl: 14px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+
+  /* Dimensions fiche anime — pixel-perfect */
+  --spacing-cover-w: 130px;
+  --spacing-cover-h: 195px;
+  --spacing-hero-banner-h: 280px;
+  --spacing-hero-overlap: 100px;
+  --spacing-char-card-w: 100px;
+  --spacing-char-card-h: 130px;
+}
+
+/*
+ * Accent adaptatif : override via <div style="--accent-override: #rrggbb">
+ * Les utilities bg-accent / text-accent / bg-accent-muted propagent
+ * automatiquement à tout le subtree sans prop à passer.
+ */
+@theme inline {
+  --color-accent: var(--accent-override, #c8a2ff);
+  --color-accent-muted: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  --color-accent-subtle: color-mix(in srgb, var(--color-accent) 6%, transparent);
+
+  /* Shadcn tokens — mappés sur la palette Miru dark-only */
+  --color-background: var(--color-bg-base);
+  --color-foreground: var(--color-text-primary);
+  --color-card: var(--color-bg-surface);
+  --color-card-foreground: var(--color-text-primary);
+  --color-popover: var(--color-bg-surface);
+  --color-popover-foreground: var(--color-text-primary);
+  --color-primary: var(--color-accent);
+  --color-primary-foreground: #08080c;
+  --color-secondary: var(--color-bg-elevated);
+  --color-secondary-foreground: var(--color-text-primary);
+  --color-muted: var(--color-bg-elevated);
+  --color-muted-foreground: var(--color-text-secondary);
+  --color-accent-foreground: #08080c;
+  --color-destructive: var(--color-error);
+  --color-input: var(--color-bg-elevated);
+  --color-ring: var(--color-accent);
+  --color-sidebar: var(--color-bg-surface);
+  --color-sidebar-foreground: var(--color-text-primary);
+  --color-sidebar-primary: var(--color-accent);
+  --color-sidebar-primary-foreground: #08080c;
+  --color-sidebar-accent: var(--color-bg-elevated);
+  --color-sidebar-accent-foreground: var(--color-text-primary);
+  --color-sidebar-border: var(--color-border);
+  --color-sidebar-ring: var(--color-accent);
 }
 
 body {

@@ -1,106 +1,117 @@
-import Image from "next/image";
 import { cn } from "../../../utils/cn";
 
 interface EpisodeRowProps {
   number: number;
   title: string | null;
   duration: number | null;
-  airedAt: Date | string | null;
-  thumbnail: string | null;
   url: string | null;
+  /** Fallback recherche plateforme (ex: "Attack on Titan episode 7"). */
+  searchQuery?: string | null;
+  /** Placeholder pour Phase 2 (watchlist). */
+  watched?: boolean;
+  current?: boolean;
   className?: string;
 }
 
-function formatDate(value: Date | string | null): string | null {
-  if (!value) return null;
-  const date = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString("fr-FR", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+function crunchyrollSearchUrl(query: string): string {
+  return `https://www.crunchyroll.com/search?q=${encodeURIComponent(query)}`;
+}
+
+function CheckIcon({ size = 10 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={3}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
 }
 
 export function EpisodeRow({
   number,
   title,
   duration,
-  airedAt,
-  thumbnail,
   url,
+  searchQuery,
+  watched = false,
+  current = false,
   className,
 }: EpisodeRowProps) {
-  const airedLabel = formatDate(airedAt);
   const paddedNumber = String(number).padStart(2, "0");
+  const fallbackSearch = searchQuery ? crunchyrollSearchUrl(searchQuery) : null;
+  const href = url ?? fallbackSearch;
 
-  return (
+  const body = (
     <article
       className={cn(
-        "group flex items-stretch gap-3 overflow-hidden rounded-lg border border-border-subtle bg-bg-surface",
-        "transition-colors duration-200 hover:border-border",
+        "flex cursor-pointer items-center gap-3.5 rounded-lg border-l-2 px-4 py-2.5",
+        "transition-colors duration-150",
+        current ? "bg-accent-subtle" : "border-l-transparent hover:bg-bg-elevated",
         className,
       )}
+      style={current ? { borderLeftColor: "var(--color-accent)" } : undefined}
     >
-      <div className="relative aspect-video w-24 shrink-0 bg-bg-elevated sm:w-36">
-        {thumbnail ? (
-          <Image
-            src={thumbnail}
-            alt={title ?? `Épisode ${number}`}
-            fill
-            sizes="(max-width: 640px) 96px, 144px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-text-tertiary">
-            <svg aria-hidden viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
-              <path d="M8 5v14l11-7z" />
-            </svg>
+      <div className="flex min-w-7 items-center justify-center">
+        {watched ? (
+          <div className="flex size-4.5 items-center justify-center rounded-full border border-border bg-bg-elevated text-text-tertiary">
+            <CheckIcon size={10} />
           </div>
+        ) : (
+          <span
+            className={cn("font-mono text-xs", current ? "font-semibold" : "text-text-tertiary")}
+            style={current ? { color: "var(--color-accent)" } : undefined}
+          >
+            {paddedNumber}
+          </span>
         )}
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-2">
-        <div className="flex items-baseline gap-2">
-          <span className="shrink-0 font-mono text-xs text-text-tertiary">{paddedNumber}</span>
-          <h3 className="truncate font-body text-sm text-text-primary">
-            {title ?? <span className="text-text-tertiary">Épisode {number}</span>}
-          </h3>
+      <div className="min-w-0 flex-1">
+        <div
+          className={cn(
+            "truncate font-body text-[13.5px]",
+            watched ? "text-text-tertiary" : "text-text-primary",
+            current && "font-medium",
+          )}
+        >
+          {title ?? `Épisode ${number}`}
         </div>
-        <p className="font-mono text-xs text-text-tertiary">
-          {[duration != null ? `${duration} min` : null, airedLabel].filter(Boolean).join(" · ") ||
-            "—"}
-        </p>
       </div>
 
-      <div className="flex shrink-0 items-center pr-3">
-        {url ? (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              "inline-flex items-center rounded-md border border-border bg-bg-elevated px-3 py-1.5",
-              "font-mono text-xs uppercase tracking-wide text-text-secondary",
-              "transition-colors duration-200 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
-            )}
-          >
-            Regarder
-          </a>
-        ) : (
-          <button
-            type="button"
-            disabled
-            className={cn(
-              "inline-flex cursor-not-allowed items-center rounded-md border border-border-subtle bg-bg-surface px-3 py-1.5",
-              "font-mono text-xs uppercase tracking-wide text-text-tertiary",
-              "transition-colors duration-200",
-            )}
-          >
-            Indisponible
-          </button>
+      <div className="flex shrink-0 items-center gap-3.5">
+        {duration != null && (
+          <span className="font-mono text-[11px] text-text-tertiary">{duration} min</span>
+        )}
+        {current && (
+          <div
+            className="h-1.5 w-1.5 rounded-full"
+            style={{
+              backgroundColor: "var(--color-accent)",
+              boxShadow: "0 0 8px var(--color-accent)",
+            }}
+          />
         )}
       </div>
     </article>
+  );
+
+  if (!href) return body;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+    >
+      {body}
+    </a>
   );
 }

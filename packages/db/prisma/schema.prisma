@@ -38,6 +38,7 @@ model Anime {
   characters AnimeCharacter[]
   relations  AnimeRelation[]
   platforms  AnimeOnPlatform[]
+  watchlist  WatchlistEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -177,8 +178,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  sessions Session[]
-  accounts Account[]
+  sessions   Session[]
+  accounts   Account[]
+  watchlist  WatchlistEntry[]
 }
 
 model Session {
@@ -226,4 +228,29 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier])
+}
+
+// ---------------------------------------------------------------------------
+// Watchlist — per-user tracking of anime status and progress.
+// ---------------------------------------------------------------------------
+
+model WatchlistEntry {
+  userId         String
+  animeId        String
+  status         String   @db.VarChar(16)
+  currentEpisode Int      @default(0)
+  rating         Int?
+  isFavorite     Boolean  @default(false)
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, animeId])
+  @@index([userId])
+  @@index([userId, status])
+  @@index([animeId])
 }

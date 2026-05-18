@@ -8,6 +8,7 @@ import { GenreModule } from "@modules/genre/genre.module";
 import { PlatformModule } from "@modules/platform/platform.module";
 import { SyncModule } from "@modules/sync/sync.module";
 import { UserModule } from "@modules/user/user.module";
+import { WatchlistModule } from "@modules/watchlist/watchlist.module";
 import { auth } from "./auth/auth";
 
 @Module({
@@ -26,6 +27,7 @@ import { auth } from "./auth/auth";
     PlatformModule,
     SyncModule,
     UserModule,
+    WatchlistModule,
   ],
 })
 export class AppModule {}

@@ -77,6 +77,15 @@ export interface AnimeDetail extends AnimeCard {
   episodes: EpisodeItem[];
   characters: CharacterCard[];
   relations: AnimeRelationCard[];
+  platforms: PlatformLink[];
+}
+
+export interface PlatformLink {
+  slug: string;
+  name: string;
+  iconUrl: string | null;
+  color: string | null;
+  url: string;
 }
 
 export interface CharacterCard {

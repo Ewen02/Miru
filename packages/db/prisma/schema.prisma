@@ -30,11 +30,12 @@ model Anime {
   averageRating     Float?
 
   studioId   String?
-  studio     Studio?          @relation(fields: [studioId], references: [id])
-  genres     Genre[]          @relation("AnimeGenres")
+  studio     Studio?           @relation(fields: [studioId], references: [id])
+  genres     Genre[]           @relation("AnimeGenres")
   episodes   Episode[]
   characters AnimeCharacter[]
   relations  AnimeRelation[]
+  platforms  AnimeOnPlatform[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -129,4 +130,33 @@ model AnimeRelation {
   @@unique([animeId, relatedExternalAnilistId])
   @@index([animeId])
   @@index([relatedExternalAnilistId])
+}
+
+model Platform {
+  id      String  @id @default(cuid())
+  name    String  @unique
+  slug    String  @unique
+  iconUrl String?
+  color   String? @db.VarChar(7)
+  baseUrl String  @unique
+
+  animes AnimeOnPlatform[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AnimeOnPlatform {
+  animeId    String
+  platformId String
+  url        String    @db.Text
+  source     String    @default("ANILIST") @db.VarChar(16)
+  verifiedAt DateTime?
+
+  anime    Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  platform Platform @relation(fields: [platformId], references: [id])
+
+  @@id([animeId, platformId])
+  @@index([animeId])
+  @@index([platformId])
 }

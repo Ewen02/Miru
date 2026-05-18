@@ -36,13 +36,13 @@ export default async function ProfilePage() {
         <div className="rounded-xl border border-border bg-bg-surface p-6">
           <h2 className="mb-3 font-display text-sm font-semibold text-text-primary">Ta watchlist</h2>
           <p className="font-body text-sm text-text-secondary">
-            La page watchlist arrive bientôt. En attendant, retourne au catalogue pour découvrir.
+            Retrouve les animes que tu suis, en pause, ou prévus.
           </p>
           <Link
-            href="/"
+            href="/watchlist"
             className="mt-4 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wide text-accent transition-colors duration-200 hover:text-text-primary"
           >
-            ← Catalogue
+            Voir ma watchlist →
           </Link>
         </div>
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import {
-  ActionBar,
   AnimeDetailTemplate,
   AnimeHero,
   CharacterCard,
@@ -17,6 +16,9 @@ import {
   type SeasonItem,
 } from "@miru/ui";
 import { fetchAnimeAccent, fetchAnimeDetail } from "@/lib/api";
+import { fetchUserWatchlist } from "@/lib/server-watchlist";
+import { getServerSession } from "@/lib/server-auth";
+import { WatchlistButton } from "@/components/watchlist-button";
 import type {
   AnimeDetail,
   AnimeRelationCard as AnimeRelationCardDTO,
@@ -78,8 +80,11 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
 }
 
 async function AnimeDetailContent({ slug }: { slug: string }) {
-  const anime = await fetchAnimeDetail(slug);
+  const [anime, session] = await Promise.all([fetchAnimeDetail(slug), getServerSession()]);
   if (!anime) notFound();
+
+  const watchlist = session ? await fetchUserWatchlist() : [];
+  const existingEntry = watchlist.find((item) => item.animeId === anime.id) ?? null;
 
   const seasons = buildSeasonList(anime);
 
@@ -118,7 +123,15 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
         />
       }
       seasonSwitcher={seasons.length > 1 ? <SeasonSwitcher seasons={seasons} /> : undefined}
-      actionBar={<ActionBar status="none" disabled />}
+      actionBar={
+        <div className="mt-6 px-5">
+          <WatchlistButton
+            animeId={anime.id}
+            initialEntry={existingEntry}
+            isAuthenticated={session !== null}
+          />
+        </div>
+      }
       platforms={
         anime.platforms.length > 0 ? <PlatformsSection platforms={anime.platforms} /> : undefined
       }

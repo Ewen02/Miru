@@ -116,3 +116,25 @@ export interface UserAnimeEntry {
   rating: number | null;
   isFavorite: boolean;
 }
+
+export interface WatchlistEntry {
+  userId: string;
+  animeId: string;
+  status: WatchStatus;
+  currentEpisode: number;
+  rating: number | null;
+  isFavorite: boolean;
+  startedAt: string | null;
+  completedAt: string | null;
+}
+
+export interface WatchlistItem extends WatchlistEntry {
+  anime: {
+    id: string;
+    slug: string;
+    title: string;
+    coverUrl: string | null;
+    accentHex: string | null;
+    episodeCount: number | null;
+  };
+}

@@ -50,7 +50,14 @@ export function AnimeHero({
       <div className="relative -mt-hero-overlap flex gap-5 px-5">
         <div className="relative h-cover-h w-cover-w shrink-0 overflow-hidden rounded-lg border-2 border-border bg-bg-surface">
           {coverUrl ? (
-            <Image src={coverUrl} alt={title} fill sizes="128px" className="object-cover" />
+            <Image
+              src={coverUrl}
+              alt={title}
+              fill
+              priority
+              sizes="128px"
+              className="object-cover"
+            />
           ) : (
             <div
               className="h-full w-full"

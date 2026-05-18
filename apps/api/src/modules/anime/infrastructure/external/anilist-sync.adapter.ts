@@ -8,6 +8,7 @@ import { extractAccentHex } from "@shared/utils/extract-accent-hex";
 import { AnimeSyncPort, MediaSeason, StreamingEpisodeInput } from "../../domain/ports/anime-sync.port";
 import {
   AnimeEntity,
+  AnimePlatformSummary,
   AnimeRelationSummary,
   CharacterSummary,
   RelationType,
@@ -147,8 +148,42 @@ export class AniListSyncAdapter implements AnimeSyncPort {
       episodes: [],
       characters,
       relations,
-      platforms: [],
+      platforms: this.toPlatforms(a),
     });
+  }
+
+  /**
+   * Filtre les externalLinks AniList pour ne garder que les vraies plateformes de
+   * streaming et les déduplique par origin (deux entrées pour le même site = idem).
+   */
+  private toPlatforms(a: AniListAnime): AnimePlatformSummary[] {
+    const seen = new Set<string>();
+    const out: AnimePlatformSummary[] = [];
+
+    for (const link of a.externalLinks ?? []) {
+      if (link.type !== "STREAMING") continue;
+      const baseUrl = this.originOf(link.url);
+      if (!baseUrl || seen.has(baseUrl)) continue;
+      seen.add(baseUrl);
+
+      out.push({
+        slug: slugify(link.site),
+        name: link.site,
+        iconUrl: link.icon ?? null,
+        color: link.color ?? null,
+        url: link.url,
+      });
+    }
+
+    return out;
+  }
+
+  private originOf(url: string): string | null {
+    try {
+      return new URL(url).origin;
+    } catch {
+      return null;
+    }
   }
 
   private mapRole(r: string): CharacterRole {

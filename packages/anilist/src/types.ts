@@ -69,6 +69,18 @@ export const AniListAnimeSchema = z.object({
     )
     .nullable()
     .default([]),
+  externalLinks: z
+    .array(
+      z.object({
+        site: z.string(),
+        url: z.string(),
+        type: z.string().nullable().optional(),
+        icon: z.string().nullable().optional(),
+        color: z.string().nullable().optional(),
+      }),
+    )
+    .nullable()
+    .default([]),
   relations: z
     .object({
       edges: z

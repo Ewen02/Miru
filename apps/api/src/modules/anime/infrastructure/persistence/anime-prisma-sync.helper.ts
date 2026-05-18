@@ -1,5 +1,9 @@
 import type { Prisma } from "@miru/db";
-import { AnimeRelationSummary, CharacterSummary } from "../../domain/entities/anime.entity";
+import {
+  AnimePlatformSummary,
+  AnimeRelationSummary,
+  CharacterSummary,
+} from "../../domain/entities/anime.entity";
 
 type TxClient = Prisma.TransactionClient;
 
@@ -83,4 +87,57 @@ export async function syncCharacters(
       },
     });
   }
+}
+
+/**
+ * Synchronise les plateformes de streaming d'un anime.
+ * Upsert chaque Platform par baseUrl (clé naturelle), puis l'AnimeOnPlatform.
+ * Wipe les liens qui ne sont plus présents pour rester aligné avec l'upstream.
+ */
+export async function syncPlatforms(
+  tx: TxClient,
+  animeId: string,
+  platforms: AnimePlatformSummary[],
+): Promise<void> {
+  const keptPlatformIds: string[] = [];
+
+  for (const p of platforms) {
+    const baseUrl = (() => {
+      try {
+        return new URL(p.url).origin;
+      } catch {
+        return null;
+      }
+    })();
+    if (!baseUrl) continue;
+
+    const platform = await tx.platform.upsert({
+      where: { baseUrl },
+      create: {
+        name: p.name,
+        slug: p.slug,
+        iconUrl: p.iconUrl,
+        color: p.color,
+        baseUrl,
+      },
+      update: {
+        name: p.name,
+        slug: p.slug,
+        iconUrl: p.iconUrl,
+        color: p.color,
+      },
+      select: { id: true },
+    });
+    keptPlatformIds.push(platform.id);
+
+    await tx.animeOnPlatform.upsert({
+      where: { animeId_platformId: { animeId, platformId: platform.id } },
+      create: { animeId, platformId: platform.id, url: p.url, source: "ANILIST" },
+      update: { url: p.url, source: "ANILIST" },
+    });
+  }
+
+  await tx.animeOnPlatform.deleteMany({
+    where: { animeId, platformId: { notIn: keptPlatformIds } },
+  });
 }

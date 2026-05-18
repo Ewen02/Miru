@@ -18,7 +18,7 @@ import {
   toDomainFull,
   toPersistence,
 } from "./anime-prisma.mappers";
-import { syncCharacters, syncRelations } from "./anime-prisma-sync.helper";
+import { syncCharacters, syncPlatforms, syncRelations } from "./anime-prisma-sync.helper";
 
 @Injectable()
 export class PrismaAnimeRepository implements AnimeRepositoryPort {
@@ -250,6 +250,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
           await syncCharacters(tx, saved.id, snap.characters);
         }
         await syncRelations(tx, saved.id, snap.relations);
+        await syncPlatforms(tx, saved.id, snap.platforms);
       },
       { timeout: 30000 },
     );

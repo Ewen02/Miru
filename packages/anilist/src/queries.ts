@@ -23,6 +23,7 @@ export const MEDIA_FRAGMENT = `
       }
     }
     streamingEpisodes { title thumbnail url site }
+    externalLinks { site url type icon color }
     relations {
       edges {
         relationType(version: 2)

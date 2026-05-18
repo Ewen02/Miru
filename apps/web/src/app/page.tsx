@@ -1,6 +1,17 @@
 import Link from "next/link";
-import { AnimeCard, CatalogToolbar, Pagination } from "@miru/ui";
-import { fetchAnimeCatalog, fetchGenres, type CatalogFilters } from "@/lib/api";
+import {
+  AnimeCard,
+  CatalogToolbar,
+  ContinueCard,
+  HomeHero,
+  HorizontalSlider,
+  Pagination,
+  type HomeHeroSlide,
+} from "@miru/ui";
+import { fetchAnimeCatalog, fetchAnimeDetail, fetchGenres, type CatalogFilters } from "@/lib/api";
+import { fetchUserWatchlist } from "@/lib/server-watchlist";
+import { getServerSession } from "@/lib/server-auth";
+import type { WatchlistItem } from "@miru/types";
 
 interface CatalogPageProps {
   searchParams: Promise<{
@@ -14,6 +25,8 @@ interface CatalogPageProps {
 }
 
 const PAGE_SIZE = 20;
+const HERO_SLIDES = 4;
+const TRENDING_SLIDER = 8;
 
 function parseFilters(sp: Awaited<CatalogPageProps["searchParams"]>): CatalogFilters {
   const genres = sp.genres ? (Array.isArray(sp.genres) ? sp.genres : [sp.genres]) : undefined;
@@ -45,50 +58,109 @@ function buildPageHref(sp: Awaited<CatalogPageProps["searchParams"]>, targetPage
   return qs ? `/?${qs}` : "/";
 }
 
+function hasActiveFilters(sp: Awaited<CatalogPageProps["searchParams"]>): boolean {
+  return Boolean(sp.search || sp.status || sp.format || sp.year || sp.genres);
+}
+
+function truncate(text: string | null, max: number): string {
+  if (!text) return "";
+  const clean = text.replace(/<[^>]+>/g, "").trim();
+  if (clean.length <= max) return clean;
+  return clean.slice(0, max).replace(/\s+\S*$/, "") + "…";
+}
+
 export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   const sp = await searchParams;
   const filters = parseFilters(sp);
+  const isFiltered = hasActiveFilters(sp);
 
-  const [catalog, genres] = await Promise.all([
+  const [catalog, genres, trending, session] = await Promise.all([
     fetchAnimeCatalog(filters).catch((err) => {
       if (process.env.NODE_ENV !== "production") console.error(err);
       return null;
     }),
     fetchGenres().catch(() => []),
+    isFiltered
+      ? Promise.resolve(null)
+      : fetchAnimeCatalog({ status: "AIRING", pageSize: TRENDING_SLIDER }).catch(() => null),
+    getServerSession(),
   ]);
+
+  // Hero needs full detail (synopsis) for the top picks. Fetch in parallel.
+  const heroSlides: HomeHeroSlide[] = trending
+    ? await Promise.all(
+        trending.data.slice(0, HERO_SLIDES).map(async (card, idx) => {
+          const detail = await fetchAnimeDetail(card.slug).catch(() => null);
+          return {
+            slug: card.slug,
+            title: card.title,
+            pitch: truncate(detail?.synopsis ?? null, 220) || "À découvrir cette saison.",
+            bannerUrl: detail?.bannerUrl ?? null,
+            coverUrl: card.coverUrl,
+            accentHex: card.accentHex,
+            rating: card.averageRating,
+            year: card.year,
+            format: card.format,
+            studio: card.studioName,
+            rank: idx + 1,
+          };
+        }),
+      )
+    : [];
+
+  const watchlistContinue: WatchlistItem[] = session
+    ? await fetchUserWatchlist("WATCHING").catch(() => [])
+    : [];
 
   const totalPages = catalog ? Math.max(1, Math.ceil(catalog.total / PAGE_SIZE)) : 1;
 
   return (
-    <main className="mx-auto max-w-300 px-6 py-14">
-      <header className="mb-10">
-        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-text-tertiary">
-          Catalogue
-        </p>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-text-primary sm:text-5xl">
-          Explorer
-        </h1>
-        <p className="mt-3 max-w-prose font-body text-text-secondary">
-          Les animes importés depuis AniList.
-        </p>
-      </header>
+    <>
+      {/* Editorial top — only when no filters are active (search is dedicated mode). */}
+      {!isFiltered && heroSlides.length > 0 && (
+        <HomeHero slides={heroSlides} showWatchlistCta={session !== null} />
+      )}
 
-      <div className="mb-10">
-        <CatalogToolbar availableGenres={genres} resultCount={catalog?.total ?? 0} />
-      </div>
+      {!isFiltered && watchlistContinue.length > 0 && (
+        <div className="mx-auto mt-16 max-w-300">
+          <HorizontalSlider
+            eyebrow="Reprendre"
+            title="Continue à regarder"
+            count={watchlistContinue.length}
+            action={{ label: "Voir tout", href: "/watchlist" }}
+          >
+            {watchlistContinue.slice(0, 12).map((item) => (
+              <ContinueCard
+                key={item.animeId}
+                slug={item.anime.slug}
+                title={item.anime.title}
+                coverUrl={item.anime.coverUrl}
+                episodesWatched={item.currentEpisode}
+                episodesTotal={item.anime.episodeCount}
+                nextLabel={
+                  item.anime.episodeCount && item.currentEpisode < item.anime.episodeCount
+                    ? `Reprendre ép. ${item.currentEpisode + 1}`
+                    : null
+                }
+              />
+            ))}
+          </HorizontalSlider>
+        </div>
+      )}
 
-      {catalog === null ? (
-        <EmptyState message="Impossible de joindre l'API. Est-elle démarrée sur le port 3001 ?" />
-      ) : catalog.data.length === 0 ? (
-        <EmptyState message="Aucun anime ne correspond à ces critères." />
-      ) : (
-        <>
-          <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {catalog.data.map((anime) => (
+      {!isFiltered && trending && trending.data.length > 0 && (
+        <div className="mx-auto mt-16 max-w-300">
+          <HorizontalSlider
+            eyebrow="Saison en cours"
+            title="Tendances cette saison"
+            count={trending.data.length}
+            action={{ label: "Voir tout", href: "/?status=AIRING" }}
+          >
+            {trending.data.map((anime) => (
               <Link
                 key={anime.id}
                 href={`/anime/${anime.slug}`}
-                className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+                className="w-44 shrink-0 snap-start rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
               >
                 <AnimeCard
                   title={anime.title}
@@ -99,18 +171,78 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 />
               </Link>
             ))}
-          </section>
-
-          <div className="mt-10">
-            <Pagination
-              currentPage={filters.page ?? 1}
-              totalPages={totalPages}
-              makeHref={(page) => buildPageHref(sp, page)}
-            />
-          </div>
-        </>
+          </HorizontalSlider>
+        </div>
       )}
-    </main>
+
+      {/* Catalog grid — always present, the "explore everything" section. */}
+      <main className="mx-auto mt-20 max-w-300 px-7 pb-20">
+        {!isFiltered && (
+          <header className="mb-8">
+            <p className="mb-2 font-mono text-[10px] tracking-[0.22em] text-text-tertiary uppercase">
+              Tout explorer
+            </p>
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">
+              Explorer le catalogue
+              {catalog?.total != null && (
+                <span className="ml-3 font-mono text-base text-text-tertiary">
+                  {catalog.total}
+                </span>
+              )}
+            </h2>
+          </header>
+        )}
+
+        {isFiltered && (
+          <header className="mb-8">
+            <p className="mb-2 font-mono text-[10px] tracking-[0.22em] text-text-tertiary uppercase">
+              Résultats filtrés
+            </p>
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">
+              Catalogue
+            </h1>
+          </header>
+        )}
+
+        <div className="mb-8">
+          <CatalogToolbar availableGenres={genres} resultCount={catalog?.total ?? 0} />
+        </div>
+
+        {catalog === null ? (
+          <EmptyState message="Impossible de joindre l'API. Est-elle démarrée sur le port 3001 ?" />
+        ) : catalog.data.length === 0 ? (
+          <EmptyState message="Aucun anime ne correspond à ces critères." />
+        ) : (
+          <>
+            <section className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {catalog.data.map((anime) => (
+                <Link
+                  key={anime.id}
+                  href={`/anime/${anime.slug}`}
+                  className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+                >
+                  <AnimeCard
+                    title={anime.title}
+                    coverUrl={anime.coverUrl}
+                    studioName={anime.studioName}
+                    year={anime.year}
+                    rating={anime.averageRating}
+                  />
+                </Link>
+              ))}
+            </section>
+
+            <div className="mt-12">
+              <Pagination
+                currentPage={filters.page ?? 1}
+                totalPages={totalPages}
+                makeHref={(page) => buildPageHref(sp, page)}
+              />
+            </div>
+          </>
+        )}
+      </main>
+    </>
   );
 }
 

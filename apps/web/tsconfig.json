@@ -3,6 +3,8 @@
   "compilerOptions": {
     "jsx": "preserve",
     "incremental": true,
+    "declaration": false,
+    "declarationMap": false,
     "paths": {
       "@/*": ["./src/*"]
     }

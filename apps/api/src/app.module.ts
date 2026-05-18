@@ -6,6 +6,7 @@ import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
 import { AnimeModule } from "@modules/anime/anime.module";
 import { GenreModule } from "@modules/genre/genre.module";
 import { PlatformModule } from "@modules/platform/platform.module";
+import { ReviewModule } from "@modules/review/review.module";
 import { SyncModule } from "@modules/sync/sync.module";
 import { UserModule } from "@modules/user/user.module";
 import { WatchlistModule } from "@modules/watchlist/watchlist.module";
@@ -28,6 +29,7 @@ import { auth } from "./auth/auth";
     SyncModule,
     UserModule,
     WatchlistModule,
+    ReviewModule,
   ],
 })
 export class AppModule {}

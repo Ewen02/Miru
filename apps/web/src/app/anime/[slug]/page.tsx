@@ -92,6 +92,12 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
 
   const seasons = buildSeasonList(anime);
 
+  // Movies and zero-episode finished anime don't have an episode list — hide
+  // the section entirely instead of showing "Aucun épisode" filler.
+  const isMovie = anime.format === "MOVIE";
+  const showEpisodes =
+    !isMovie && (anime.episodes.length > 0 || anime.status === "AIRING");
+
   return (
     <AnimeDetailTemplate
       accentHex={anime.accentHex}
@@ -114,6 +120,7 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
           format={anime.format}
           status={anime.status}
           studioName={anime.studioName}
+          reviewCount={reviews.length}
         />
       }
       seasonSwitcher={seasons.length > 1 ? <SeasonSwitcher seasons={seasons} /> : undefined}
@@ -121,6 +128,7 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
         <div className="mt-6 px-5">
           <WatchlistButton
             animeId={anime.id}
+            episodeCount={anime.episodeCount}
             initialEntry={existingEntry}
             isAuthenticated={session !== null}
           />
@@ -129,8 +137,10 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
       platforms={
         anime.platforms.length > 0 ? <PlatformsSection platforms={anime.platforms} /> : undefined
       }
-      episodes={<EpisodesSection episodes={anime.episodes} animeTitle={anime.title} />}
-      episodesCount={anime.episodes.length > 0 ? anime.episodes.length : null}
+      episodes={showEpisodes ? (
+        <EpisodesSection episodes={anime.episodes} animeTitle={anime.title} />
+      ) : undefined}
+      episodesCount={showEpisodes && anime.episodes.length > 0 ? anime.episodes.length : null}
       synopsis={<SynopsisSection anime={anime} />}
       characters={
         anime.characters.length > 0 ? (

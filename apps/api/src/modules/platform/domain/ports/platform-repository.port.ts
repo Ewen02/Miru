@@ -11,8 +11,9 @@ export interface PlatformUpsertInput {
 export interface PlatformRepositoryPort {
   findAll(): Promise<PlatformEntity[]>;
   /**
-   * Upsert idempotent par baseUrl. La baseUrl est la clé naturelle car AniList ne
-   * fournit que l'URL et le `site` libre — le slug est dérivé localement.
+   * Upsert idempotent par slug. Le slug est dérivé du `site` AniList (slugifié)
+   * et reste stable même quand AniList renvoie plusieurs URLs/casing pour le
+   * même service.
    */
-  upsertByBaseUrl(input: PlatformUpsertInput): Promise<PlatformEntity>;
+  upsertBySlug(input: PlatformUpsertInput): Promise<PlatformEntity>;
 }

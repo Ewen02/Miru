@@ -25,15 +25,15 @@ export class PrismaPlatformRepository implements PlatformRepositoryPort {
     );
   }
 
-  async upsertByBaseUrl(input: PlatformUpsertInput): Promise<PlatformEntity> {
+  async upsertBySlug(input: PlatformUpsertInput): Promise<PlatformEntity> {
     const record = await this.prisma.platform.upsert({
-      where: { baseUrl: input.baseUrl },
+      where: { slug: input.slug },
       create: input,
       update: {
         name: input.name,
-        slug: input.slug,
         iconUrl: input.iconUrl,
         color: input.color,
+        baseUrl: input.baseUrl,
       },
     });
     return PlatformEntity.create(record.id, {

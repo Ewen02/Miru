@@ -112,7 +112,7 @@ export async function syncPlatforms(
     if (!baseUrl) continue;
 
     const platform = await tx.platform.upsert({
-      where: { baseUrl },
+      where: { slug: p.slug },
       create: {
         name: p.name,
         slug: p.slug,
@@ -122,9 +122,9 @@ export async function syncPlatforms(
       },
       update: {
         name: p.name,
-        slug: p.slug,
         iconUrl: p.iconUrl,
         color: p.color,
+        baseUrl,
       },
       select: { id: true },
     });

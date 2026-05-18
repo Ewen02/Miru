@@ -43,7 +43,7 @@ export function ContinueCard({
         className,
       )}
     >
-      <div className="relative mb-2.5 aspect-[16/10] overflow-hidden rounded-lg border border-border bg-bg-elevated">
+      <div className="relative mb-2.5 aspect-16/10 overflow-hidden rounded-lg border border-border bg-bg-elevated">
         {coverUrl ? (
           <Image
             src={coverUrl}

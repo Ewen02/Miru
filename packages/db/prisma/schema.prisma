@@ -1,6 +1,8 @@
-// Miru — schema Prisma cœur (MVP explorer, sans auth).
-// Sources : AnimeEntity (domain) et AniListAnime (@miru/anilist).
-// Pas de User/Session/Watchlist/Review tant que l'auth n'est pas câblée.
+// Miru — schema Prisma.
+// - Catalog tables (Anime, Studio, Genre, Episode, Character, ...) reflect
+//   the AnimeEntity domain and AniList payloads.
+// - Better Auth tables (User, Session, Account, Verification) live at the
+//   bottom; their model names are mapped in apps/api/src/auth/auth.ts.
 
 generator client {
   provider = "prisma-client-js"
@@ -159,4 +161,69 @@ model AnimeOnPlatform {
   @@id([animeId, platformId])
   @@index([animeId])
   @@index([platformId])
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth — managed schema. Do not rename fields without updating
+// apps/api/src/auth/auth.ts model name mappings.
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions Session[]
+  accounts Account[]
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?   @db.Text
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
 }

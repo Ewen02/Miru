@@ -9,6 +9,7 @@ import {
   AnimeHero,
   CharacterCard,
   EpisodeRow,
+  PlatformBadge,
   RelationCard,
   SeasonSwitcher,
   Skeleton,
@@ -20,6 +21,7 @@ import type {
   AnimeDetail,
   AnimeRelationCard as AnimeRelationCardDTO,
   CharacterCard as CharacterCardDTO,
+  PlatformLink,
   RelationType,
 } from "@miru/types";
 
@@ -117,6 +119,9 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
       }
       seasonSwitcher={seasons.length > 1 ? <SeasonSwitcher seasons={seasons} /> : undefined}
       actionBar={<ActionBar status="none" disabled />}
+      platforms={
+        anime.platforms.length > 0 ? <PlatformsSection platforms={anime.platforms} /> : undefined
+      }
       episodes={<EpisodesSection episodes={anime.episodes} animeTitle={anime.title} />}
       episodesCount={anime.episodes.length > 0 ? anime.episodes.length : null}
       synopsis={<SynopsisSection anime={anime} />}
@@ -305,6 +310,22 @@ function CharactersSection({ characters }: { characters: CharacterCardDTO[] }) {
           imageUrl={c.imageUrl}
           role={c.role}
           voiceActor={c.voiceActor}
+        />
+      ))}
+    </div>
+  );
+}
+
+function PlatformsSection({ platforms }: { platforms: PlatformLink[] }) {
+  return (
+    <div className="flex flex-wrap gap-2 px-5">
+      {platforms.map((p) => (
+        <PlatformBadge
+          key={p.slug}
+          name={p.name}
+          url={p.url}
+          iconUrl={p.iconUrl}
+          color={p.color}
         />
       ))}
     </div>

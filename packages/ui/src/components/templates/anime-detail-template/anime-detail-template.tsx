@@ -15,6 +15,7 @@ interface AnimeDetailTemplateProps {
   charactersCount?: number | null;
   relations?: ReactNode;
   relationsCount?: number | null;
+  platforms?: ReactNode;
   back?: ReactNode;
   className?: string;
 }
@@ -32,6 +33,7 @@ export function AnimeDetailTemplate({
   charactersCount,
   relations,
   relationsCount,
+  platforms,
   back,
   className,
 }: AnimeDetailTemplateProps) {
@@ -53,6 +55,13 @@ export function AnimeDetailTemplate({
         {seasonSwitcher}
 
         {actionBar}
+
+        {platforms && (
+          <section className="mt-10 md:mt-14">
+            <SectionHeader label="Regarder sur" />
+            {platforms}
+          </section>
+        )}
 
         <section className="mt-10 md:mt-14">
           <SectionHeader label="Épisodes" count={episodesCount ?? null} />

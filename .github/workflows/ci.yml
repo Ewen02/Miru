@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: miru
+          POSTGRES_PASSWORD: miru
+          POSTGRES_DB: miru
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U miru -d miru"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://miru:miru@localhost:5432/miru?schema=public
+      BETTER_AUTH_SECRET: ci-only-secret-32-chars-minimum-padding-pad
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations
+        run: pnpm --filter @miru/db exec prisma migrate deploy
+
+      - name: Type-check + build
+        run: pnpm turbo type-check build
+
+      - name: Test
+        run: pnpm --filter api test

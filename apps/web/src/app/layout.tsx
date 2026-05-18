@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://miru.app";
@@ -50,7 +51,41 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
         />
       </head>
-      <body className="min-h-full bg-bg-base font-body text-text-primary">{children}</body>
+      <body className="flex min-h-full flex-col bg-bg-base font-body text-text-primary">
+        <div className="flex-1">{children}</div>
+        <footer className="border-t border-border-subtle px-6 py-6">
+          <div className="mx-auto flex max-w-300 flex-wrap items-center justify-between gap-3 font-body text-xs text-text-tertiary">
+            <span>
+              Miru — données{" "}
+              <a
+                href="https://anilist.co"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-secondary underline-offset-2 hover:underline"
+              >
+                AniList
+              </a>{" "}
+              &amp;{" "}
+              <a
+                href="https://myanimelist.net"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-secondary underline-offset-2 hover:underline"
+              >
+                MyAnimeList
+              </a>
+            </span>
+            <nav className="flex gap-4">
+              <Link href="/about" className="hover:text-text-secondary">
+                À propos
+              </Link>
+              <Link href="/watchlist" className="hover:text-text-secondary">
+                Watchlist
+              </Link>
+            </nav>
+          </div>
+        </footer>
+      </body>
     </html>
   );
 }

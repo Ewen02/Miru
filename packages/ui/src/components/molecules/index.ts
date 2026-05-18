@@ -1,4 +1,5 @@
 // Molecules — combinaisons d'atoms : SearchInput, FilterChip, RatingDisplay, etc.
+export { EmptyState } from "./empty-state";
 export { FilterBar } from "./filter-bar";
 export { FilterChip } from "./filter-chip";
 export { Pagination } from "./pagination";

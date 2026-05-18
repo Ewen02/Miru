@@ -9,3 +9,4 @@ export { EpisodeRow } from "./episode-row";
 export { HomeHero, type HomeHeroSlide } from "./home-hero";
 export { HorizontalSlider } from "./horizontal-slider";
 export { StickyHeader } from "./sticky-header";
+export { WatchlistCard } from "./watchlist-card";

@@ -1,8 +1,6 @@
-import "reflect-metadata";
-import { NestFactory } from "@nestjs/core";
-import { AppModule } from "../app.module";
 import { ImportBySeasonUseCase } from "../modules/sync/application/use-cases/import-by-season.use-case";
 import type { MediaSeason } from "../modules/anime/domain/ports/anime-sync.port";
+import { runWithContext } from "./run-with-context";
 
 const ALL_SEASONS: readonly MediaSeason[] = ["WINTER", "SPRING", "SUMMER", "FALL"];
 
@@ -33,39 +31,26 @@ function parseSeasons(): MediaSeason[] {
     .filter((s): s is MediaSeason => allowed.has(s));
 }
 
-async function main() {
-  const years = parseYears();
-  const seasons = parseSeasons();
-  const pages = Number(parseArg("pages") ?? process.env.PAGES ?? 2);
-  const perPage = Number(parseArg("perPage") ?? process.env.PER_PAGE ?? 50);
+const years = parseYears();
+const seasons = parseSeasons();
+const pages = Number(parseArg("pages") ?? process.env.PAGES ?? 2);
+const perPage = Number(parseArg("perPage") ?? process.env.PER_PAGE ?? 50);
 
-  const app = await NestFactory.createApplicationContext(AppModule, {
-    logger: ["log", "warn", "error"],
-  });
+void runWithContext("Seed seasons", async (app) => {
+  const useCase = app.get(ImportBySeasonUseCase);
+  let totalImported = 0;
+  let totalPages = 0;
 
-  try {
-    const useCase = app.get(ImportBySeasonUseCase);
-    let totalImported = 0;
-    let totalPages = 0;
-
-    for (const year of years) {
-      for (const season of seasons) {
-        const result = await useCase.execute({ season, seasonYear: year, pages, perPage });
-        totalImported += result.imported;
-        totalPages += result.pagesFetched;
-      }
+  for (const year of years) {
+    for (const season of seasons) {
+      const result = await useCase.execute({ season, seasonYear: year, pages, perPage });
+      totalImported += result.imported;
+      totalPages += result.pagesFetched;
     }
-
-    console.log(
-      `✓ Seed done: ${totalImported} anime imported across ${totalPages} page(s) ` +
-        `(${years.length} year(s) × ${seasons.length} season(s), pages=${pages}, perPage=${perPage})`,
-    );
-  } finally {
-    await app.close();
   }
-}
 
-main().catch((err) => {
-  console.error("✗ Seed failed:", err);
-  process.exit(1);
+  console.log(
+    `✓ Seed done: ${totalImported} anime imported across ${totalPages} page(s) ` +
+      `(${years.length} year(s) × ${seasons.length} season(s), pages=${pages}, perPage=${perPage})`,
+  );
 });

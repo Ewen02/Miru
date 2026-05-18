@@ -1,3 +1,6 @@
+// Sentry instrumentation must be the very first import.
+import "./instrument";
+
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { Logger } from "nestjs-pino";

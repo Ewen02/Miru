@@ -1,8 +1,10 @@
 import { Module } from "@nestjs/common";
+import { APP_FILTER } from "@nestjs/core";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ScheduleModule } from "@nestjs/schedule";
 import { AuthModule } from "@thallesp/nestjs-better-auth";
 import { LoggerModule } from "nestjs-pino";
+import { SentryModule, SentryGlobalFilter } from "@sentry/nestjs/setup";
 import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
 import { HealthController } from "@shared/infrastructure/http/health.controller";
 import { AnimeModule } from "@modules/anime/anime.module";
@@ -18,6 +20,7 @@ const isDev = process.env.NODE_ENV !== "production";
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     LoggerModule.forRoot({
       pinoHttp: {
         level: process.env.LOG_LEVEL ?? (isDev ? "debug" : "info"),
@@ -62,5 +65,12 @@ const isDev = process.env.NODE_ENV !== "production";
     ReviewModule,
   ],
   controllers: [HealthController],
+  providers: [
+    // SentryGlobalFilter must be registered before any other filter so that
+    // it captures every unhandled exception. Our DomainExceptionFilter still
+    // runs (registered globally in main.ts) and converts known domain errors
+    // to HTTP responses — Sentry records them either way.
+    { provide: APP_FILTER, useClass: SentryGlobalFilter },
+  ],
 })
 export class AppModule {}

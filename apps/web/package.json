@@ -13,6 +13,7 @@
     "@miru/db": "workspace:*",
     "@miru/types": "workspace:*",
     "@miru/ui": "workspace:*",
+    "@sentry/nextjs": "^10.53.1",
     "better-auth": "^1.6.11",
     "next": "16.2.3",
     "react": "19.2.4",

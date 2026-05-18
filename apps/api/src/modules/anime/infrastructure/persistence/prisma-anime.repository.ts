@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { Prisma } from "@miru/db";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
-import { slugify } from "@shared/utils/slugify";
 import { generateUniqueAnimeSlug } from "@shared/infrastructure/prisma/generate-unique-slug";
 import {
   AnimeAccentPreview,
@@ -9,40 +8,17 @@ import {
   AnimeRepositoryPort,
 } from "../../domain/ports/anime-repository.port";
 import { EpisodeInput } from "../../domain/ports/episode-sync.port";
-import {
-  AnimeEntity,
-  AnimeRelationSummary,
-  CharacterSummary,
-  RelationType,
-} from "../../domain/entities/anime.entity";
+import { AnimeEntity } from "../../domain/entities/anime.entity";
 import { PaginatedResult, PaginatedQuery } from "@shared/domain/repository.port";
-import { AnimeStatus, AnimeFormat, CharacterRole } from "@miru/types";
-
-/**
- * Profil léger pour les listes (catalogue, trending, sync).
- * N'expose PAS episodes ni characters — ils sont inutiles pour AnimeCard.
- */
-const INCLUDE_CARD = {
-  genres: true,
-  studio: true,
-} as const satisfies Prisma.AnimeInclude;
-
-/**
- * Profil complet pour la fiche anime.
- * Ajoute episodes + characters (avec character + voiceActor).
- */
-const INCLUDE_FULL = {
-  ...INCLUDE_CARD,
-  episodes: { orderBy: { number: "asc" } },
-  characters: {
-    include: { character: true, voiceActor: true },
-    orderBy: { order: "asc" },
-  },
-  relations: true,
-} as const satisfies Prisma.AnimeInclude;
-
-type AnimeCardRecord = Prisma.AnimeGetPayload<{ include: typeof INCLUDE_CARD }>;
-type AnimeFullRecord = Prisma.AnimeGetPayload<{ include: typeof INCLUDE_FULL }>;
+import { AnimeStatus } from "@miru/types";
+import {
+  INCLUDE_CARD,
+  INCLUDE_FULL,
+  toDomainCard,
+  toDomainFull,
+  toPersistence,
+} from "./anime-prisma.mappers";
+import { syncCharacters, syncRelations } from "./anime-prisma-sync.helper";
 
 @Injectable()
 export class PrismaAnimeRepository implements AnimeRepositoryPort {
@@ -53,7 +29,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       where: { id },
       include: INCLUDE_FULL,
     });
-    return record ? this.toDomainFull(record) : null;
+    return record ? toDomainFull(record) : null;
   }
 
   async findBySlug(slug: string): Promise<AnimeEntity | null> {
@@ -61,7 +37,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       where: { slug },
       include: INCLUDE_FULL,
     });
-    return record ? this.toDomainFull(record) : null;
+    return record ? toDomainFull(record) : null;
   }
 
   async findAccentPreviewBySlug(slug: string): Promise<AnimeAccentPreview | null> {
@@ -76,7 +52,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       where: { externalAnilistId: anilistId },
       include: INCLUDE_FULL,
     });
-    return record ? this.toDomainFull(record) : null;
+    return record ? toDomainFull(record) : null;
   }
 
   async findByFilters(
@@ -111,7 +87,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     ]);
 
     return {
-      data: records.map((r) => this.toDomainCard(r)),
+      data: records.map(toDomainCard),
       total,
       page: pagination.page,
       pageSize: pagination.pageSize,
@@ -131,7 +107,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       take: options.limit,
       orderBy: { averageRating: "desc" },
     });
-    return records.map((r) => this.toDomainCard(r));
+    return records.map(toDomainCard);
   }
 
   async findAllWithAnilistId(
@@ -146,7 +122,30 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       take: options.limit,
       orderBy: { averageRating: "desc" },
     });
-    return records.map((r) => this.toDomainCard(r));
+    return records.map(toDomainCard);
+  }
+
+  async findTrending(limit: number): Promise<AnimeEntity[]> {
+    const records = await this.prisma.anime.findMany({
+      take: limit,
+      orderBy: { averageRating: "desc" },
+      where: { status: "AIRING" },
+      include: INCLUDE_CARD,
+    });
+    return records.map(toDomainCard);
+  }
+
+  async findSlugsByAnilistIds(anilistIds: number[]): Promise<Map<number, string>> {
+    if (anilistIds.length === 0) return new Map();
+    const records = await this.prisma.anime.findMany({
+      where: { externalAnilistId: { in: anilistIds } },
+      select: { externalAnilistId: true, slug: true },
+    });
+    const map = new Map<number, string>();
+    for (const r of records) {
+      if (r.externalAnilistId != null) map.set(r.externalAnilistId, r.slug);
+    }
+    return map;
   }
 
   async saveEpisodes(animeId: string, episodes: EpisodeInput[]): Promise<void> {
@@ -190,18 +189,8 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     return results.reduce((acc, r) => acc + r.count, 0);
   }
 
-  async findTrending(limit: number): Promise<AnimeEntity[]> {
-    const records = await this.prisma.anime.findMany({
-      take: limit,
-      orderBy: { averageRating: "desc" },
-      where: { status: "AIRING" },
-      include: INCLUDE_CARD,
-    });
-    return records.map((r) => this.toDomainCard(r));
-  }
-
   /**
-   * Upsert idempotent.
+   * Upsert idempotent d'un anime + ses relations + ses personnages.
    * Clé : externalAnilistId si présent (import sync), sinon id (création locale).
    */
   async save(entity: AnimeEntity): Promise<void> {
@@ -242,7 +231,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       if (malConflict != null && !isSelf) safeMalId = null;
     }
 
-    const payload = this.toPersistence({ ...snap, slug: finalSlug, externalMalId: safeMalId });
+    const payload = toPersistence({ ...snap, slug: finalSlug, externalMalId: safeMalId });
     const where =
       snap.externalAnilistId != null
         ? { externalAnilistId: snap.externalAnilistId }
@@ -255,95 +244,12 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       select: { id: true },
     });
 
-    if (snap.characters.length > 0) {
-      await this.syncCharacters(saved.id, snap.characters);
-    }
-
-    await this.syncRelations(saved.id, snap.relations);
-  }
-
-  private async syncRelations(animeId: string, relations: AnimeRelationSummary[]): Promise<void> {
-    const data = relations.map((r) => ({
-      animeId,
-      relatedExternalAnilistId: r.relatedExternalAnilistId,
-      relationType: r.relationType,
-      title: r.title,
-      coverUrl: r.coverUrl,
-      format: r.format,
-      year: r.year,
-    }));
-
-    await this.prisma.$transaction([
-      this.prisma.animeRelation.deleteMany({ where: { animeId } }),
-      ...(data.length > 0
-        ? [this.prisma.animeRelation.createMany({ data, skipDuplicates: true })]
-        : []),
-    ]);
-  }
-
-  async findSlugsByAnilistIds(anilistIds: number[]): Promise<Map<number, string>> {
-    if (anilistIds.length === 0) return new Map();
-    const records = await this.prisma.anime.findMany({
-      where: { externalAnilistId: { in: anilistIds } },
-      select: { externalAnilistId: true, slug: true },
-    });
-    const map = new Map<number, string>();
-    for (const r of records) {
-      if (r.externalAnilistId != null) map.set(r.externalAnilistId, r.slug);
-    }
-    return map;
-  }
-
-  private async syncCharacters(animeId: string, characters: CharacterSummary[]): Promise<void> {
     await this.prisma.$transaction(
       async (tx) => {
-        for (const c of characters) {
-          const character = await tx.character.upsert({
-            where: { externalAnilistId: c.externalAnilistId },
-            create: {
-              externalAnilistId: c.externalAnilistId,
-              name: c.name,
-              nameJp: c.nameJp,
-              imageUrl: c.imageUrl,
-            },
-            update: {
-              name: c.name,
-              nameJp: c.nameJp,
-              imageUrl: c.imageUrl,
-            },
-            select: { id: true },
-          });
-
-          let voiceActorId: string | null = null;
-          if (c.voiceActorAnilistId != null && c.voiceActorName) {
-            const va = await tx.voiceActor.upsert({
-              where: { externalAnilistId: c.voiceActorAnilistId },
-              create: {
-                externalAnilistId: c.voiceActorAnilistId,
-                name: c.voiceActorName,
-              },
-              update: { name: c.voiceActorName },
-              select: { id: true },
-            });
-            voiceActorId = va.id;
-          }
-
-          await tx.animeCharacter.upsert({
-            where: { animeId_characterId: { animeId, characterId: character.id } },
-            create: {
-              animeId,
-              characterId: character.id,
-              voiceActorId,
-              role: c.role,
-              order: c.order,
-            },
-            update: {
-              voiceActorId,
-              role: c.role,
-              order: c.order,
-            },
-          });
+        if (snap.characters.length > 0) {
+          await syncCharacters(tx, saved.id, snap.characters);
         }
+        await syncRelations(tx, saved.id, snap.relations);
       },
       { timeout: 30000 },
     );
@@ -351,135 +257,5 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
 
   async delete(id: string): Promise<void> {
     await this.prisma.anime.delete({ where: { id } });
-  }
-
-  // --- Mappers privés domain ↔ persistence ---
-
-  private toDomainCard(record: AnimeCardRecord): AnimeEntity {
-    return AnimeEntity.create(record.id, {
-      slug: record.slug,
-      title: record.title,
-      titleJp: record.titleJp,
-      titleEn: record.titleEn,
-      synopsis: record.synopsis,
-      status: record.status as AnimeStatus,
-      format: record.format as AnimeFormat,
-      episodeCount: record.episodeCount,
-      year: record.year,
-      studioName: record.studio?.name ?? null,
-      studioSlug: record.studio?.slug ?? null,
-      coverUrl: record.coverUrl,
-      bannerUrl: record.bannerUrl,
-      accentHex: record.accentHex,
-      averageRating: record.averageRating,
-      externalAnilistId: record.externalAnilistId,
-      externalMalId: record.externalMalId,
-      genres: record.genres.map((g) => g.slug),
-      episodes: [],
-      characters: [],
-      relations: [],
-    });
-  }
-
-  private toDomainFull(record: AnimeFullRecord): AnimeEntity {
-    const relations: AnimeRelationSummary[] = record.relations.map((r) => ({
-      relatedExternalAnilistId: r.relatedExternalAnilistId,
-      relationType: r.relationType as RelationType,
-      title: r.title,
-      coverUrl: r.coverUrl,
-      format: r.format,
-      year: r.year,
-    }));
-    return AnimeEntity.create(record.id, {
-      slug: record.slug,
-      title: record.title,
-      titleJp: record.titleJp,
-      titleEn: record.titleEn,
-      synopsis: record.synopsis,
-      status: record.status as AnimeStatus,
-      format: record.format as AnimeFormat,
-      episodeCount: record.episodeCount,
-      year: record.year,
-      studioName: record.studio?.name ?? null,
-      studioSlug: record.studio?.slug ?? null,
-      coverUrl: record.coverUrl,
-      bannerUrl: record.bannerUrl,
-      accentHex: record.accentHex,
-      averageRating: record.averageRating,
-      externalAnilistId: record.externalAnilistId,
-      externalMalId: record.externalMalId,
-      genres: record.genres.map((g) => g.slug),
-      relations,
-      episodes: record.episodes.map((e) => ({
-        id: e.id,
-        number: e.number,
-        title: e.title,
-        titleJp: e.titleJp,
-        titleRomaji: e.titleRomaji,
-        duration: e.duration,
-        airedAt: e.airedAt,
-        filler: e.filler,
-        recap: e.recap,
-        thumbnail: e.thumbnail,
-        url: e.url,
-      })),
-      characters: record.characters.map((ac) => ({
-        id: ac.character.id,
-        externalAnilistId: ac.character.externalAnilistId,
-        name: ac.character.name,
-        nameJp: ac.character.nameJp,
-        imageUrl: ac.character.imageUrl,
-        role: ac.role as CharacterRole,
-        voiceActorAnilistId: ac.voiceActor?.externalAnilistId ?? null,
-        voiceActorName: ac.voiceActor?.name ?? null,
-        order: ac.order,
-      })),
-    });
-  }
-
-  private toPersistence(snap: ReturnType<AnimeEntity["toSnapshot"]>) {
-    const base = {
-      slug: snap.slug,
-      title: snap.title,
-      titleJp: snap.titleJp,
-      titleEn: snap.titleEn,
-      synopsis: snap.synopsis,
-      status: snap.status,
-      format: snap.format,
-      episodeCount: snap.episodeCount,
-      year: snap.year,
-      coverUrl: snap.coverUrl,
-      bannerUrl: snap.bannerUrl,
-      accentHex: snap.accentHex,
-      averageRating: snap.averageRating,
-      externalAnilistId: snap.externalAnilistId,
-      externalMalId: snap.externalMalId,
-    };
-
-    const studio =
-      snap.studioName && snap.studioSlug
-        ? {
-            studio: {
-              connectOrCreate: {
-                where: { slug: snap.studioSlug },
-                create: { name: snap.studioName, slug: snap.studioSlug },
-              },
-            },
-          }
-        : {};
-
-    const genres =
-      snap.genres.length > 0
-        ? {
-            genres: {
-              connectOrCreate: snap.genres.map((name) => {
-                const slug = slugify(name);
-                return { where: { slug }, create: { name, slug } };
-              }),
-            },
-          }
-        : {};
-
-    return { ...base, ...studio, ...genres };
   }
 }

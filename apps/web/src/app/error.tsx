@@ -17,7 +17,7 @@ export default function Error({ reset }: ErrorProps) {
       <p className="font-body text-sm text-text-secondary">
         Le catalogue n&apos;a pas pu se charger.
       </p>
-      <Button variant="primary" onClick={reset}>
+      <Button onClick={reset}>
         Réessayer
       </Button>
     </main>

@@ -19,7 +19,7 @@ export default function Error({ reset }: ErrorProps) {
         Une erreur est survenue pendant la récupération des données.
       </p>
       <div className="flex items-center gap-3">
-        <Button variant="primary" onClick={reset}>
+        <Button onClick={reset}>
           Réessayer
         </Button>
         <Link

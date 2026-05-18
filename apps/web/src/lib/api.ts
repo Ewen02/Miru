@@ -51,6 +51,22 @@ export async function fetchAnimeDetail(slug: string): Promise<AnimeDetail | null
   return res.json() as Promise<AnimeDetail>;
 }
 
+export interface AnimeAccentPreview {
+  slug: string;
+  title: string;
+  accentHex: string | null;
+}
+
+export async function fetchAnimeAccent(slug: string): Promise<AnimeAccentPreview | null> {
+  const url = new URL(`/animes/${encodeURIComponent(slug)}/accent`, API_URL);
+  const res = await fetch(url, { next: { revalidate: 60 } });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`Miru API ${res.status}: ${await res.text()}`);
+  }
+  return res.json() as Promise<AnimeAccentPreview>;
+}
+
 export async function fetchGenres(): Promise<GenreCard[]> {
   const url = new URL("/genres", API_URL);
   const res = await fetch(url, { next: { revalidate: 3600 } });

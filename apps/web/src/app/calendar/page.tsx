@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import type { CalendarEpisode } from "@miru/types";
 import { fetchCalendarWeek } from "@/lib/api";
+import { addDays, formatDateRange, startOfDay, startOfWeek, timeZoneLabel } from "@/lib/dates";
 
 interface CalendarPageProps {
   searchParams: Promise<{ from?: string }>;
@@ -46,7 +47,7 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
             Calendrier
           </h1>
           <p className="m-0 mt-2 font-body text-sm text-text-secondary">
-            {formatRange(monday, sunday)} · fuseau {tzLabel()}
+            {formatDateRange(monday, sunday)} · fuseau {timeZoneLabel()}
           </p>
         </div>
         <nav className="flex gap-2" aria-label="Navigation hebdomadaire">
@@ -197,7 +198,7 @@ function LiveSpotlight({ episode }: { episode: CalendarEpisode }) {
           Épisode {episode.episodeNumber}
           {episode.episodeCount && <span className="text-text-tertiary"> / {episode.episodeCount}</span>}
           {" · "}
-          {time} {tzLabel()}
+          {time} {timeZoneLabel()}
         </p>
       </div>
     </section>
@@ -205,26 +206,6 @@ function LiveSpotlight({ episode }: { episode: CalendarEpisode }) {
 }
 
 const DAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-
-function startOfWeek(d: Date): Date {
-  const x = new Date(d);
-  const day = (x.getDay() + 6) % 7; // 0 = Monday
-  x.setDate(x.getDate() - day);
-  x.setHours(0, 0, 0, 0);
-  return x;
-}
-
-function startOfDay(d: Date): Date {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  return x;
-}
-
-function addDays(d: Date, n: number): Date {
-  const x = new Date(d);
-  x.setDate(x.getDate() + n);
-  return x;
-}
 
 function groupByDay(
   episodes: CalendarEpisode[],
@@ -243,19 +224,3 @@ function groupByDay(
   return days;
 }
 
-function formatRange(from: Date, to: Date): string {
-  const last = addDays(to, -1);
-  const sameMonth = from.getMonth() === last.getMonth();
-  if (sameMonth) {
-    return `${from.getDate()} – ${last.getDate()} ${last.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}`;
-  }
-  return `${from.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} – ${last.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}`;
-}
-
-function tzLabel(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone ?? "local";
-  } catch {
-    return "local";
-  }
-}

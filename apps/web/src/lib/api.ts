@@ -1,3 +1,4 @@
+import { API_URL } from "./env";
 import type {
   AnimeCard,
   AnimeDetail,
@@ -10,7 +11,6 @@ import type {
   VoiceActorDetail,
 } from "@miru/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 interface Paginated<T> {
   data: T[];

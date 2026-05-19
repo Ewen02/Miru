@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   AnimeCard,
+  CatalogTemplate,
   CatalogToolbar,
   ContinueCard,
   HomeHero,
@@ -11,6 +12,7 @@ import {
 import { fetchAnimeCatalog, fetchAnimeDetail, fetchGenres, type CatalogFilters } from "@/lib/api";
 import { fetchUserWatchlist } from "@/lib/server-watchlist";
 import { getServerSession } from "@/lib/server-auth";
+import { currentSeasonLabel } from "@/lib/dates";
 import type { WatchlistItem } from "@miru/types";
 
 interface CatalogPageProps {
@@ -175,45 +177,17 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         </div>
       )}
 
-      {/* Catalog grid — always present, the "explore everything" section. */}
-      <main className="mx-auto mt-20 max-w-300 px-7 pb-20">
-        {!isFiltered && (
-          <header className="mb-8">
-            <p className="mb-2 font-mono text-[10px] tracking-[0.22em] text-text-tertiary uppercase">
-              Tout explorer
-            </p>
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">
-              Explorer le catalogue
-              {catalog?.total != null && (
-                <span className="ml-3 font-mono text-base text-text-tertiary">
-                  {catalog.total}
-                </span>
-              )}
-            </h2>
-          </header>
-        )}
-
-        {isFiltered && (
-          <header className="mb-8">
-            <p className="mb-2 font-mono text-[10px] tracking-[0.22em] text-text-tertiary uppercase">
-              Résultats filtrés
-            </p>
-            <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">
-              Catalogue
-            </h1>
-          </header>
-        )}
-
-        <div className="mb-8">
-          <CatalogToolbar availableGenres={genres} resultCount={catalog?.total ?? 0} />
-        </div>
-
-        {catalog === null ? (
-          <EmptyState message="Impossible de joindre l'API. Est-elle démarrée sur le port 3001 ?" />
-        ) : catalog.data.length === 0 ? (
-          <EmptyState message="Aucun anime ne correspond à ces critères." />
-        ) : (
-          <>
+      <CatalogTemplate
+        eyebrow={isFiltered ? "Résultats filtrés" : "Tout explorer"}
+        title={isFiltered ? "Catalogue" : "Explorer le catalogue"}
+        totalCount={!isFiltered ? catalog?.total ?? null : null}
+        toolbar={<CatalogToolbar availableGenres={genres} resultCount={catalog?.total ?? 0} />}
+        grid={
+          catalog === null ? (
+            <EmptyState message="Impossible de joindre l'API. Est-elle démarrée sur le port 3001 ?" />
+          ) : catalog.data.length === 0 ? (
+            <EmptyState message="Aucun anime ne correspond à ces critères." />
+          ) : (
             <section className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {catalog.data.map((anime) => (
                 <Link
@@ -231,17 +205,18 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 </Link>
               ))}
             </section>
-
-            <div className="mt-12">
-              <Pagination
-                currentPage={filters.page ?? 1}
-                totalPages={totalPages}
-                makeHref={(page) => buildPageHref(sp, page)}
-              />
-            </div>
-          </>
-        )}
-      </main>
+          )
+        }
+        pagination={
+          catalog && catalog.data.length > 0 ? (
+            <Pagination
+              currentPage={filters.page ?? 1}
+              totalPages={totalPages}
+              makeHref={(page) => buildPageHref(sp, page)}
+            />
+          ) : null
+        }
+      />
     </>
   );
 }
@@ -254,16 +229,3 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
-/**
- * Human-readable label for the current anime season, FR. AniList buckets:
- * WINTER Jan-Mar, SPRING Apr-Jun, SUMMER Jul-Sep, FALL Oct-Dec.
- */
-function currentSeasonLabel(): string {
-  const now = new Date();
-  const month = now.getMonth();
-  const year = now.getFullYear();
-  const seasons = ["hiver", "printemps", "été", "automne"];
-  // Map month (0-11) → bucket index: 0,1,2 → 0 (winter); 3,4,5 → 1; …
-  const name = seasons[Math.floor(month / 3)];
-  return `${name} ${year}`;
-}

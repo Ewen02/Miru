@@ -1,6 +1,6 @@
+import { API_URL } from "./env";
 import type { WatchStatus, WatchlistEntry } from "@miru/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 /**
  * Client-side mutation helpers. They rely on credentials: include so the

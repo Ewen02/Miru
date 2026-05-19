@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+import { API_URL } from "./env";
 
 export const reviewApi = {
   async upsert(animeId: string, payload: { rating: number; body: string | null }): Promise<void> {

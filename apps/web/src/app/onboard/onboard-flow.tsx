@@ -90,7 +90,7 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
         </Link>
       </header>
 
-      <div className="mb-10 h-1 overflow-hidden rounded-full bg-bg-elevated">
+      <div className="mb-10 h-1 overflow-hidden rounded-sm bg-bg-elevated">
         <div
           className="h-full transition-[width] duration-300 ease-out"
           style={{
@@ -197,7 +197,7 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
                     {selected && (
                       <span
                         aria-hidden
-                        className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full"
+                        className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-sm"
                         style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
                       >
                         ✓

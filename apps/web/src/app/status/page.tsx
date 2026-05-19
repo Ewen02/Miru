@@ -69,7 +69,7 @@ export default function StatusPage() {
             >
               <span
                 aria-hidden
-                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                className="h-2.5 w-2.5 shrink-0 rounded-sm"
                 style={{ backgroundColor: STATUS_COLOR[s.status] }}
               />
               <p className="m-0 flex-1 font-body text-sm font-medium text-text-primary">

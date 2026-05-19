@@ -1,8 +1,8 @@
+import { API_URL } from "./env";
 import "server-only";
 import { cookies } from "next/headers";
 import type { YearInReviewDto } from "@miru/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export async function fetchUserYearInReview(year: number): Promise<YearInReviewDto | null> {
   const cookieStore = await cookies();

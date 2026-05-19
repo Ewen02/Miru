@@ -32,7 +32,7 @@ export function CreateListButton() {
         setOpen(false);
         setTitle("");
         setDescription("");
-        router.push(`/lists/${id}` as never);
+        router.push(`/lists/${id}`);
       } catch (err) {
         const msg = (err as Error).message;
         setError(

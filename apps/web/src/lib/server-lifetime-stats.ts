@@ -1,8 +1,8 @@
+import { API_URL } from "./env";
 import "server-only";
 import { cookies } from "next/headers";
 import type { UserLifetime } from "@miru/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 /**
  * Server-side fetch of the current user's lifetime stats. Returns null for

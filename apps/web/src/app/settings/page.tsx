@@ -140,7 +140,7 @@ function ToggleRow({
       </div>
       <span
         aria-hidden
-        className="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full"
+        className="relative inline-flex h-5 w-9 shrink-0 items-center rounded-md"
         style={{
           backgroundColor: defaultOn
             ? "var(--color-accent)"
@@ -148,7 +148,7 @@ function ToggleRow({
         }}
       >
         <span
-          className="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200"
+          className="inline-block h-3.5 w-3.5 transform rounded-sm bg-white transition-transform duration-200"
           style={{ transform: defaultOn ? "translateX(20px)" : "translateX(3px)" }}
         />
       </span>

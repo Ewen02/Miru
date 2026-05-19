@@ -9,7 +9,7 @@ interface TopPageProps {
 }
 
 const PAGE_SIZE = 20;
-const TOTAL_ITEMS = 100;
+const TOP_LIMIT = 100;
 
 export const metadata: Metadata = {
   title: "Top 100",
@@ -18,11 +18,16 @@ export const metadata: Metadata = {
 
 export default async function TopPage({ searchParams }: TopPageProps) {
   const sp = await searchParams;
-  const page = clampPage(Number(sp.page), 1, Math.ceil(TOTAL_ITEMS / PAGE_SIZE));
+  const requestedPage = Math.max(1, Number(sp.page) || 1);
 
-  const catalog = await fetchAnimeCatalog({ page, pageSize: PAGE_SIZE }).catch(() => null);
-  const items = catalog?.data ?? [];
-  const totalPages = Math.ceil(TOTAL_ITEMS / PAGE_SIZE);
+  const catalog = await fetchAnimeCatalog({ page: requestedPage, pageSize: PAGE_SIZE }).catch(
+    () => null,
+  );
+  const totalAvailable = Math.min(catalog?.total ?? 0, TOP_LIMIT);
+  const totalPages = Math.max(1, Math.ceil(totalAvailable / PAGE_SIZE));
+  const page = Math.min(requestedPage, totalPages);
+  const sliceEnd = Math.max(0, totalAvailable - (page - 1) * PAGE_SIZE);
+  const items = (catalog?.data ?? []).slice(0, sliceEnd);
 
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
@@ -39,7 +44,9 @@ export default async function TopPage({ searchParams }: TopPageProps) {
           </p>
         </div>
         <p className="font-mono text-[11px] text-text-tertiary">
-          {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, TOTAL_ITEMS)} sur {TOTAL_ITEMS}
+          {totalAvailable === 0
+            ? "—"
+            : `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, totalAvailable)} sur ${totalAvailable}`}
         </p>
       </header>
 
@@ -164,8 +171,3 @@ function Th({ children, className }: { children: React.ReactNode; className?: st
   );
 }
 
-function clampPage(value: number, min: number, max: number): number {
-  if (Number.isNaN(value) || value < min) return min;
-  if (value > max) return max;
-  return value;
-}

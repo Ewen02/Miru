@@ -161,24 +161,24 @@ function ReviewForm({
             className={cn(
               "h-7 w-full cursor-pointer appearance-none bg-transparent",
               // WebKit
-              "[&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full",
+              "[&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-sm",
               "[&::-webkit-slider-runnable-track]:border [&::-webkit-slider-runnable-track]:border-border-subtle",
               "[&::-webkit-slider-runnable-track]:bg-bg-base",
               "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4",
-              "[&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:[background:var(--color-accent)]",
+              "[&::-webkit-slider-thumb]:rounded-md [&::-webkit-slider-thumb]:[background:var(--color-accent)]",
               "[&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:cursor-pointer",
               // Firefox
-              "[&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full",
+              "[&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-sm",
               "[&::-moz-range-track]:border [&::-moz-range-track]:border-border-subtle",
               "[&::-moz-range-track]:bg-bg-base",
-              "[&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full",
+              "[&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-md",
               "[&::-moz-range-thumb]:[background:var(--color-accent)] [&::-moz-range-thumb]:border-0",
             )}
           />
           {/* Accent fill behind the thumb */}
           <div
             aria-hidden
-            className="pointer-events-none absolute top-2.5 left-0 h-2 rounded-full opacity-30"
+            className="pointer-events-none absolute top-2.5 left-0 h-2 rounded-sm opacity-30"
             style={{
               width: `${sliderPct}%`,
               backgroundColor: "var(--color-accent)",

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import type { YearInReviewDto } from "@miru/types";
-import { StatCard } from "@miru/ui";
+import { EditorialSectionHeader, StatCard } from "@miru/ui";
 import { fetchUserYearInReview } from "@/lib/server-year-in-review";
 
 interface YearInReviewProps {
@@ -105,7 +105,7 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
 
       {/* Monthly bar chart */}
       <section className="mt-20">
-        <SectionHeader eyebrow="Rythme" title="Ton année, mois par mois" />
+        <EditorialSectionHeader eyebrow="Rythme" title="Ton année, mois par mois" />
         <div className="rounded-2xl border border-border-subtle bg-bg-surface p-8">
           <div className="flex h-50 items-end gap-3">
             {data.months.map((mo) => {
@@ -152,7 +152,7 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
       {/* Top anime */}
       {data.topAnime.length > 0 && (
         <section className="mt-20">
-          <SectionHeader eyebrow="Tes coups de cœur" title={`Top ${data.topAnime.length} de l'année`} />
+          <EditorialSectionHeader eyebrow="Tes coups de cœur" title={`Top ${data.topAnime.length} de l'année`} />
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-5">
             {data.topAnime.map((anime, idx) => (
               <Link
@@ -200,7 +200,7 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
       {/* Genres + Studios */}
       {(data.genres.length > 0 || data.studios.length > 0) && (
         <section className="mt-20">
-          <SectionHeader eyebrow="Tes préférences" title="Genres & studios de l'année" />
+          <EditorialSectionHeader eyebrow="Tes préférences" title="Genres & studios de l'année" />
           <div className="grid grid-cols-1 gap-12 rounded-2xl border border-border-subtle bg-bg-surface p-8 lg:grid-cols-2">
             <div>
               <p className="m-0 mb-5 font-mono text-[9px] uppercase tracking-[0.22em] text-text-tertiary">
@@ -310,18 +310,6 @@ function EmptyYear({ year }: { year: number }) {
   );
 }
 
-function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
-  return (
-    <header className="mb-6">
-      <p className="m-0 mb-1 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-        {eyebrow}
-      </p>
-      <h2 className="m-0 font-display text-2xl font-semibold tracking-[-0.02em] text-text-primary">
-        {title}
-      </h2>
-    </header>
-  );
-}
 
 const MONTH_LABELS = [
   "Jan", "Fév", "Mar", "Avr", "Mai", "Juin",

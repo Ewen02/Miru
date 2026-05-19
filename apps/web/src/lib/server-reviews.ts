@@ -1,7 +1,7 @@
+import { API_URL } from "./env";
 import "server-only";
 import type { ReviewItem } from "@miru/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export async function fetchAnimeReviews(animeId: string): Promise<ReviewItem[]> {
   const url = new URL(`/animes/${encodeURIComponent(animeId)}/reviews`, API_URL);

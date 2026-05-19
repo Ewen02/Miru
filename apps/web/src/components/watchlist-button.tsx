@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { WatchStatus, WatchlistEntry } from "@miru/types";
 import { Button, cn } from "@miru/ui";
 import { watchlistApi } from "@/lib/watchlist-api";
+import { useDismiss } from "@/lib/use-dismiss";
 
 interface WatchlistButtonProps {
   animeId: string;
@@ -22,13 +23,7 @@ const STATUS_LABELS: Record<WatchStatus, string> = {
   DROPPED: "Abandonné",
 };
 
-const STATUS_ORDER: WatchStatus[] = [
-  "WATCHING" as WatchStatus,
-  "PLANNED" as WatchStatus,
-  "ON_HOLD" as WatchStatus,
-  "COMPLETED" as WatchStatus,
-  "DROPPED" as WatchStatus,
-];
+const STATUS_ORDER: WatchStatus[] = ["WATCHING", "PLANNED", "ON_HOLD", "COMPLETED", "DROPPED"];
 
 export function WatchlistButton({
   animeId,
@@ -46,37 +41,8 @@ export function WatchlistButton({
   const statusRef = useRef<HTMLDivElement>(null);
   const rateRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!statusOpen) return;
-    const onPointer = (e: MouseEvent) => {
-      if (!statusRef.current?.contains(e.target as Node)) setStatusOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setStatusOpen(false);
-    };
-    document.addEventListener("mousedown", onPointer);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onPointer);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [statusOpen]);
-
-  useEffect(() => {
-    if (!rateOpen) return;
-    const onPointer = (e: MouseEvent) => {
-      if (!rateRef.current?.contains(e.target as Node)) setRateOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setRateOpen(false);
-    };
-    document.addEventListener("mousedown", onPointer);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onPointer);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [rateOpen]);
+  useDismiss(statusRef, statusOpen, () => setStatusOpen(false));
+  useDismiss(rateRef, rateOpen, () => setRateOpen(false));
 
   if (!isAuthenticated) {
     return (
@@ -85,7 +51,7 @@ export function WatchlistButton({
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push(`/login?next=/anime/${animeId}` as never)}
+            onClick={() => router.push(`/login?next=/anime/${animeId}`)}
           >
             Se connecter pour suivre
           </Button>
@@ -163,7 +129,7 @@ export function WatchlistButton({
         <div className="flex flex-wrap items-center gap-3">
           <Button
             type="button"
-            onClick={() => setStatus("PLANNED" as WatchStatus)}
+            onClick={() => setStatus("PLANNED")}
             disabled={pending}
             style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
           >
@@ -172,7 +138,7 @@ export function WatchlistButton({
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setStatus("COMPLETED" as WatchStatus)}
+            onClick={() => setStatus("COMPLETED")}
             disabled={pending}
             className="text-text-secondary"
           >
@@ -212,7 +178,7 @@ export function WatchlistButton({
           >
             <span
               aria-hidden
-              className="h-1.5 w-1.5 rounded-full"
+              className="h-1.5 w-1.5 rounded-sm"
               style={{ backgroundColor: "var(--color-accent)" }}
             />
             {STATUS_LABELS[entry.status]}
@@ -246,7 +212,7 @@ export function WatchlistButton({
         </div>
 
         {/* Episode stepper — only meaningful when status === WATCHING and episodeCount available */}
-        {entry.status === ("WATCHING" as WatchStatus) && (
+        {entry.status === "WATCHING" && (
           <div className="inline-flex h-10 items-center overflow-hidden rounded-md border border-border bg-bg-base">
             <button
               type="button"

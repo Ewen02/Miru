@@ -1,8 +1,8 @@
+import { API_URL } from "./env";
 import "server-only";
 import { cookies } from "next/headers";
 import type { ListDetailDto, ListSummaryDto } from "@miru/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 async function buildHeaders(): Promise<Record<string, string>> {
   const cookieStore = await cookies();

@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button, Input, Logo, cn } from "@miru/ui";
+import { Button, Logo } from "@miru/ui";
 import { authClient } from "@/lib/auth-client";
+import { AuthBackdrop } from "../_auth/auth-backdrop";
+import { AuthField } from "../_auth/auth-field";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,13 +27,13 @@ export default function LoginPage() {
       setLoading(false);
       return;
     }
-    router.push((next ?? "/profile") as never);
+    router.push(next ?? "/profile");
     router.refresh();
   }
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-10">
-      <BackdropCovers />
+      <AuthBackdrop />
 
       <div className="relative w-full max-w-100 rounded-2xl border border-border bg-bg-surface p-8">
         <div className="mb-7 flex flex-col items-center gap-4 text-center">
@@ -53,7 +55,7 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Field
+          <AuthField
             label="Adresse e-mail"
             type="email"
             value={email}
@@ -63,7 +65,7 @@ export default function LoginPage() {
             required
           />
 
-          <Field
+          <AuthField
             label="Mot de passe"
             type="password"
             value={password}
@@ -100,77 +102,3 @@ export default function LoginPage() {
   );
 }
 
-interface FieldProps {
-  label: string;
-  type?: "text" | "email" | "password";
-  value: string;
-  onChange: (next: string) => void;
-  placeholder?: string;
-  autoComplete?: string;
-  required?: boolean;
-  minLength?: number;
-  hint?: string;
-  invalid?: boolean;
-}
-
-function Field({
-  label,
-  type = "text",
-  value,
-  onChange,
-  placeholder,
-  autoComplete,
-  required,
-  minLength,
-  hint,
-  invalid,
-}: FieldProps) {
-  return (
-    <label className="flex flex-col gap-2">
-      <span className="font-mono text-[10px] tracking-[0.22em] text-text-tertiary uppercase">
-        {label}
-      </span>
-      <Input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        required={required}
-        minLength={minLength}
-        aria-invalid={invalid}
-        className={cn(invalid && "border-error/40 bg-error-muted")}
-      />
-      {hint && (
-        <span
-          className={cn(
-            "font-body text-xs",
-            invalid ? "text-error" : "text-text-tertiary",
-          )}
-        >
-          {hint}
-        </span>
-      )}
-    </label>
-  );
-}
-
-/** Decorative scattered cover silhouettes behind the auth card. */
-function BackdropCovers() {
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0">
-      <div
-        className="absolute left-[8%] top-[20%] h-58 w-40 -rotate-8 rounded-xl border border-border-subtle opacity-40"
-        style={{ background: "linear-gradient(160deg, #1a0e36, #2d1844)" }}
-      />
-      <div
-        className="absolute right-[10%] bottom-[12%] h-62 w-45 rotate-6 rounded-xl border border-border-subtle opacity-30"
-        style={{ background: "linear-gradient(160deg, #0e1620, #1c5170)" }}
-      />
-      <div
-        className="absolute right-[30%] top-[8%] h-48 w-33 -rotate-4 rounded-xl border border-border-subtle opacity-20"
-        style={{ background: "linear-gradient(160deg, #1c1313, #6e1f1f)" }}
-      />
-    </div>
-  );
-}

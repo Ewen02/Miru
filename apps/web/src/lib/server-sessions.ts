@@ -1,8 +1,8 @@
+import { API_URL } from "./env";
 import "server-only";
 import { cookies } from "next/headers";
 import type { UserActiveSessionDto } from "@miru/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export async function fetchUserSessions(): Promise<UserActiveSessionDto[] | null> {
   const cookieStore = await cookies();

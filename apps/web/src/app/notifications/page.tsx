@@ -78,7 +78,7 @@ function NotificationCard({ notification: n }: { notification: NotificationItemD
       {isUnread && (
         <span
           aria-hidden
-          className="absolute left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full"
+          className="absolute left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-sm"
           style={{ backgroundColor: "var(--color-accent)" }}
         />
       )}

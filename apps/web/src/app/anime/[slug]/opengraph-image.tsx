@@ -7,11 +7,12 @@ export const contentType = "image/png";
 export const alt = "Anime detail OG card";
 
 interface OpenGraphImageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function OpenGraphImage({ params }: OpenGraphImageProps) {
-  const anime = await fetchAnimeDetail(params.slug).catch(() => null);
+  const { slug } = await params;
+  const anime = await fetchAnimeDetail(slug).catch(() => null);
   const accent = anime?.accentHex ?? "#c8a2ff";
   const title = anime?.title ?? "Miru";
   const studio = anime?.studioName ?? null;

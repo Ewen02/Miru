@@ -34,9 +34,6 @@ const NO_HEADER_PREFIXES = ["/login", "/register"];
 
 export function AppHeaderClient({ user, unreadCount, logo }: AppHeaderClientProps) {
   const pathname = usePathname();
-  if (pathname && NO_HEADER_PREFIXES.some((p) => pathname.startsWith(p))) {
-    return null;
-  }
   const activeTab = resolveActiveTab(pathname);
   const detail = useHeaderDetail();
   const isDetailRoute = pathname?.startsWith("/anime/") ?? false;
@@ -67,6 +64,10 @@ export function AppHeaderClient({ user, unreadCount, logo }: AppHeaderClientProp
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  if (pathname && NO_HEADER_PREFIXES.some((p) => pathname.startsWith(p))) {
+    return null;
+  }
 
   const tabs: Array<{ key: "catalogue" | "watchlist"; label: string; href: string }> = [
     { key: "catalogue", label: "Catalogue", href: "/" },
@@ -184,7 +185,7 @@ export function AppHeaderClient({ user, unreadCount, logo }: AppHeaderClientProp
                 {unreadCount > 0 && (
                   <span
                     aria-hidden
-                    className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono text-[9px] font-semibold"
+                    className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-sm px-1 font-mono text-[9px] font-semibold"
                     style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
                   >
                     {unreadCount > 9 ? "9+" : unreadCount}

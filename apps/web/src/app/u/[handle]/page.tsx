@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { AnimeCard, RatingHistogram, StatCard } from "@miru/ui";
+import { AnimeCard, EditorialSectionHeader, RatingHistogram, StatCard } from "@miru/ui";
 import { fetchUserProfile } from "@/lib/api";
 import type { UserProfileReview } from "@miru/types";
 
@@ -78,7 +78,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       {/* Reviews */}
       {profile.reviews.length > 0 && (
         <section className="mb-16">
-          <SectionHeader
+          <EditorialSectionHeader
             eyebrow="Communauté"
             title="Avis publiés"
             count={profile.stats.reviewCount}
@@ -94,13 +94,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       {/* Favorites grid */}
       {profile.favorites.length > 0 && (
         <section>
-          <SectionHeader eyebrow="Top 5" title="Favoris de tous les temps" />
+          <EditorialSectionHeader eyebrow="Top 5" title="Favoris de tous les temps" />
           <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-5">
             {profile.favorites.map((fav, idx) => (
               <div key={fav.id} className="relative">
                 <span
                   aria-hidden
-                  className="absolute -left-2 -top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full font-display text-sm font-bold"
+                  className="absolute -left-2 -top-2 z-10 flex h-8 w-8 items-center justify-center rounded-sm font-display text-sm font-bold"
                   style={{
                     backgroundColor: "var(--color-accent)",
                     color: "#08080c",
@@ -156,33 +156,6 @@ function Avatar({ image, initial }: { image: string | null; initial: string }) {
   );
 }
 
-function SectionHeader({
-  eyebrow,
-  title,
-  count,
-}: {
-  eyebrow?: string;
-  title: string;
-  count?: number;
-}) {
-  return (
-    <header className="mb-6 flex items-baseline justify-between">
-      <div>
-        {eyebrow && (
-          <p className="m-0 mb-1 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-            {eyebrow}
-          </p>
-        )}
-        <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">
-          {title}
-        </h2>
-      </div>
-      {count != null && (
-        <span className="font-mono text-[11px] text-text-tertiary">{count}</span>
-      )}
-    </header>
-  );
-}
 
 function ReviewCard({ review }: { review: UserProfileReview }) {
   return (

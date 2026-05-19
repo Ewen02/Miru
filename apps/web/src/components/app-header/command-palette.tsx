@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { AnimeCard } from "@miru/types";
 import { cn } from "@miru/ui";
+import { API_URL } from "@/lib/env";
 
 interface CommandPaletteProps {
   open: boolean;
   onClose: () => void;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 interface CatalogPage {
   data: AnimeCard[];

@@ -275,6 +275,17 @@ export interface UserLifetime {
   stats: UserLifetimeStats;
 }
 
+export interface UserActiveSessionDto {
+  id: string;
+  userAgent: string | null;
+  ipAddress: string | null;
+  /** ISO string. */
+  createdAt: string;
+  /** ISO string. */
+  expiresAt: string;
+  current: boolean;
+}
+
 export interface YearInReviewMonth {
   /** 1-12 */
   month: number;

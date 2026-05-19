@@ -11,6 +11,7 @@ import { AnimeModule } from "@modules/anime/anime.module";
 import { CharacterModule } from "@modules/character/character.module";
 import { GenreModule } from "@modules/genre/genre.module";
 import { ListModule } from "@modules/list/list.module";
+import { NotificationModule } from "@modules/notification/notification.module";
 import { PlatformModule } from "@modules/platform/platform.module";
 import { ReviewModule } from "@modules/review/review.module";
 import { StudioModule } from "@modules/studio/studio.module";
@@ -64,6 +65,7 @@ const isDev = process.env.NODE_ENV !== "production";
     CharacterModule,
     GenreModule,
     ListModule,
+    NotificationModule,
     PlatformModule,
     StudioModule,
     SyncModule,

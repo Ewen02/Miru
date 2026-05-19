@@ -7,6 +7,7 @@ import {
   UserProfileStats,
   UserPublicReview,
   UserRepositoryPort,
+  YearInReview,
 } from "../../domain/ports/user-repository.port";
 
 const COMPLETED_STATUS = "COMPLETED";
@@ -175,6 +176,124 @@ export class PrismaUserRepository implements UserRepositoryPort {
         ? { name: topStudioRow[0].name, count: Number(topStudioRow[0].count) }
         : null,
       firstAddedAt: firstAdded?.createdAt ?? null,
+    };
+  }
+
+  async yearInReviewByUserId(userId: string, year: number): Promise<YearInReview> {
+    const start = new Date(Date.UTC(year, 0, 1));
+    const end = new Date(Date.UTC(year + 1, 0, 1));
+    const prevStart = new Date(Date.UTC(year - 1, 0, 1));
+    const prevEnd = new Date(Date.UTC(year, 0, 1));
+
+    // "Completed this year" uses completedAt when present, falling back to
+    // updatedAt for legacy rows that didn't record the transition timestamp.
+    const dateFilter = {
+      OR: [
+        { completedAt: { gte: start, lt: end } },
+        { AND: [{ completedAt: null }, { updatedAt: { gte: start, lt: end } }] },
+      ],
+    };
+    const prevDateFilter = {
+      OR: [
+        { completedAt: { gte: prevStart, lt: prevEnd } },
+        { AND: [{ completedAt: null }, { updatedAt: { gte: prevStart, lt: prevEnd } }] },
+      ],
+    };
+
+    const baseWhere = { userId, status: COMPLETED_STATUS, ...dateFilter };
+
+    const [
+      completedCount,
+      previousYearCompletedCount,
+      moviesCount,
+      reviewCount,
+      monthRows,
+      topAnimeRows,
+      genreRows,
+      studioRows,
+    ] = await Promise.all([
+      this.prisma.watchlistEntry.count({ where: baseWhere }),
+      this.prisma.watchlistEntry.count({
+        where: { userId, status: COMPLETED_STATUS, ...prevDateFilter },
+      }),
+      this.prisma.watchlistEntry.count({
+        where: { ...baseWhere, anime: { format: MOVIE_FORMAT } },
+      }),
+      this.prisma.review.count({
+        where: { userId, createdAt: { gte: start, lt: end } },
+      }),
+      // GROUP BY EXTRACT(MONTH FROM COALESCE(completedAt, updatedAt)).
+      this.prisma.$queryRaw<Array<{ month: number; count: bigint }>>`
+        SELECT EXTRACT(MONTH FROM COALESCE(w."completedAt", w."updatedAt"))::int AS month,
+               COUNT(*)::bigint AS count
+        FROM "WatchlistEntry" w
+        WHERE w."userId" = ${userId}
+          AND w.status = ${COMPLETED_STATUS}
+          AND COALESCE(w."completedAt", w."updatedAt") >= ${start}
+          AND COALESCE(w."completedAt", w."updatedAt") <  ${end}
+        GROUP BY month
+        ORDER BY month
+      `,
+      this.prisma.watchlistEntry.findMany({
+        where: baseWhere,
+        orderBy: [{ rating: { sort: "desc", nulls: "last" } }, { updatedAt: "desc" }],
+        take: 5,
+        include: {
+          anime: { select: { id: true, slug: true, title: true, coverUrl: true } },
+        },
+      }),
+      this.prisma.$queryRaw<Array<{ name: string; count: bigint }>>`
+        SELECT g.name, COUNT(*)::bigint AS count
+        FROM "WatchlistEntry" w
+        JOIN "_AnimeGenres" ag ON ag."A" = w."animeId"
+        JOIN "Genre" g ON g.id = ag."B"
+        WHERE w."userId" = ${userId}
+          AND w.status = ${COMPLETED_STATUS}
+          AND COALESCE(w."completedAt", w."updatedAt") >= ${start}
+          AND COALESCE(w."completedAt", w."updatedAt") <  ${end}
+        GROUP BY g.id, g.name
+        ORDER BY count DESC
+        LIMIT 6
+      `,
+      this.prisma.$queryRaw<Array<{ name: string; count: bigint }>>`
+        SELECT s.name, COUNT(*)::bigint AS count
+        FROM "WatchlistEntry" w
+        JOIN "Anime" a ON a.id = w."animeId"
+        JOIN "Studio" s ON s.id = a."studioId"
+        WHERE w."userId" = ${userId}
+          AND w.status = ${COMPLETED_STATUS}
+          AND COALESCE(w."completedAt", w."updatedAt") >= ${start}
+          AND COALESCE(w."completedAt", w."updatedAt") <  ${end}
+        GROUP BY s.id, s.name
+        ORDER BY count DESC
+        LIMIT 5
+      `,
+    ]);
+
+    const monthsMap = new Map<number, number>();
+    for (const row of monthRows) monthsMap.set(row.month, Number(row.count));
+    const months = Array.from({ length: 12 }, (_, i) => ({
+      month: i + 1,
+      completedCount: monthsMap.get(i + 1) ?? 0,
+    }));
+
+    return {
+      year,
+      completedCount,
+      hoursWatched: Math.round((completedCount * AVG_EPISODE_MINUTES) / 60),
+      moviesCount,
+      reviewCount,
+      previousYearCompletedCount,
+      months,
+      topAnime: topAnimeRows.map((e) => ({
+        animeId: e.anime.id,
+        slug: e.anime.slug,
+        title: e.anime.title,
+        coverUrl: e.anime.coverUrl,
+        rating: e.rating ?? null,
+      })),
+      genres: genreRows.map((r) => ({ name: r.name, count: Number(r.count) })),
+      studios: studioRows.map((r) => ({ name: r.name, count: Number(r.count) })),
     };
   }
 

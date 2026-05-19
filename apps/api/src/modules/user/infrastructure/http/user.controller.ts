@@ -1,10 +1,11 @@
-import { Controller, Get, Param, UseGuards } from "@nestjs/common";
-import type { UserLifetime, UserProfile } from "@miru/types";
+import { Controller, Get, Param, ParseIntPipe, UseGuards } from "@nestjs/common";
+import type { UserLifetime, UserProfile, YearInReviewDto } from "@miru/types";
 import { AuthRequiredGuard } from "@auth/auth-required.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
 import { GetCurrentUserUseCase } from "../../application/use-cases/get-current-user.use-case";
 import { GetUserProfileUseCase } from "../../application/use-cases/get-user-profile.use-case";
 import { GetUserLifetimeStatsUseCase } from "../../application/use-cases/get-user-lifetime-stats.use-case";
+import { GetUserYearInReviewUseCase } from "../../application/use-cases/get-user-year-in-review.use-case";
 
 interface UserDto {
   id: string;
@@ -20,6 +21,7 @@ export class UserController {
     private readonly getCurrentUser: GetCurrentUserUseCase,
     private readonly getUserProfile: GetUserProfileUseCase,
     private readonly getUserLifetime: GetUserLifetimeStatsUseCase,
+    private readonly getUserYearInReview: GetUserYearInReviewUseCase,
   ) {}
 
   @Get("me")
@@ -50,6 +52,15 @@ export class UserController {
         firstAddedAt: stats.firstAddedAt ? stats.firstAddedAt.toISOString() : null,
       },
     };
+  }
+
+  @Get("me/year-in-review/:year")
+  @UseGuards(AuthRequiredGuard)
+  async yearInReview(
+    @Param("year", ParseIntPipe) year: number,
+    @CurrentUserId() userId: string,
+  ): Promise<YearInReviewDto> {
+    return this.getUserYearInReview.execute({ userId, year });
   }
 
   @Get(":handle")

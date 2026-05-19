@@ -45,6 +45,40 @@ export interface UserLifetimeStats {
   firstAddedAt: Date | null;
 }
 
+export interface YearInReviewMonth {
+  /** 1-12 */
+  month: number;
+  completedCount: number;
+}
+
+export interface YearInReviewBreakdownRow {
+  name: string;
+  count: number;
+}
+
+export interface YearInReviewTopAnime {
+  animeId: string;
+  slug: string;
+  title: string;
+  coverUrl: string | null;
+  /** User's personal rating from the watchlist entry. */
+  rating: number | null;
+}
+
+export interface YearInReview {
+  year: number;
+  completedCount: number;
+  hoursWatched: number;
+  moviesCount: number;
+  reviewCount: number;
+  /** completedCount last year, for YoY growth. */
+  previousYearCompletedCount: number;
+  months: YearInReviewMonth[];
+  topAnime: YearInReviewTopAnime[];
+  genres: YearInReviewBreakdownRow[];
+  studios: YearInReviewBreakdownRow[];
+}
+
 export interface UserRepositoryPort {
   findById(id: string): Promise<UserEntity | null>;
   /**
@@ -58,4 +92,6 @@ export interface UserRepositoryPort {
   joinedAt(userId: string): Promise<Date | null>;
   /** Heavier aggregation for the personal /lifetime-stats page. */
   lifetimeStatsByUserId(userId: string): Promise<UserLifetimeStats>;
+  /** Per-user year-in-review aggregation. Bounded to a single calendar year. */
+  yearInReviewByUserId(userId: string, year: number): Promise<YearInReview>;
 }

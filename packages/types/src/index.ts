@@ -51,9 +51,88 @@ export interface AnimeCard {
   genres: string[];
 }
 
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasNext: boolean;
+}
+
 export interface GenreCard {
   slug: string;
   name: string;
+}
+
+export interface GenreStats {
+  totalAnimes: number;
+  thisYearAnimes: number;
+  averageRating: number | null;
+}
+
+export interface GenreDetail {
+  slug: string;
+  name: string;
+  stats: GenreStats;
+  animes: PaginatedResult<AnimeCard>;
+}
+
+export interface UserProfileStats {
+  completedCount: number;
+  hoursWatched: number;
+  reviewCount: number;
+  /** 10-bin histogram of Review.rating, index 0 = rating 1. */
+  ratingHistogram: number[];
+}
+
+export interface UserProfileFavorite {
+  id: string;
+  slug: string;
+  title: string;
+  coverUrl: string | null;
+  rating: number | null;
+}
+
+export interface UserProfileReview {
+  id: string;
+  rating: number;
+  body: string | null;
+  /** ISO string. */
+  createdAt: string;
+  anime: { id: string; slug: string; title: string; coverUrl: string | null };
+}
+
+export interface CalendarEpisode {
+  animeId: string;
+  animeSlug: string;
+  animeTitle: string;
+  studioName: string | null;
+  coverUrl: string | null;
+  episodeCount: number | null;
+  episodeNumber: number;
+  episodeTitle: string | null;
+  /** ISO string. */
+  airedAt: string;
+}
+
+export interface CalendarWeek {
+  /** ISO string, inclusive start. */
+  from: string;
+  /** ISO string, exclusive end. */
+  to: string;
+  episodes: CalendarEpisode[];
+}
+
+export interface UserProfile {
+  id: string;
+  handle: string;
+  name: string;
+  image: string | null;
+  /** ISO string or null when join date is unknown. */
+  joinedAt: string | null;
+  stats: UserProfileStats;
+  favorites: UserProfileFavorite[];
+  reviews: UserProfileReview[];
 }
 
 export interface EpisodeItem {

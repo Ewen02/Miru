@@ -27,6 +27,7 @@ export const AniListAnimeSchema = z.object({
   episodes: z.number().int().nullable().optional(),
   duration: z.number().int().nullable().optional(),
   genres: z.array(z.string()).default([]),
+  isAdult: z.boolean().nullable().optional(),
   averageScore: z.number().nullable().optional(),
   studios: z
     .object({ nodes: z.array(z.object({ name: z.string() })).default([]) })

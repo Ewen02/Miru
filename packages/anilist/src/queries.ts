@@ -13,6 +13,7 @@ export const MEDIA_FRAGMENT = `
     episodes
     duration
     genres
+    isAdult
     averageScore
     studios(isMain: true) { nodes { name } }
     characters(sort: ROLE, perPage: 25) {
@@ -42,7 +43,7 @@ export const MEDIA_FRAGMENT = `
 export const TRENDING_QUERY = `
   query Trending($page: Int, $perPage: Int) {
     Page(page: $page, perPage: $perPage) {
-      media(sort: TRENDING_DESC, type: ANIME) { ...MediaFragment }
+      media(sort: TRENDING_DESC, type: ANIME, isAdult: false) { ...MediaFragment }
     }
   }
   ${MEDIA_FRAGMENT}
@@ -51,7 +52,7 @@ export const TRENDING_QUERY = `
 export const SEASON_QUERY = `
   query Season($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int) {
     Page(page: $page, perPage: $perPage) {
-      media(season: $season, seasonYear: $seasonYear, type: ANIME, sort: POPULARITY_DESC) {
+      media(season: $season, seasonYear: $seasonYear, type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
         ...MediaFragment
       }
     }
@@ -62,7 +63,7 @@ export const SEASON_QUERY = `
 export const ANIME_SEARCH_QUERY = `
   query Search($query: String, $page: Int, $perPage: Int) {
     Page(page: $page, perPage: $perPage) {
-      media(search: $query, type: ANIME) { ...MediaFragment }
+      media(search: $query, type: ANIME, isAdult: false) { ...MediaFragment }
     }
   }
   ${MEDIA_FRAGMENT}

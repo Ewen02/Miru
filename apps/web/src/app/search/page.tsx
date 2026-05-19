@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import type { AnimeCard as AnimeCardDTO } from "@miru/types";
 import { AnimeCard, Pagination } from "@miru/ui";
 import { fetchAnimeCatalog } from "@/lib/api";
 
@@ -22,10 +23,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = sp.q?.trim() ?? "";
   const page = Number(sp.page) > 0 ? Number(sp.page) : 1;
 
-  const catalog =
+  const [catalog, suggestions] = await Promise.all([
     query.length > 0
-      ? await fetchAnimeCatalog({ search: query, page, pageSize: PAGE_SIZE }).catch(() => null)
-      : null;
+      ? fetchAnimeCatalog({ search: query, page, pageSize: PAGE_SIZE }).catch(() => null)
+      : Promise.resolve(null),
+    // Suggestions: top-rated handful from the catalog. Only computed on the
+    // empty-state path — pointless to re-fetch when results are showing.
+    query.length === 0
+      ? fetchAnimeCatalog({ pageSize: 8 }).catch(() => null)
+      : Promise.resolve(null),
+  ]);
 
   const total = catalog?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -70,7 +77,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       </form>
 
       {query.length === 0 ? (
-        <SuggestionsPanel />
+        <SuggestionsPanel anime={suggestions?.data ?? []} />
       ) : catalog === null ? (
         <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
           <p className="m-0 font-body text-sm text-text-tertiary">
@@ -122,34 +129,38 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   );
 }
 
-function SuggestionsPanel() {
+function SuggestionsPanel({ anime }: { anime: AnimeCardDTO[] }) {
+  if (anime.length === 0) {
+    return (
+      <section className="rounded-2xl border border-border-subtle bg-bg-surface p-8 text-center">
+        <p className="m-0 font-body text-sm text-text-tertiary">
+          Saisis une recherche pour explorer le catalogue.
+        </p>
+      </section>
+    );
+  }
   return (
-    <section className="rounded-2xl border border-border-subtle bg-bg-surface p-8">
+    <section>
       <p className="m-0 mb-5 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-        Suggestions
+        Mieux notés ces temps-ci
       </p>
-      <div className="flex flex-wrap gap-2">
-        {SUGGESTED_QUERIES.map((q) => (
+      <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
+        {anime.map((a) => (
           <Link
-            key={q}
-            href={`/search?q=${encodeURIComponent(q)}`}
-            className="inline-flex h-9 items-center rounded-md border border-border bg-bg-base px-3 font-body text-sm text-text-secondary transition-colors duration-200 hover:bg-bg-elevated hover:text-text-primary"
+            key={a.id}
+            href={`/anime/${a.slug}`}
+            className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
           >
-            {q}
+            <AnimeCard
+              title={a.title}
+              coverUrl={a.coverUrl}
+              studioName={a.studioName}
+              year={a.year}
+              rating={a.averageRating}
+            />
           </Link>
         ))}
       </div>
     </section>
   );
 }
-
-const SUGGESTED_QUERIES = [
-  "Frieren",
-  "Vinland Saga",
-  "Mushishi",
-  "Cowboy Bebop",
-  "Made in Abyss",
-  "Spy x Family",
-  "Demon Slayer",
-  "Bocchi the Rock",
-];

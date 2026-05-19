@@ -28,6 +28,7 @@ function makeRepoMock(): jest.Mocked<AnimeRepositoryPort> {
     enrichEpisodes: jest.fn(),
     save: jest.fn(),
     markSyncFailed: jest.fn(),
+    findAiringEpisodesBetween: jest.fn(),
     delete: jest.fn(),
   };
 }

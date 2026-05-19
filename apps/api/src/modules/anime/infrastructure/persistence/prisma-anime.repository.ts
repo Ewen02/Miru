@@ -6,6 +6,7 @@ import {
   AnimeAccentPreview,
   AnimeFilters,
   AnimeRepositoryPort,
+  EpisodeAiringRow,
 } from "../../domain/ports/anime-repository.port";
 import { EpisodeInput } from "../../domain/ports/episode-sync.port";
 import { AnimeEntity } from "../../domain/entities/anime.entity";
@@ -19,6 +20,15 @@ import {
   toPersistence,
 } from "./anime-prisma.mappers";
 import { syncCharacters, syncPlatforms, syncRelations } from "./anime-prisma-sync.helper";
+
+/**
+ * Catalogue-wide exclusion of NSFW titles. Applied in every discovery /
+ * listing query — not on `findById*` so we can still load an existing
+ * record for purging or internal sync flows.
+ */
+const NSFW_EXCLUDE: Prisma.AnimeWhereInput = {
+  genres: { none: { slug: "hentai" } },
+};
 
 @Injectable()
 export class PrismaAnimeRepository implements AnimeRepositoryPort {
@@ -59,7 +69,9 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     filters: AnimeFilters,
     pagination: PaginatedQuery,
   ): Promise<PaginatedResult<AnimeEntity>> {
-    const where: Prisma.AnimeWhereInput = {};
+    // NSFW exclusion goes in AND so it can't be silently dropped by a later
+    // assignment to `where.genres` when the user filters by genre.
+    const where: Prisma.AnimeWhereInput = { AND: [NSFW_EXCLUDE] };
 
     if (filters.status) where.status = filters.status;
     if (filters.format) where.format = filters.format;
@@ -72,7 +84,12 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       ];
     }
     if (filters.genres?.length) {
-      where.genres = { some: { slug: { in: filters.genres } } };
+      // Drop "hentai" from the user-supplied list so URL hacking the chip
+      // can't bypass the global filter.
+      const safeGenres = filters.genres.filter((g) => g.toLowerCase() !== "hentai");
+      if (safeGenres.length > 0) {
+        where.genres = { some: { slug: { in: safeGenres } } };
+      }
     }
 
     const [records, total] = await Promise.all([
@@ -129,7 +146,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     const records = await this.prisma.anime.findMany({
       take: limit,
       orderBy: { averageRating: "desc" },
-      where: { status: "AIRING" },
+      where: { status: "AIRING", ...NSFW_EXCLUDE },
       include: INCLUDE_CARD,
     });
     return records.map(toDomainCard);
@@ -266,5 +283,40 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
       where: { id: animeId },
       data: { syncFailedAt: new Date() },
     });
+  }
+
+  async findAiringEpisodesBetween(from: Date, to: Date): Promise<EpisodeAiringRow[]> {
+    const rows = await this.prisma.episode.findMany({
+      where: {
+        airedAt: { gte: from, lt: to },
+        anime: { ...NSFW_EXCLUDE },
+      },
+      orderBy: { airedAt: "asc" },
+      include: {
+        anime: {
+          select: {
+            slug: true,
+            title: true,
+            coverUrl: true,
+            episodeCount: true,
+            studio: { select: { name: true } },
+          },
+        },
+      },
+    });
+
+    return rows
+      .filter((r) => r.airedAt != null)
+      .map((r) => ({
+        animeId: r.animeId,
+        animeSlug: r.anime.slug,
+        animeTitle: r.anime.title,
+        studioName: r.anime.studio?.name ?? null,
+        coverUrl: r.anime.coverUrl,
+        episodeCount: r.anime.episodeCount,
+        episodeNumber: r.number,
+        episodeTitle: r.title,
+        airedAt: r.airedAt as Date,
+      }));
   }
 }

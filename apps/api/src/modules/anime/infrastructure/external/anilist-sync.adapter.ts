@@ -24,6 +24,16 @@ const ALLOWED_RELATION_TYPES = new Set<RelationType>([
 function isAllowedRelationType(value: string): value is RelationType {
   return (ALLOWED_RELATION_TYPES as Set<string>).has(value);
 }
+
+/**
+ * Defense in depth on top of `isAdult: false` in the GraphQL query.
+ * Some titles slip through with `isAdult: false` but still carry the
+ * Hentai genre tag — drop them too.
+ */
+function isSafeForAllAges(a: AniListAnime): boolean {
+  if (a.isAdult === true) return false;
+  return !(a.genres ?? []).some((g) => g.toLowerCase() === "hentai");
+}
 import { ANILIST_CLIENT } from "../../application/tokens";
 
 @Injectable()
@@ -34,7 +44,7 @@ export class AniListSyncAdapter implements AnimeSyncPort {
 
   async fetchTrending(page: number, perPage: number): Promise<AnimeEntity[]> {
     const list = await this.client.getTrending(page, perPage);
-    return Promise.all(list.map((a) => this.toDomain(a)));
+    return Promise.all(list.filter(isSafeForAllAges).map((a) => this.toDomain(a)));
   }
 
   async fetchBySeason(
@@ -44,13 +54,14 @@ export class AniListSyncAdapter implements AnimeSyncPort {
     perPage: number,
   ): Promise<AnimeEntity[]> {
     const list = await this.client.getBySeason(season, seasonYear, page, perPage);
-    return Promise.all(list.map((a) => this.toDomain(a)));
+    return Promise.all(list.filter(isSafeForAllAges).map((a) => this.toDomain(a)));
   }
 
   async fetchById(externalId: number): Promise<AnimeEntity | null> {
     try {
       const a = await this.client.getById(externalId);
-      return a ? await this.toDomain(a) : null;
+      if (!a || !isSafeForAllAges(a)) return null;
+      return await this.toDomain(a);
     } catch (err) {
       this.logger.warn(`fetchById(${externalId}) failed: ${(err as Error).message}`);
       return null;
@@ -59,7 +70,7 @@ export class AniListSyncAdapter implements AnimeSyncPort {
 
   async searchByTitle(query: string): Promise<AnimeEntity[]> {
     const list = await this.client.search(query);
-    return Promise.all(list.map((a) => this.toDomain(a)));
+    return Promise.all(list.filter(isSafeForAllAges).map((a) => this.toDomain(a)));
   }
 
   async fetchStreamingEpisodes(externalId: number): Promise<StreamingEpisodeInput[]> {

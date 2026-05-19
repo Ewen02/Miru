@@ -17,6 +17,22 @@ export interface AnimeAccentPreview {
   accentHex: string | null;
 }
 
+/**
+ * Flat row for the airing calendar — denormalized for the API/UI layer so
+ * we don't ship full anime entities for what is essentially a date+title list.
+ */
+export interface EpisodeAiringRow {
+  animeId: string;
+  animeSlug: string;
+  animeTitle: string;
+  studioName: string | null;
+  coverUrl: string | null;
+  episodeCount: number | null;
+  episodeNumber: number;
+  episodeTitle: string | null;
+  airedAt: Date;
+}
+
 export interface AnimeRepositoryPort extends RepositoryPort<AnimeEntity> {
   findByFilters(
     filters: AnimeFilters,
@@ -43,4 +59,6 @@ export interface AnimeRepositoryPort extends RepositoryPort<AnimeEntity> {
   ): Promise<number>;
   /** Marks the anime as having failed its last sync attempt. */
   markSyncFailed(animeId: string): Promise<void>;
+  /** Episodes airing in [from, to] for the airing calendar. NSFW excluded. */
+  findAiringEpisodesBetween(from: Date, to: Date): Promise<EpisodeAiringRow[]>;
 }

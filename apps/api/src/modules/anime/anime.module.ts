@@ -7,6 +7,7 @@ import { GetAnimeCatalogUseCase } from "./application/use-cases/get-anime-catalo
 import { GetAnimeDetailUseCase } from "./application/use-cases/get-anime-detail.use-case";
 import { GetAnimeAccentUseCase } from "./application/use-cases/get-anime-accent.use-case";
 import { GetAnimeCharactersUseCase } from "./application/use-cases/get-anime-characters.use-case";
+import { GetCalendarWeekUseCase } from "./application/use-cases/get-calendar-week.use-case";
 import {
   ANILIST_CLIENT,
   ANIME_REPOSITORY,
@@ -17,6 +18,7 @@ import {
 
 // Infrastructure
 import { AnimeController } from "./infrastructure/http/anime.controller";
+import { CalendarController } from "./infrastructure/http/calendar.controller";
 import { PrismaAnimeRepository } from "./infrastructure/persistence/prisma-anime.repository";
 import { AniListSyncAdapter } from "./infrastructure/external/anilist-sync.adapter";
 import { JikanEpisodeAdapter } from "./infrastructure/external/jikan-episode.adapter";
@@ -26,12 +28,13 @@ import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
 
 @Module({
   imports: [PrismaModule],
-  controllers: [AnimeController],
+  controllers: [AnimeController, CalendarController],
   providers: [
     GetAnimeCatalogUseCase,
     GetAnimeDetailUseCase,
     GetAnimeAccentUseCase,
     GetAnimeCharactersUseCase,
+    GetCalendarWeekUseCase,
     { provide: ANILIST_CLIENT, useFactory: () => new AniListClient() },
     { provide: JIKAN_CLIENT, useFactory: () => new JikanClient() },
     { provide: ANIME_REPOSITORY, useClass: PrismaAnimeRepository },

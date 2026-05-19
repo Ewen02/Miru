@@ -121,6 +121,7 @@ export function ActionBar({
             disabled={primaryDisabled}
             className={cn(
               "inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2.5 font-body text-[13px] font-semibold text-white transition-opacity",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
               "disabled:cursor-not-allowed",
             )}
             style={{
@@ -152,6 +153,7 @@ export function ActionBar({
             disabled={disabled}
             className={cn(
               "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 font-body text-xs font-medium transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
               "disabled:cursor-not-allowed disabled:opacity-50",
               inWatchlist
                 ? "border bg-accent-muted text-accent"
@@ -170,7 +172,7 @@ export function ActionBar({
             type="button"
             onClick={onRate}
             disabled={disabled}
-            className="rounded-md border border-border bg-transparent px-4 py-2 font-body text-xs font-medium text-text-secondary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md border border-border bg-transparent px-4 py-2 font-body text-xs font-medium text-text-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Noter
           </button>

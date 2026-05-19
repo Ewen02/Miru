@@ -47,16 +47,6 @@ export function EditorialHero({
         className,
       )}
     >
-      {decorative && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-25 -top-12 h-150 w-150 rounded-full opacity-60"
-          style={{
-            background:
-              "radial-gradient(circle at center, color-mix(in srgb, var(--color-accent) 10%, transparent) 0%, transparent 60%)",
-          }}
-        />
-      )}
       <div className="mx-auto max-w-300 px-7 pb-12 pt-14">
         <div className="flex flex-wrap items-end gap-x-14 gap-y-6">
           <div className="min-w-0 flex-1">

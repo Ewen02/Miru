@@ -115,7 +115,7 @@ export function SeasonSwitcher({ seasons, className }: SeasonSwitcherProps) {
         {indicator && (
           <span
             aria-hidden
-            className="pointer-events-none absolute bottom-0.5 z-0 h-0.5 rounded-full transition-all duration-300 ease-out"
+            className="pointer-events-none absolute bottom-0.5 z-0 h-0.5 rounded-sm transition-all duration-300 ease-out"
             style={{
               left: indicator.left,
               width: indicator.width,

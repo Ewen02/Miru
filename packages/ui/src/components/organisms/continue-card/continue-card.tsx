@@ -63,7 +63,7 @@ export function ContinueCard({
         <div className="absolute inset-0 flex items-center justify-center">
           <div
             className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full border border-white/20",
+              "flex h-10 w-10 items-center justify-center rounded-md border border-white/20",
               "bg-bg-base/70 pl-0.5 text-white backdrop-blur-sm transition-transform duration-200",
               "group-hover:scale-110",
             )}

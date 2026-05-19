@@ -61,7 +61,7 @@ export function EpisodeRow({
     >
       <div className="flex min-w-7 items-center justify-center">
         {watched ? (
-          <div className="flex size-4.5 items-center justify-center rounded-full border border-border bg-bg-elevated text-text-tertiary">
+          <div className="flex size-4.5 items-center justify-center rounded-sm border border-border bg-bg-elevated text-text-tertiary">
             <CheckIcon size={10} />
           </div>
         ) : (
@@ -92,7 +92,7 @@ export function EpisodeRow({
         )}
         {current && (
           <div
-            className="h-1.5 w-1.5 rounded-full"
+            className="h-1.5 w-1.5 rounded-sm"
             style={{
               backgroundColor: "var(--color-accent)",
               boxShadow: "0 0 8px var(--color-accent)",

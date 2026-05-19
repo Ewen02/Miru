@@ -113,6 +113,7 @@ export function toDomainFull(record: AnimeFullRecord): AnimeEntity {
       nameJp: ac.character.nameJp,
       imageUrl: ac.character.imageUrl,
       role: ac.role as CharacterRole,
+      voiceActorId: ac.voiceActor?.id ?? null,
       voiceActorAnilistId: ac.voiceActor?.externalAnilistId ?? null,
       voiceActorName: ac.voiceActor?.name ?? null,
       order: ac.order,

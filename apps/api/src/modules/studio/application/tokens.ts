@@ -1,0 +1,1 @@
+export const STUDIO_REPOSITORY = Symbol("STUDIO_REPOSITORY");

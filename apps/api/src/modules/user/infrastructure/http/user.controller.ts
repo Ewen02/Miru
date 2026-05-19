@@ -1,9 +1,10 @@
 import { Controller, Get, Param, UseGuards } from "@nestjs/common";
-import type { UserProfile } from "@miru/types";
+import type { UserLifetime, UserProfile } from "@miru/types";
 import { AuthRequiredGuard } from "@auth/auth-required.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
 import { GetCurrentUserUseCase } from "../../application/use-cases/get-current-user.use-case";
 import { GetUserProfileUseCase } from "../../application/use-cases/get-user-profile.use-case";
+import { GetUserLifetimeStatsUseCase } from "../../application/use-cases/get-user-lifetime-stats.use-case";
 
 interface UserDto {
   id: string;
@@ -18,6 +19,7 @@ export class UserController {
   constructor(
     private readonly getCurrentUser: GetCurrentUserUseCase,
     private readonly getUserProfile: GetUserProfileUseCase,
+    private readonly getUserLifetime: GetUserLifetimeStatsUseCase,
   ) {}
 
   @Get("me")
@@ -30,6 +32,23 @@ export class UserController {
       name: user.name,
       emailVerified: user.emailVerified,
       image: user.image,
+    };
+  }
+
+  /**
+   * Personal lifetime aggregation — declared before `:handle` so the literal
+   * path `me/lifetime-stats` wins over the param match.
+   */
+  @Get("me/lifetime-stats")
+  @UseGuards(AuthRequiredGuard)
+  async lifetimeStats(@CurrentUserId() userId: string): Promise<UserLifetime> {
+    const { joinedAt, stats } = await this.getUserLifetime.execute({ userId });
+    return {
+      joinedAt: joinedAt ? joinedAt.toISOString() : null,
+      stats: {
+        ...stats,
+        firstAddedAt: stats.firstAddedAt ? stats.firstAddedAt.toISOString() : null,
+      },
     };
   }
 

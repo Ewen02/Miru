@@ -136,6 +136,7 @@ export class AniListSyncAdapter implements AnimeSyncPort {
         nameJp: edge.node.name.native ?? null,
         imageUrl: edge.node.image.large ?? null,
         role: this.mapRole(edge.role),
+        voiceActorId: null,
         voiceActorAnilistId: va?.id ?? null,
         voiceActorName: va?.name.full ?? null,
         order: idx,

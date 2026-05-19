@@ -9,6 +9,8 @@ export interface AnimeFilters {
   genres?: string[];
   year?: number;
   search?: string;
+  /** Slug of a studio — single match (not array, studios are 1-to-many in DB). */
+  studioSlug?: string;
 }
 
 export interface AnimeAccentPreview {

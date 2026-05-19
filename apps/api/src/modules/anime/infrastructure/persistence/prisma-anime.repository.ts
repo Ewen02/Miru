@@ -91,6 +91,9 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
         where.genres = { some: { slug: { in: safeGenres } } };
       }
     }
+    if (filters.studioSlug) {
+      where.studio = { slug: filters.studioSlug };
+    }
 
     const [records, total] = await Promise.all([
       this.prisma.anime.findMany({

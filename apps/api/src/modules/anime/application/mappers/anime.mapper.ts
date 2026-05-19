@@ -49,6 +49,7 @@ export class AnimeMapper {
         imageUrl: c.imageUrl,
         role: c.role,
         voiceActor: c.voiceActorName,
+        voiceActorId: c.voiceActorId,
       }));
   }
 

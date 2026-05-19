@@ -27,6 +27,24 @@ export interface UserPublicReview {
   anime: { id: string; slug: string; title: string; coverUrl: string | null };
 }
 
+export interface UserLifetimeStats {
+  completedCount: number;
+  hoursWatched: number;
+  /** Movies watched (anime with format === MOVIE in COMPLETED). */
+  moviesCount: number;
+  reviewCount: number;
+  reviewAverageRating: number | null;
+  /** Watchlist totals across all statuses. */
+  watchlistTotal: number;
+  watchlistPlanned: number;
+  /** Most-watched genre slug + count, null when user has no completed anime. */
+  topGenre: { name: string; count: number } | null;
+  /** Most-watched studio name + count. */
+  topStudio: { name: string; count: number } | null;
+  /** Earliest watchlist entry creation date — proxy for "first anime added". */
+  firstAddedAt: Date | null;
+}
+
 export interface UserRepositoryPort {
   findById(id: string): Promise<UserEntity | null>;
   /**
@@ -38,4 +56,6 @@ export interface UserRepositoryPort {
   favoritesByUserId(userId: string, limit: number): Promise<UserFavoriteAnime[]>;
   reviewsByUserId(userId: string, limit: number): Promise<UserPublicReview[]>;
   joinedAt(userId: string): Promise<Date | null>;
+  /** Heavier aggregation for the personal /lifetime-stats page. */
+  lifetimeStatsByUserId(userId: string): Promise<UserLifetimeStats>;
 }

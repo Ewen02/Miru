@@ -9,6 +9,8 @@ export interface CharacterSummary {
   nameJp: string | null;
   imageUrl: string | null;
   role: CharacterRole;
+  /** Local DB id of the voice actor — drives the /people/[id] link. */
+  voiceActorId: string | null;
   voiceActorAnilistId: number | null;
   voiceActorName: string | null;
   order: number;

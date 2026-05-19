@@ -1,4 +1,5 @@
-import { Injectable, Inject, ForbiddenException } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
+import { ForbiddenException } from "@shared/domain/domain-exception";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { UseCase } from "@shared/domain/use-case.base";
 import { ReviewNotFoundException } from "../../domain/exceptions/review.exceptions";

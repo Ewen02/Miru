@@ -12,8 +12,8 @@ export class NotFoundException extends DomainException {
   readonly code = "NOT_FOUND";
   readonly httpStatus = 404;
 
-  constructor(entity: string, id: string) {
-    super(`${entity} with id ${id} not found`);
+  constructor(entityOrMessage: string, id?: string) {
+    super(id ? `${entityOrMessage} with id ${id} not found` : entityOrMessage);
   }
 }
 
@@ -41,5 +41,14 @@ export class ValidationException extends DomainException {
 
   constructor(message: string) {
     super(message);
+  }
+}
+
+export class UnauthorizedException extends DomainException {
+  readonly code = "UNAUTHORIZED";
+  readonly httpStatus = 401;
+
+  constructor(message?: string) {
+    super(message ?? "Authentication required");
   }
 }

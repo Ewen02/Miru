@@ -1,4 +1,5 @@
-import { Injectable, Inject, NotFoundException } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
+import { NotFoundException } from "@shared/domain/domain-exception";
 import { UseCase } from "@shared/domain/use-case.base";
 import { VoiceActorEntity } from "../../domain/entities/voice-actor.entity";
 import {

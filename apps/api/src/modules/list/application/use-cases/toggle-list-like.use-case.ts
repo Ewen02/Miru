@@ -1,4 +1,5 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
+import { NotFoundException, ForbiddenException } from "@shared/domain/domain-exception";
 import { UseCase } from "@shared/domain/use-case.base";
 import { ListRepositoryPort } from "../../domain/ports/list-repository.port";
 import { LIST_REPOSITORY } from "../tokens";

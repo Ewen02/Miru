@@ -1,4 +1,5 @@
-import { Injectable, Inject, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
+import { UnauthorizedException } from "@shared/domain/domain-exception";
 import { UseCase } from "@shared/domain/use-case.base";
 import {
   UserLifetimeStats,

@@ -7,16 +7,17 @@ import { LIST_REPOSITORY } from "../tokens";
 interface Input {
   userId: string;
   listId: string;
+  animeId: string;
 }
 
 @Injectable()
-export class DeleteListUseCase implements UseCase<Input, void> {
+export class RemoveItemFromListUseCase implements UseCase<Input, void> {
   constructor(@Inject(LIST_REPOSITORY) private readonly repo: ListRepositoryPort) {}
 
-  async execute({ userId, listId }: Input): Promise<void> {
+  async execute({ userId, listId, animeId }: Input): Promise<void> {
     const list = await this.repo.findById(listId);
     if (!list) throw new NotFoundException("List not found");
     if (list.userId !== userId) throw new ForbiddenException("Not the list owner");
-    await this.repo.delete(listId);
+    await this.repo.removeItem(listId, animeId);
   }
 }

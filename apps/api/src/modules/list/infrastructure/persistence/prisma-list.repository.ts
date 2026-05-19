@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { ConflictException } from "@shared/domain/domain-exception";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { ListEntity } from "../../domain/entities/list.entity";
 import {
@@ -96,16 +97,23 @@ export class PrismaListRepository implements ListRepositoryPort {
   }
 
   async create(input: CreateListInput): Promise<ListEntity> {
-    const record = await this.prisma.list.create({
-      data: {
-        userId: input.userId,
-        title: input.title,
-        description: input.description ?? null,
-        slug: input.slug,
-        isPublic: input.isPublic ?? true,
-      },
-    });
-    return this.toEntity(record);
+    try {
+      const record = await this.prisma.list.create({
+        data: {
+          userId: input.userId,
+          title: input.title,
+          description: input.description ?? null,
+          slug: input.slug,
+          isPublic: input.isPublic ?? true,
+        },
+      });
+      return this.toEntity(record);
+    } catch (err) {
+      if ((err as { code?: string }).code === "P2002") {
+        throw new ConflictException("You already have a list with that name");
+      }
+      throw err;
+    }
   }
 
   async update(id: string, input: UpdateListInput): Promise<ListEntity> {

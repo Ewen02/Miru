@@ -1,9 +1,8 @@
-import { Injectable, Inject, BadRequestException, ConflictException } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
+import { ValidationException } from "@shared/domain/domain-exception";
 import { UseCase } from "@shared/domain/use-case.base";
 import { slugify } from "@shared/utils/slugify";
-import {
-  ListRepositoryPort,
-} from "../../domain/ports/list-repository.port";
+import { ListRepositoryPort } from "../../domain/ports/list-repository.port";
 import { ListEntity } from "../../domain/entities/list.entity";
 import { LIST_REPOSITORY } from "../tokens";
 
@@ -21,29 +20,21 @@ export class CreateListUseCase implements UseCase<Input, ListEntity> {
   async execute({ userId, title, description, isPublic }: Input): Promise<ListEntity> {
     const trimmedTitle = title.trim();
     if (trimmedTitle.length < 2) {
-      throw new BadRequestException("Title must be at least 2 characters");
+      throw new ValidationException("Title must be at least 2 characters");
     }
     if (trimmedTitle.length > 80) {
-      throw new BadRequestException("Title must be 80 characters or less");
+      throw new ValidationException("Title must be 80 characters or less");
     }
 
     const slug = slugify(trimmedTitle);
-    if (!slug) throw new BadRequestException("Title produces an empty slug");
+    if (!slug) throw new ValidationException("Title produces an empty slug");
 
-    try {
-      return await this.repo.create({
-        userId,
-        title: trimmedTitle,
-        description: description ?? null,
-        slug,
-        isPublic: isPublic ?? true,
-      });
-    } catch (err) {
-      // Per-user slug uniqueness violation surfaces as a Prisma P2002.
-      if ((err as { code?: string }).code === "P2002") {
-        throw new ConflictException("You already have a list with that name");
-      }
-      throw err;
-    }
+    return this.repo.create({
+      userId,
+      title: trimmedTitle,
+      description: description ?? null,
+      slug,
+      isPublic: isPublic ?? true,
+    });
   }
 }

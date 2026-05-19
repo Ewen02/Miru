@@ -5,16 +5,16 @@ import { NOTIFICATION_REPOSITORY } from "../tokens";
 
 interface Input {
   userId: string;
-  notificationId: string;
 }
 
 @Injectable()
-export class MarkNotificationReadUseCase implements UseCase<Input, void> {
+export class MarkAllNotificationsReadUseCase implements UseCase<Input, { updated: number }> {
   constructor(
     @Inject(NOTIFICATION_REPOSITORY) private readonly repo: NotificationRepositoryPort,
   ) {}
 
-  async execute({ userId, notificationId }: Input): Promise<void> {
-    await this.repo.markRead(notificationId, userId);
+  async execute({ userId }: Input): Promise<{ updated: number }> {
+    const updated = await this.repo.markAllRead(userId);
+    return { updated };
   }
 }

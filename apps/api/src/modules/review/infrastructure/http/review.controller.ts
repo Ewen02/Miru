@@ -15,7 +15,7 @@ import { ReviewWithAuthor } from "../../domain/ports/review-repository.port";
 import { DeleteReviewUseCase } from "../../application/use-cases/delete-review.use-case";
 import { ListReviewsForAnimeUseCase } from "../../application/use-cases/list-reviews.use-case";
 import { UpsertReviewUseCase } from "../../application/use-cases/upsert-review.use-case";
-import { UpsertReviewDto, ReviewDto, ReviewListItemDto } from "./review.dto";
+import { UpsertReviewDto, ReviewDto, ReviewListItemDto } from "../../application/dtos/review.dto";
 
 @Controller()
 export class ReviewController {

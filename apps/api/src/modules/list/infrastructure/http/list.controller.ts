@@ -19,12 +19,10 @@ import { ListUserListsUseCase } from "../../application/use-cases/list-user-list
 import { GetListDetailUseCase } from "../../application/use-cases/get-list-detail.use-case";
 import { CreateListUseCase } from "../../application/use-cases/create-list.use-case";
 import { DeleteListUseCase } from "../../application/use-cases/delete-list.use-case";
-import {
-  AddItemToListUseCase,
-  RemoveItemFromListUseCase,
-} from "../../application/use-cases/manage-list-item.use-case";
+import { AddItemToListUseCase } from "../../application/use-cases/add-list-item.use-case";
+import { RemoveItemFromListUseCase } from "../../application/use-cases/remove-list-item.use-case";
 import { ToggleListLikeUseCase } from "../../application/use-cases/toggle-list-like.use-case";
-import { AddListItemDto, CreateListDto, ListsFilterDto } from "./list.dto";
+import { AddListItemDto, CreateListDto, ListsFilterDto } from "../../application/dtos/list.dto";
 import { ListMapper } from "../../application/mappers/list.mapper";
 
 @Controller("lists")

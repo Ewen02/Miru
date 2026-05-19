@@ -1,4 +1,5 @@
-import { Injectable, Inject, NotFoundException } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
+import { NotFoundException } from "@shared/domain/domain-exception";
 import { UseCase } from "@shared/domain/use-case.base";
 import { PaginatedResult } from "@shared/domain/repository.port";
 import { AnimeEntity } from "@modules/anime/domain/entities/anime.entity";

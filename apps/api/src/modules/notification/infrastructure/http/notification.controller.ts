@@ -3,10 +3,8 @@ import type { NotificationsListDto } from "@miru/types";
 import { AuthRequiredGuard } from "@auth/auth-required.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
 import { ListNotificationsUseCase } from "../../application/use-cases/list-notifications.use-case";
-import {
-  MarkAllNotificationsReadUseCase,
-  MarkNotificationReadUseCase,
-} from "../../application/use-cases/mark-notification-read.use-case";
+import { MarkNotificationReadUseCase } from "../../application/use-cases/mark-notification-read.use-case";
+import { MarkAllNotificationsReadUseCase } from "../../application/use-cases/mark-all-notifications-read.use-case";
 
 @Controller("notifications")
 @UseGuards(AuthRequiredGuard)

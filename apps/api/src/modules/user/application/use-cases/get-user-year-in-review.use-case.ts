@@ -1,4 +1,5 @@
-import { Injectable, Inject, BadRequestException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
+import { ValidationException, UnauthorizedException } from "@shared/domain/domain-exception";
 import { UseCase } from "@shared/domain/use-case.base";
 import {
   UserRepositoryPort,
@@ -19,7 +20,7 @@ export class GetUserYearInReviewUseCase implements UseCase<Input, YearInReview> 
     if (!userId) throw new UnauthorizedException("Session required");
     const currentYear = new Date().getFullYear();
     if (!Number.isInteger(year) || year < 2000 || year > currentYear) {
-      throw new BadRequestException(`Invalid year: ${year}`);
+      throw new ValidationException(`Invalid year: ${year}`);
     }
     return this.users.yearInReviewByUserId(userId, year);
   }

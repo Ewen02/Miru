@@ -22,7 +22,7 @@ import {
   UpdateWatchlistEntryDto,
   WatchlistEntryDto,
   WatchlistItemDto,
-} from "./watchlist.dto";
+} from "../../application/dtos/watchlist.dto";
 
 @Controller()
 @UseGuards(AuthRequiredGuard)

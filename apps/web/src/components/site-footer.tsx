@@ -18,6 +18,7 @@ export function SiteFooter() {
             label="Découvrir"
             links={[
               { href: "/", label: "Catalogue" },
+              { href: "/search", label: "Recherche" },
               { href: "/calendar", label: "Calendrier" },
               { href: "/top", label: "Top 100" },
               { href: "/seasons/" + new Date().getFullYear(), label: "Cette année" },

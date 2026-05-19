@@ -1,56 +1,36 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
+import type { ListSummaryDto } from "@miru/types";
+import { fetchLists } from "@/lib/server-lists";
+import { getServerSession } from "@/lib/server-auth";
+import { CreateListButton } from "./create-list-button";
+
+interface ListsPageProps {
+  searchParams: Promise<{ tab?: string }>;
+}
 
 export const metadata: Metadata = {
   title: "Listes",
-  description: "Tes listes Miru et les sélections curées de la communauté.",
+  description: "Tes listes Miru et les listes publiques de la communauté.",
 };
 
-const MY_LISTS = [
-  {
-    id: "rewatch-2026",
-    title: "Rewatch 2026",
-    description: "Les titres que je veux revoir cette année avant les sorties d'automne.",
-    count: 12,
-    likes: 38,
-    pinned: true,
-  },
-  {
-    id: "best-mappa",
-    title: "Le meilleur de MAPPA",
-    description: "Mes choix MAPPA depuis Yuri on Ice. Mise à jour à chaque saison.",
-    count: 18,
-    likes: 124,
-  },
-  {
-    id: "slice-of-life-essentials",
-    title: "Slice of life essentiels",
-    description: "Si tu commences le genre, commence par ces dix-là.",
-    count: 10,
-    likes: 67,
-  },
-];
+const TABS = [
+  { key: "mine", label: "Mes listes" },
+  { key: "liked", label: "Likées" },
+  { key: "public", label: "Communauté" },
+] as const;
 
-const OFFICIAL_LISTS = [
-  {
-    id: "miru-100",
-    title: "Miru 100",
-    description: "Les 100 titres qui ont défini le médium selon notre équipe éditoriale.",
-    count: 100,
-    likes: 4280,
-    official: true,
-  },
-  {
-    id: "comfort-watch",
-    title: "Comfort watch",
-    description: "Quand rien d'autre ne va. Sélection lente, douce, sans enjeu vital.",
-    count: 24,
-    likes: 1820,
-    official: true,
-  },
-];
+type Tab = (typeof TABS)[number]["key"];
 
-export default function ListsPage() {
+export default async function ListsPage({ searchParams }: ListsPageProps) {
+  const sp = await searchParams;
+  const session = await getServerSession();
+  const requestedTab = (sp.tab as Tab) ?? (session ? "mine" : "public");
+  const activeTab = TABS.find((t) => t.key === requestedTab)?.key ?? "mine";
+
+  const lists = await fetchLists(activeTab).catch(() => [] as ListSummaryDto[]);
+
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
       <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
@@ -62,87 +42,121 @@ export default function ListsPage() {
             Listes
           </h1>
         </div>
-        <button
-          type="button"
-          className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
-          style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
-        >
-          + Créer une liste
-        </button>
+        {session && <CreateListButton />}
       </header>
 
-      <nav className="mb-8 flex flex-wrap gap-1 border-b border-border-subtle" aria-label="Onglets">
-        <Tab label="Mes listes" active />
-        <Tab label="Likées" />
-        <Tab label="Officielles" />
-        <Tab label="Communauté" />
+      <nav
+        className="mb-8 flex flex-wrap gap-1 border-b border-border-subtle"
+        aria-label="Onglets"
+      >
+        {TABS.map((tab) => {
+          // Hide "mine"/"liked" for anonymous visitors.
+          if (!session && (tab.key === "mine" || tab.key === "liked")) return null;
+          const isActive = activeTab === tab.key;
+          return (
+            <Link
+              key={tab.key}
+              href={tab.key === "public" ? "/lists?tab=public" : `/lists?tab=${tab.key}`}
+              role="tab"
+              aria-selected={isActive}
+              className="relative inline-flex h-10 items-center rounded-t-md px-4 font-body text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+              style={{
+                color: isActive ? "var(--color-text-primary)" : "var(--color-text-secondary)",
+              }}
+            >
+              {tab.label}
+              {isActive && (
+                <span
+                  aria-hidden
+                  className="absolute -bottom-px left-3 right-3 h-0.5"
+                  style={{ backgroundColor: "var(--color-accent)" }}
+                />
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      <section className="mb-16">
-        <header className="mb-6">
-          <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">
-            Mes listes
-          </h2>
-        </header>
+      {lists.length === 0 ? (
+        <EmptyState tab={activeTab} authenticated={session !== null} />
+      ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {MY_LISTS.map((list) => (
+          {lists.map((list) => (
             <ListCard key={list.id} list={list} />
           ))}
         </div>
-      </section>
-
-      <section>
-        <header className="mb-6">
-          <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">
-            Sélections officielles
-          </h2>
-        </header>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {OFFICIAL_LISTS.map((list) => (
-            <ListCard key={list.id} list={list} />
-          ))}
-        </div>
-      </section>
+      )}
     </main>
   );
 }
 
-interface ListSummary {
-  id: string;
-  title: string;
-  description: string;
-  count: number;
-  likes: number;
-  pinned?: boolean;
-  official?: boolean;
+function EmptyState({ tab, authenticated }: { tab: Tab; authenticated: boolean }) {
+  if (!authenticated && tab !== "public") {
+    return (
+      <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
+        <p className="m-0 mb-4 font-body text-sm text-text-tertiary">
+          Connecte-toi pour gérer tes listes et likes.
+        </p>
+        <Link
+          href="/login?next=/lists"
+          className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
+          style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+        >
+          Se connecter
+        </Link>
+      </div>
+    );
+  }
+  const messages: Record<Tab, string> = {
+    mine: "Tu n'as pas encore de liste. Clique sur « Créer une liste » pour commencer.",
+    liked: "Tu n'as pas encore liké de liste publique.",
+    public: "Aucune liste publique pour l'instant.",
+  };
+  return (
+    <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
+      <p className="m-0 font-body text-sm text-text-tertiary">{messages[tab]}</p>
+    </div>
+  );
 }
 
-function ListCard({ list }: { list: ListSummary }) {
+function ListCard({ list }: { list: ListSummaryDto }) {
   return (
     <Link
       href={`/lists/${list.id}`}
       className="group block overflow-hidden rounded-2xl border border-border-subtle bg-bg-surface transition-colors duration-200 hover:border-border hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
     >
       <div className="relative grid h-40 grid-cols-2 gap-px bg-bg-base">
-        {[0, 1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-full w-full"
-            style={{
-              background: `linear-gradient(${130 + i * 15}deg, color-mix(in srgb, var(--color-accent) ${15 + i * 5}%, transparent), var(--color-bg-elevated))`,
-            }}
-          />
-        ))}
-        {list.pinned && (
-          <span className="absolute left-3 top-3 rounded-xs border border-accent/40 bg-accent/15 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider"
-            style={{ color: "var(--color-accent)" }}>
-            Épinglée
-          </span>
-        )}
-        {list.official && (
-          <span className="absolute left-3 top-3 rounded-xs border border-accent/40 bg-accent/15 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider"
-            style={{ color: "var(--color-accent)" }}>
-            Officielle
+        {Array.from({ length: 4 }, (_, i) => {
+          const cover = list.previewCovers[i] ?? null;
+          if (cover) {
+            return (
+              <div key={i} className="relative h-full w-full">
+                <Image
+                  src={cover}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 25vw, 50vw"
+                  className="object-cover"
+                />
+              </div>
+            );
+          }
+          return (
+            <div
+              key={i}
+              aria-hidden
+              className="h-full w-full"
+              style={{
+                background: `linear-gradient(${130 + i * 15}deg, color-mix(in srgb, var(--color-accent) ${15 + i * 5}%, transparent), var(--color-bg-elevated))`,
+              }}
+            />
+          );
+        })}
+        {!list.isPublic && (
+          <span
+            className="absolute left-3 top-3 rounded-xs border border-border bg-bg-base/80 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-text-secondary backdrop-blur-sm"
+          >
+            Privée
           </span>
         )}
       </div>
@@ -150,35 +164,19 @@ function ListCard({ list }: { list: ListSummary }) {
         <h3 className="m-0 mb-1 font-display text-base font-semibold leading-tight text-text-primary group-hover:text-accent">
           {list.title}
         </h3>
-        <p className="m-0 mb-3 line-clamp-2 font-body text-xs text-text-secondary">{list.description}</p>
+        {list.description && (
+          <p className="m-0 mb-3 line-clamp-2 font-body text-xs text-text-secondary">
+            {list.description}
+          </p>
+        )}
         <div className="flex items-center gap-3 font-mono text-[10px] text-text-tertiary">
-          <span>{list.count} titres</span>
+          <span>{list.itemCount} titres</span>
           <span aria-hidden>·</span>
-          <span>{list.likes} ❤</span>
+          <span>{list.likeCount} ❤</span>
+          <span aria-hidden>·</span>
+          <span>par {list.ownerName}</span>
         </div>
       </div>
     </Link>
-  );
-}
-
-function Tab({ label, active }: { label: string; active?: boolean }) {
-  return (
-    <span
-      role="tab"
-      aria-selected={active}
-      className="relative inline-flex h-10 items-center rounded-t-md px-4 font-body text-sm font-medium"
-      style={{
-        color: active ? "var(--color-text-primary)" : "var(--color-text-secondary)",
-      }}
-    >
-      {label}
-      {active && (
-        <span
-          aria-hidden
-          className="absolute -bottom-px left-3 right-3 h-0.5"
-          style={{ backgroundColor: "var(--color-accent)" }}
-        />
-      )}
-    </span>
   );
 }

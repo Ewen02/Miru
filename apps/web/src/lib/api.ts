@@ -2,9 +2,12 @@ import type {
   AnimeCard,
   AnimeDetail,
   CalendarWeek,
+  CharacterDetail,
   GenreCard,
   GenreDetail,
+  StudioDetail,
   UserProfile,
+  VoiceActorDetail,
 } from "@miru/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -102,6 +105,41 @@ export async function fetchUserProfile(handle: string): Promise<UserProfile | nu
     throw new Error(`Miru API ${res.status}: ${await res.text()}`);
   }
   return res.json() as Promise<UserProfile>;
+}
+
+export async function fetchVoiceActorDetail(id: string): Promise<VoiceActorDetail | null> {
+  const url = new URL(`/voice-actors/${encodeURIComponent(id)}`, API_URL);
+  const res = await fetch(url, { next: { revalidate: 600 } });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`Miru API ${res.status}: ${await res.text()}`);
+  }
+  return res.json() as Promise<VoiceActorDetail>;
+}
+
+export async function fetchCharacterDetail(id: string): Promise<CharacterDetail | null> {
+  const url = new URL(`/characters/${encodeURIComponent(id)}`, API_URL);
+  const res = await fetch(url, { next: { revalidate: 600 } });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`Miru API ${res.status}: ${await res.text()}`);
+  }
+  return res.json() as Promise<CharacterDetail>;
+}
+
+export async function fetchStudioDetail(
+  slug: string,
+  options: { page?: number; pageSize?: number } = {},
+): Promise<StudioDetail | null> {
+  const url = new URL(`/studios/${encodeURIComponent(slug)}`, API_URL);
+  if (options.page) url.searchParams.set("page", String(options.page));
+  if (options.pageSize) url.searchParams.set("pageSize", String(options.pageSize));
+  const res = await fetch(url, { next: { revalidate: 300 } });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`Miru API ${res.status}: ${await res.text()}`);
+  }
+  return res.json() as Promise<StudioDetail>;
 }
 
 export async function fetchGenreDetail(

@@ -19,6 +19,7 @@ import { fetchUserWatchlist } from "@/lib/server-watchlist";
 import { fetchAnimeReviews } from "@/lib/server-reviews";
 import { getServerSession } from "@/lib/server-auth";
 import { WatchlistButton } from "@/components/watchlist-button";
+import { AddToListButton } from "@/components/add-to-list-button";
 import { ReviewSection } from "@/components/review-section";
 import { HeaderDetailBridge } from "@/components/app-header/header-context";
 import type {
@@ -133,13 +134,16 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
       }
       seasonSwitcher={seasons.length > 1 ? <SeasonSwitcher seasons={seasons} /> : undefined}
       actionBar={
-        <div className="mt-6 px-5">
-          <WatchlistButton
-            animeId={anime.id}
-            episodeCount={anime.episodeCount}
-            initialEntry={existingEntry}
-            isAuthenticated={session !== null}
-          />
+        <div className="mt-6 flex flex-wrap items-start gap-3 px-5">
+          <div className="min-w-0 flex-1">
+            <WatchlistButton
+              animeId={anime.id}
+              episodeCount={anime.episodeCount}
+              initialEntry={existingEntry}
+              isAuthenticated={session !== null}
+            />
+          </div>
+          <AddToListButton animeId={anime.id} isAuthenticated={session !== null} />
         </div>
       }
       platforms={

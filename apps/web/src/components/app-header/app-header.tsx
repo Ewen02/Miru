@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@miru/ui";
 import { getServerSession } from "@/lib/server-auth";
+import { fetchNotifications } from "@/lib/server-notifications";
 import { AppHeaderClient } from "./app-header.client";
 
 /**
@@ -14,10 +15,14 @@ import { AppHeaderClient } from "./app-header.client";
  */
 export async function AppHeader() {
   const session = await getServerSession();
+  const notifications = session
+    ? await fetchNotifications().catch(() => null)
+    : null;
 
   return (
     <AppHeaderClient
       user={session?.user ?? null}
+      unreadCount={notifications?.unreadCount ?? 0}
       logo={
         <Link
           href="/"

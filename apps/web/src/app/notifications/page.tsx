@@ -1,71 +1,18 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import type { NotificationItemDto } from "@miru/types";
+import { fetchNotifications } from "@/lib/server-notifications";
+import { MarkAllReadButton } from "./mark-all-read-button";
 
 export const metadata: Metadata = {
   title: "Notifications",
   description: "Tes notifications Miru.",
 };
 
-interface MockNotification {
-  id: string;
-  kind: "episode" | "social" | "recap" | "system";
-  title: string;
-  excerpt: string;
-  when: string;
-  unread?: boolean;
-}
-
-const NOTIFICATIONS: MockNotification[] = [
-  {
-    id: "1",
-    kind: "episode",
-    title: "Frieren — Épisode 12 disponible",
-    excerpt: "« La fin du voyage » — sorti il y a 12 min sur Crunchyroll.",
-    when: "12 min",
-    unread: true,
-  },
-  {
-    id: "2",
-    kind: "social",
-    title: "@léa a commenté ton avis",
-    excerpt: "« Totalement d'accord sur la séquence du pont, je l'ai revue trois fois. »",
-    when: "1h",
-    unread: true,
-  },
-  {
-    id: "3",
-    kind: "recap",
-    title: "Ton récap de la semaine",
-    excerpt: "Tu as terminé 3 anime et regardé 8h cette semaine. +12% vs semaine passée.",
-    when: "il y a 4h",
-    unread: true,
-  },
-  {
-    id: "4",
-    kind: "episode",
-    title: "Solo Leveling — Épisode 8",
-    excerpt: "Disponible depuis hier sur Crunchyroll. Tu en es à l'épisode 7.",
-    when: "1j",
-  },
-  {
-    id: "5",
-    kind: "system",
-    title: "Mise à jour de l'interface",
-    excerpt: "La fiche anime a un nouveau header en mode scroll. Vois le changelog.",
-    when: "2j",
-  },
-];
-
-const FILTERS = [
-  { key: "all", label: "Tout" },
-  { key: "unread", label: "Non lues" },
-  { key: "episodes", label: "Épisodes" },
-  { key: "social", label: "Social" },
-  { key: "recaps", label: "Récaps" },
-];
-
-export default function NotificationsPage() {
-  const unreadCount = NOTIFICATIONS.filter((n) => n.unread).length;
+export default async function NotificationsPage() {
+  const data = await fetchNotifications();
+  if (!data) redirect("/login?next=/notifications");
 
   return (
     <main className="mx-auto max-w-3xl px-7 pb-20 pt-12">
@@ -78,16 +25,11 @@ export default function NotificationsPage() {
             Notifications
           </h1>
           <p className="m-0 mt-2 font-body text-sm text-text-secondary">
-            {unreadCount} non lue{unreadCount > 1 ? "s" : ""} sur {NOTIFICATIONS.length}
+            {data.unreadCount} non lue{data.unreadCount > 1 ? "s" : ""} sur {data.items.length}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="inline-flex h-9 items-center rounded-md border border-border bg-bg-surface px-3 font-body text-xs text-text-secondary transition-colors duration-200 hover:bg-bg-elevated hover:text-text-primary"
-          >
-            Tout marquer comme lu
-          </button>
+          {data.unreadCount > 0 && <MarkAllReadButton />}
           <Link
             href="/settings"
             aria-label="Paramètres notifications"
@@ -101,94 +43,83 @@ export default function NotificationsPage() {
         </div>
       </header>
 
-      <nav className="mb-6 flex flex-wrap gap-1 border-b border-border-subtle" aria-label="Filtres">
-        {FILTERS.map((f, i) => {
-          const active = i === 0;
-          return (
-            <span
-              key={f.key}
-              role="tab"
-              aria-selected={active}
-              className="relative inline-flex h-9 items-center rounded-t-md px-3 font-body text-sm font-medium"
-              style={{
-                color: active ? "var(--color-text-primary)" : "var(--color-text-secondary)",
-              }}
-            >
-              {f.label}
-              {active && (
-                <span
-                  aria-hidden
-                  className="absolute -bottom-px left-3 right-3 h-0.5"
-                  style={{ backgroundColor: "var(--color-accent)" }}
-                />
-              )}
-            </span>
-          );
-        })}
-      </nav>
-
-      <ul className="flex flex-col gap-2">
-        {NOTIFICATIONS.map((n) => (
-          <li key={n.id}>
-            <article className="relative flex gap-3 rounded-xl border border-border-subtle bg-bg-surface p-4">
-              {n.unread && (
-                <span
-                  aria-hidden
-                  className="absolute left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full"
-                  style={{ backgroundColor: "var(--color-accent)" }}
-                />
-              )}
-              <div
-                aria-hidden
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border-subtle text-text-secondary"
-                style={{ backgroundColor: "var(--color-bg-elevated)" }}
-              >
-                <KindIcon kind={n.kind} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="m-0 font-body text-sm font-medium text-text-primary">
-                  {n.title}
-                </p>
-                <p className="m-0 mt-0.5 line-clamp-2 font-body text-xs text-text-secondary">
-                  {n.excerpt}
-                </p>
-              </div>
-              <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
-                {n.when}
-              </span>
-            </article>
-          </li>
-        ))}
-      </ul>
-
-      <div className="mt-8 flex justify-center">
-        <button
-          type="button"
-          className="inline-flex h-10 items-center rounded-md border border-border bg-bg-surface px-5 font-body text-sm text-text-secondary transition-colors duration-200 hover:bg-bg-elevated hover:text-text-primary"
-        >
-          Charger plus
-        </button>
-      </div>
+      {data.items.length === 0 ? (
+        <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
+          <p className="m-0 mb-2 font-display text-base font-semibold text-text-primary">
+            Tu es à jour.
+          </p>
+          <p className="m-0 font-body text-sm text-text-tertiary">
+            Aucune notification pour l'instant. Les nouveautés (nouveaux épisodes, récaps) apparaîtront ici.
+          </p>
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {data.items.map((n) => (
+            <li key={n.id}>
+              <NotificationCard notification={n} />
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   );
 }
 
-function KindIcon({ kind }: { kind: MockNotification["kind"] }) {
-  if (kind === "episode") {
+function NotificationCard({ notification: n }: { notification: NotificationItemDto }) {
+  const isUnread = n.readAt == null;
+  const Wrapper: React.ElementType = n.linkUrl ? Link : "div";
+  const wrapperProps = n.linkUrl ? { href: n.linkUrl } : {};
+
+  return (
+    <Wrapper
+      {...wrapperProps}
+      className="relative flex gap-3 rounded-xl border border-border-subtle bg-bg-surface p-4 transition-colors duration-150 hover:bg-bg-elevated"
+    >
+      {isUnread && (
+        <span
+          aria-hidden
+          className="absolute left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full"
+          style={{ backgroundColor: "var(--color-accent)" }}
+        />
+      )}
+      <div
+        aria-hidden
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border-subtle text-text-secondary"
+        style={{ backgroundColor: "var(--color-bg-elevated)" }}
+      >
+        <KindIcon kind={n.kind} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="m-0 font-body text-sm font-medium text-text-primary">{n.title}</p>
+        {n.excerpt && (
+          <p className="m-0 mt-0.5 line-clamp-2 font-body text-xs text-text-secondary">
+            {n.excerpt}
+          </p>
+        )}
+      </div>
+      <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
+        {formatRelative(n.createdAt)}
+      </span>
+    </Wrapper>
+  );
+}
+
+function KindIcon({ kind }: { kind: NotificationItemDto["kind"] }) {
+  if (kind === "EPISODE_AIRED") {
     return (
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
         <path d="M8 5v14l11-7z" />
       </svg>
     );
   }
-  if (kind === "social") {
+  if (kind === "REVIEW_REPLY") {
     return (
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
         <path d="M21 11.5a8.38 8.38 0 0 1-9 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.5 8.5 0 1 1 16.1-3.8z" />
       </svg>
     );
   }
-  if (kind === "recap") {
+  if (kind === "WEEKLY_RECAP") {
     return (
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
         <path d="M3 3v18h18" />
@@ -203,4 +134,17 @@ function KindIcon({ kind }: { kind: MockNotification["kind"] }) {
       <path d="M12 16h.01" />
     </svg>
   );
+}
+
+function formatRelative(iso: string): string {
+  const date = new Date(iso);
+  const diff = Date.now() - date.getTime();
+  const min = Math.floor(diff / 60_000);
+  if (min < 1) return "À l'instant";
+  if (min < 60) return `${min} min`;
+  const hours = Math.floor(min / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}j`;
+  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }

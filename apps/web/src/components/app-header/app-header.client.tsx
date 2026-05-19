@@ -17,6 +17,7 @@ interface AppHeaderClientProps {
     name: string;
     image: string | null;
   } | null;
+  unreadCount: number;
   logo: ReactNode;
 }
 
@@ -31,7 +32,7 @@ function resolveActiveTab(pathname: string | null): "catalogue" | "watchlist" | 
 /** Pages that render their own full-screen layout (no app header). */
 const NO_HEADER_PREFIXES = ["/login", "/register"];
 
-export function AppHeaderClient({ user, logo }: AppHeaderClientProps) {
+export function AppHeaderClient({ user, unreadCount, logo }: AppHeaderClientProps) {
   const pathname = usePathname();
   if (pathname && NO_HEADER_PREFIXES.some((p) => pathname.startsWith(p))) {
     return null;
@@ -165,6 +166,33 @@ export function AppHeaderClient({ user, logo }: AppHeaderClientProps) {
               </kbd>
             </button>
 
+            {user && (
+              <Link
+                href="/notifications"
+                aria-label={
+                  unreadCount > 0
+                    ? `Notifications, ${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`
+                    : "Notifications"
+                }
+                className={cn(
+                  "relative inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-bg-surface text-text-secondary",
+                  "transition-colors duration-200 hover:border-border hover:bg-bg-elevated hover:text-text-primary",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
+                )}
+              >
+                <BellIcon />
+                {unreadCount > 0 && (
+                  <span
+                    aria-hidden
+                    className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono text-[9px] font-semibold"
+                    style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+                  >
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
             {user ? (
               <AvatarMenu user={user} />
             ) : (
@@ -202,6 +230,25 @@ function SearchIcon() {
     >
       <circle cx="11" cy="11" r="7" />
       <path d="m20 20-3.5-3.5" />
+    </svg>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
     </svg>
   );
 }

@@ -1,11 +1,27 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards } from "@nestjs/common";
-import type { UserLifetime, UserProfile, YearInReviewDto } from "@miru/types";
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+} from "@nestjs/common";
+import type {
+  UserActiveSessionDto,
+  UserLifetime,
+  UserProfile,
+  YearInReviewDto,
+} from "@miru/types";
 import { AuthRequiredGuard } from "@auth/auth-required.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
+import { CurrentSessionId } from "@auth/current-session-id.decorator";
 import { GetCurrentUserUseCase } from "../../application/use-cases/get-current-user.use-case";
 import { GetUserProfileUseCase } from "../../application/use-cases/get-user-profile.use-case";
 import { GetUserLifetimeStatsUseCase } from "../../application/use-cases/get-user-lifetime-stats.use-case";
 import { GetUserYearInReviewUseCase } from "../../application/use-cases/get-user-year-in-review.use-case";
+import { ListUserSessionsUseCase } from "../../application/use-cases/list-user-sessions.use-case";
+import { RevokeUserSessionUseCase } from "../../application/use-cases/revoke-user-session.use-case";
 
 interface UserDto {
   id: string;
@@ -22,6 +38,8 @@ export class UserController {
     private readonly getUserProfile: GetUserProfileUseCase,
     private readonly getUserLifetime: GetUserLifetimeStatsUseCase,
     private readonly getUserYearInReview: GetUserYearInReviewUseCase,
+    private readonly listUserSessions: ListUserSessionsUseCase,
+    private readonly revokeUserSession: RevokeUserSessionUseCase,
   ) {}
 
   @Get("me")
@@ -52,6 +70,34 @@ export class UserController {
         firstAddedAt: stats.firstAddedAt ? stats.firstAddedAt.toISOString() : null,
       },
     };
+  }
+
+  @Get("me/sessions")
+  @UseGuards(AuthRequiredGuard)
+  async sessions(
+    @CurrentUserId() userId: string,
+    @CurrentSessionId() currentSessionId: string | null,
+  ): Promise<UserActiveSessionDto[]> {
+    const sessions = await this.listUserSessions.execute({ userId, currentSessionId });
+    return sessions.map((s) => ({
+      id: s.id,
+      userAgent: s.userAgent,
+      ipAddress: s.ipAddress,
+      createdAt: s.createdAt.toISOString(),
+      expiresAt: s.expiresAt.toISOString(),
+      current: s.current,
+    }));
+  }
+
+  @Delete("me/sessions/:sessionId")
+  @UseGuards(AuthRequiredGuard)
+  @HttpCode(204)
+  async revokeSession(
+    @Param("sessionId") sessionId: string,
+    @CurrentUserId() userId: string,
+    @CurrentSessionId() currentSessionId: string | null,
+  ): Promise<void> {
+    await this.revokeUserSession.execute({ userId, sessionId, currentSessionId });
   }
 
   @Get("me/year-in-review/:year")

@@ -79,6 +79,15 @@ export interface YearInReview {
   studios: YearInReviewBreakdownRow[];
 }
 
+export interface UserActiveSession {
+  id: string;
+  userAgent: string | null;
+  ipAddress: string | null;
+  createdAt: Date;
+  expiresAt: Date;
+  current: boolean;
+}
+
 export interface UserRepositoryPort {
   findById(id: string): Promise<UserEntity | null>;
   /**
@@ -94,4 +103,8 @@ export interface UserRepositoryPort {
   lifetimeStatsByUserId(userId: string): Promise<UserLifetimeStats>;
   /** Per-user year-in-review aggregation. Bounded to a single calendar year. */
   yearInReviewByUserId(userId: string, year: number): Promise<YearInReview>;
+  /** Active sessions for the user, newest first. Caller flags `current`. */
+  activeSessionsByUserId(userId: string): Promise<Omit<UserActiveSession, "current">[]>;
+  /** Revoke a single session by id. Scoped by userId for safety. */
+  revokeSession(userId: string, sessionId: string): Promise<void>;
 }

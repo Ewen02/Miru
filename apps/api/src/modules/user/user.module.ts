@@ -4,6 +4,8 @@ import { GetCurrentUserUseCase } from "./application/use-cases/get-current-user.
 import { GetUserProfileUseCase } from "./application/use-cases/get-user-profile.use-case";
 import { GetUserLifetimeStatsUseCase } from "./application/use-cases/get-user-lifetime-stats.use-case";
 import { GetUserYearInReviewUseCase } from "./application/use-cases/get-user-year-in-review.use-case";
+import { ListUserSessionsUseCase } from "./application/use-cases/list-user-sessions.use-case";
+import { RevokeUserSessionUseCase } from "./application/use-cases/revoke-user-session.use-case";
 import { USER_REPOSITORY } from "./application/tokens";
 import { PrismaUserRepository } from "./infrastructure/persistence/prisma-user.repository";
 import { UserController } from "./infrastructure/http/user.controller";
@@ -16,6 +18,8 @@ import { UserController } from "./infrastructure/http/user.controller";
     GetUserProfileUseCase,
     GetUserLifetimeStatsUseCase,
     GetUserYearInReviewUseCase,
+    ListUserSessionsUseCase,
+    RevokeUserSessionUseCase,
     { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
   ],
   exports: [USER_REPOSITORY, GetCurrentUserUseCase],

@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { UserEntity } from "../../domain/entities/user.entity";
 import {
+  UserActiveSession,
   UserFavoriteAnime,
   UserLifetimeStats,
   UserProfileStats,
@@ -295,6 +296,30 @@ export class PrismaUserRepository implements UserRepositoryPort {
       genres: genreRows.map((r) => ({ name: r.name, count: Number(r.count) })),
       studios: studioRows.map((r) => ({ name: r.name, count: Number(r.count) })),
     };
+  }
+
+  async activeSessionsByUserId(
+    userId: string,
+  ): Promise<Omit<UserActiveSession, "current">[]> {
+    const records = await this.prisma.session.findMany({
+      where: { userId, expiresAt: { gt: new Date() } },
+      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        userAgent: true,
+        ipAddress: true,
+        createdAt: true,
+        expiresAt: true,
+      },
+    });
+    return records;
+  }
+
+  async revokeSession(userId: string, sessionId: string): Promise<void> {
+    // Scoped by userId so a user can't revoke someone else's session.
+    await this.prisma.session.deleteMany({
+      where: { id: sessionId, userId },
+    });
   }
 
   private toEntity(record: {

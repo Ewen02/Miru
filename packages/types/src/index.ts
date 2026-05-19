@@ -188,6 +188,26 @@ export interface ListDetailDto {
   items: ListItemDto[];
 }
 
+export type NotificationKind = "EPISODE_AIRED" | "REVIEW_REPLY" | "WEEKLY_RECAP" | "SYSTEM";
+
+export interface NotificationItemDto {
+  id: string;
+  kind: NotificationKind;
+  title: string;
+  excerpt: string | null;
+  linkUrl: string | null;
+  coverUrl: string | null;
+  /** ISO string or null when unread. */
+  readAt: string | null;
+  /** ISO string. */
+  createdAt: string;
+}
+
+export interface NotificationsListDto {
+  unreadCount: number;
+  items: NotificationItemDto[];
+}
+
 export interface UserProfileStats {
   completedCount: number;
   hoursWatched: number;
@@ -253,6 +273,40 @@ export interface UserLifetime {
   /** ISO string. */
   joinedAt: string | null;
   stats: UserLifetimeStats;
+}
+
+export interface YearInReviewMonth {
+  /** 1-12 */
+  month: number;
+  completedCount: number;
+}
+
+export interface YearInReviewBreakdownRow {
+  name: string;
+  count: number;
+}
+
+export interface YearInReviewTopAnime {
+  animeId: string;
+  slug: string;
+  title: string;
+  coverUrl: string | null;
+  /** User's personal rating from the watchlist entry. */
+  rating: number | null;
+}
+
+export interface YearInReviewDto {
+  year: number;
+  completedCount: number;
+  hoursWatched: number;
+  moviesCount: number;
+  reviewCount: number;
+  /** Last year's completedCount for YoY growth. */
+  previousYearCompletedCount: number;
+  months: YearInReviewMonth[];
+  topAnime: YearInReviewTopAnime[];
+  genres: YearInReviewBreakdownRow[];
+  studios: YearInReviewBreakdownRow[];
 }
 
 export interface UserProfile {

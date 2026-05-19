@@ -77,6 +77,117 @@ export interface GenreDetail {
   animes: PaginatedResult<AnimeCard>;
 }
 
+export interface StudioStats {
+  totalAnimes: number;
+  averageRating: number | null;
+  tvCount: number;
+  movieCount: number;
+}
+
+export interface StudioDetail {
+  slug: string;
+  name: string;
+  stats: StudioStats;
+  animes: PaginatedResult<AnimeCard>;
+}
+
+export interface CharacterAppearance {
+  animeId: string;
+  animeSlug: string;
+  animeTitle: string;
+  animeYear: number | null;
+  animeCoverUrl: string | null;
+  animeEpisodeCount: number | null;
+  role: string;
+}
+
+export interface CharacterVoiceCredit {
+  voiceActorId: string;
+  voiceActorName: string;
+  appearances: number;
+}
+
+export interface CharacterDetail {
+  id: string;
+  name: string;
+  nameJp: string | null;
+  imageUrl: string | null;
+  appearances: CharacterAppearance[];
+  voiceCredits: CharacterVoiceCredit[];
+}
+
+export interface VoiceActorRole {
+  characterId: string;
+  characterName: string;
+  characterImageUrl: string | null;
+  animeId: string;
+  animeSlug: string;
+  animeTitle: string;
+  animeCoverUrl: string | null;
+  animeYear: number | null;
+  role: string;
+}
+
+export interface VoiceActorStats {
+  animeCount: number;
+  roleCount: number;
+}
+
+export interface VoiceActorDetail {
+  id: string;
+  name: string;
+  stats: VoiceActorStats;
+  roles: VoiceActorRole[];
+}
+
+export interface ListSummaryDto {
+  id: string;
+  userId: string;
+  ownerName: string;
+  title: string;
+  description: string | null;
+  slug: string;
+  isPublic: boolean;
+  coverArtSeed: number | null;
+  /** Up to 4 cover URLs from the first items, for the preview tile. */
+  previewCovers: Array<string | null>;
+  itemCount: number;
+  likeCount: number;
+  /** ISO string. */
+  updatedAt: string;
+}
+
+export interface ListItemDto {
+  animeId: string;
+  animeSlug: string;
+  animeTitle: string;
+  animeYear: number | null;
+  animeCoverUrl: string | null;
+  animeAverageRating: number | null;
+  order: number;
+  note: string | null;
+  /** ISO string. */
+  addedAt: string;
+}
+
+export interface ListDetailDto {
+  id: string;
+  userId: string;
+  ownerName: string;
+  title: string;
+  description: string | null;
+  slug: string;
+  isPublic: boolean;
+  coverArtSeed: number | null;
+  itemCount: number;
+  likeCount: number;
+  /** ISO string. */
+  updatedAt: string;
+  likedByViewer: boolean;
+  ownedByViewer: boolean;
+  items: ListItemDto[];
+}
+
 export interface UserProfileStats {
   completedCount: number;
   hoursWatched: number;
@@ -121,6 +232,27 @@ export interface CalendarWeek {
   /** ISO string, exclusive end. */
   to: string;
   episodes: CalendarEpisode[];
+}
+
+export interface UserLifetimeStats {
+  completedCount: number;
+  hoursWatched: number;
+  moviesCount: number;
+  reviewCount: number;
+  /** Mean of published Review.rating, 1-10 scale. null when no reviews. */
+  reviewAverageRating: number | null;
+  watchlistTotal: number;
+  watchlistPlanned: number;
+  topGenre: { name: string; count: number } | null;
+  topStudio: { name: string; count: number } | null;
+  /** ISO string — earliest watchlist entry creation date. */
+  firstAddedAt: string | null;
+}
+
+export interface UserLifetime {
+  /** ISO string. */
+  joinedAt: string | null;
+  stats: UserLifetimeStats;
 }
 
 export interface UserProfile {
@@ -174,6 +306,8 @@ export interface CharacterCard {
   imageUrl: string | null;
   role: CharacterRole;
   voiceActor: string | null;
+  /** Local DB id of the voice actor — used to link to /people/[id]. */
+  voiceActorId: string | null;
 }
 
 export type RelationType = "SEQUEL" | "PREQUEL" | "SIDE_STORY" | "SPIN_OFF";

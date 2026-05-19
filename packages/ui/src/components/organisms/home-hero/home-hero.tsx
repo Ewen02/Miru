@@ -49,6 +49,7 @@ export function HomeHero({
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
 
   const total = slides.length;
   const safeIntervalMs = total > 1 ? intervalMs : 0;
@@ -60,6 +61,22 @@ export function HomeHero({
     }, safeIntervalMs);
     return () => window.clearInterval(handle);
   }, [safeIntervalMs, paused, total]);
+
+  function onTouchStart(e: React.TouchEvent) {
+    if (total <= 1) return;
+    touchStartX.current = e.touches[0].clientX;
+    setPaused(true);
+  }
+
+  function onTouchEnd(e: React.TouchEvent) {
+    if (total <= 1 || touchStartX.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    // 50px threshold filters accidental taps. Swipe left → next, right → prev.
+    if (dx <= -50) setIndex((i) => (i + 1) % total);
+    else if (dx >= 50) setIndex((i) => (i - 1 + total) % total);
+    setPaused(false);
+  }
 
   if (total === 0) return null;
 
@@ -73,8 +90,10 @@ export function HomeHero({
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
       aria-label="Tendance"
-      className={cn("relative h-[520px] w-full overflow-hidden bg-bg-base", className)}
+      className={cn("relative h-130 w-full overflow-hidden bg-bg-base", className)}
       style={{ "--accent-override": accent } as React.CSSProperties}
     >
       {/* Banner layers — each slide cross-fades. */}
@@ -114,7 +133,7 @@ export function HomeHero({
           />
           {/* Bottom fade to base. */}
           <div
-            className="absolute inset-x-0 bottom-0 h-[260px]"
+            className="absolute inset-x-0 bottom-0 h-65"
             style={{
               background:
                 "linear-gradient(180deg, transparent 0%, rgba(8,8,12,0.6) 35%, var(--color-bg-base) 100%)",
@@ -124,7 +143,7 @@ export function HomeHero({
       ))}
 
       {/* Content (re-renders per slide change for the title). */}
-      <div className="relative z-10 flex h-full flex-col justify-end gap-5 px-14 pb-16 max-w-[720px]">
+      <div className="relative z-10 flex h-full max-w-180 flex-col justify-end gap-5 px-14 pb-16">
         <p className="font-mono text-[11px] tracking-[0.22em] text-white/60 uppercase">
           Tendance{current.rank != null ? ` #${current.rank}` : ""}
           {current.studio && <span> · {current.studio}</span>}
@@ -132,7 +151,7 @@ export function HomeHero({
         <h1 className="m-0 font-display text-[64px] font-semibold leading-[0.98] tracking-[-0.025em] text-text-primary">
           {current.title}
         </h1>
-        <p className="m-0 max-w-[560px] font-body text-base leading-relaxed text-white/75 text-pretty">
+        <p className="m-0 max-w-140 font-body text-base leading-relaxed text-white/75 text-pretty">
           {current.pitch}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-3">

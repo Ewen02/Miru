@@ -67,15 +67,19 @@ export function AnimeDetailTemplate({
           </section>
         )}
 
-        <section className="mt-10 md:mt-14">
-          <SectionHeader label="Épisodes" count={episodesCount ?? null} />
-          {episodes}
-        </section>
+        {/* Synopsis (left, 1fr) + Episodes (right, 380px on lg+).
+            Below lg they stack: synopsis first, then episodes. */}
+        <div className="mt-10 grid grid-cols-1 gap-10 md:mt-14 lg:grid-cols-[1fr_380px] lg:gap-12">
+          <section className="min-w-0">
+            <SectionHeader label="Synopsis" />
+            {synopsis}
+          </section>
 
-        <section className="mt-10 md:mt-14">
-          <SectionHeader label="Synopsis" />
-          {synopsis}
-        </section>
+          <section className="min-w-0">
+            <SectionHeader label="Épisodes" count={episodesCount ?? null} />
+            {episodes}
+          </section>
+        </div>
 
         {characters && (
           <section className="mt-10 md:mt-14">

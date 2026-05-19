@@ -12,7 +12,7 @@ export function SectionHeader({ label, count, className }: SectionHeaderProps) {
       <h2 className="m-0 flex items-center gap-2 font-body text-[11px] font-medium uppercase tracking-[0.22em] text-text-secondary">
         <span
           aria-hidden
-          className="inline-block h-[2px] w-6 rounded-full"
+          className="inline-block h-0.5 w-6 rounded-full"
           style={{ backgroundColor: "var(--color-accent)" }}
         />
         {label}

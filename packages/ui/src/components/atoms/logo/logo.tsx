@@ -1,70 +1,41 @@
+import { cn } from "../../../utils/cn";
+
 interface LogoProps {
   size?: number;
+  /** Show the accent pip after the wordmark. Defaults to true. */
+  pip?: boolean;
   className?: string;
 }
 
 /**
- * Logo Miru — SVG extrait du mockup de référence.
- * Couleur hérite de `currentColor`, donc contrôlable via text-*.
+ * Logo Miru — wordmark "miru" + accent pip. Inspired by the Claude Design
+ * reference: a lowercase Clash Display "miru" with a small square pip that
+ * picks up the page accent.
+ *
+ * Size is the cap-height in px; the rest scales relative to it.
  */
-export function Logo({ size = 20, className }: LogoProps) {
+export function Logo({ size = 20, pip = true, className }: LogoProps) {
   return (
-    <svg
-      width={size * 3.2}
-      height={size}
-      viewBox="0 0 154 48"
-      fill="none"
+    <span
       aria-label="Miru"
-      className={className}
+      className={cn(
+        "inline-flex items-baseline gap-1.5 font-display font-semibold leading-none text-text-primary",
+        className,
+      )}
+      style={{ fontSize: size, letterSpacing: "-0.04em" }}
     >
-      <text
-        x="0"
-        y="38"
-        fontFamily="'Clash Display'"
-        fontSize="42"
-        fontWeight="600"
-        fill="currentColor"
-        letterSpacing="-1"
-      >
-        m
-      </text>
-      <rect x="50" y="16" width="4.5" height="23" rx="2" fill="currentColor" />
-      <g transform="translate(47, -1)">
-        <rect
-          x="0"
-          y="1"
-          width="11"
-          height="13"
-          rx="2"
-          stroke="currentColor"
-          strokeWidth="2.2"
-          fill="none"
+      <span>miru</span>
+      {pip && (
+        <span
+          aria-hidden
+          className="inline-block rounded-xs"
+          style={{
+            width: size * 0.32,
+            height: size * 0.32,
+            backgroundColor: "var(--color-accent)",
+          }}
         />
-        <line x1="2" y1="5.5" x2="9" y2="5.5" stroke="currentColor" strokeWidth="1.6" />
-        <line x1="2" y1="9.5" x2="9" y2="9.5" stroke="currentColor" strokeWidth="1.6" />
-      </g>
-      <text
-        x="66"
-        y="38"
-        fontFamily="'Clash Display'"
-        fontSize="42"
-        fontWeight="600"
-        fill="currentColor"
-        letterSpacing="-1"
-      >
-        r
-      </text>
-      <text
-        x="86"
-        y="38"
-        fontFamily="'Clash Display'"
-        fontSize="42"
-        fontWeight="600"
-        fill="currentColor"
-        letterSpacing="-1"
-      >
-        u
-      </text>
-    </svg>
+      )}
+    </span>
   );
 }

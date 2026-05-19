@@ -20,6 +20,7 @@ import { fetchAnimeReviews } from "@/lib/server-reviews";
 import { getServerSession } from "@/lib/server-auth";
 import { WatchlistButton } from "@/components/watchlist-button";
 import { ReviewSection } from "@/components/review-section";
+import { HeaderDetailBridge } from "@/components/app-header/header-context";
 import type {
   AnimeDetail,
   AnimeRelationCard as AnimeRelationCardDTO,
@@ -99,6 +100,13 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
     !isMovie && (anime.episodes.length > 0 || anime.status === "AIRING");
 
   return (
+    <>
+      <HeaderDetailBridge
+        title={anime.title}
+        rating={anime.averageRating}
+        coverUrl={anime.coverUrl}
+        accentHex={anime.accentHex}
+      />
     <AnimeDetailTemplate
       accentHex={anime.accentHex}
       back={
@@ -161,6 +169,7 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
       }
       reviewsCount={reviews.length > 0 ? reviews.length : null}
     />
+    </>
   );
 }
 
@@ -280,13 +289,27 @@ function RelationsSection({ relations }: { relations: AnimeRelationCardDTO[] }) 
 }
 
 function SynopsisSection({ anime }: { anime: AnimeDetail }) {
-  const infoRows: Array<[string, string | null]> = [
+  const studioSlug = anime.studioName ? slugifyStudio(anime.studioName) : null;
+  const studioCell: React.ReactNode = anime.studioName
+    ? studioSlug
+      ? (
+          <Link
+            href={`/studios/${studioSlug}`}
+            className="text-text-primary underline-offset-2 hover:underline"
+          >
+            {anime.studioName}
+          </Link>
+        )
+      : anime.studioName
+    : "—";
+
+  const infoRows: Array<[string, React.ReactNode]> = [
     ["Format", anime.format],
     ["Statut", anime.status],
-    ["Année", anime.year?.toString() ?? null],
-    ["Épisodes", anime.episodeCount != null ? anime.episodeCount.toString() : null],
-    ["Studio", anime.studioName],
-    ["Titre EN", anime.titleEn],
+    ["Année", anime.year?.toString() ?? "—"],
+    ["Épisodes", anime.episodeCount != null ? anime.episodeCount.toString() : "—"],
+    ["Studio", studioCell],
+    ["Titre EN", anime.titleEn ?? "—"],
   ];
 
   return (
@@ -316,7 +339,7 @@ function SynopsisSection({ anime }: { anime: AnimeDetail }) {
         {infoRows.map(([label, value]) => (
           <div key={label} className="contents">
             <dt className="text-text-tertiary">{label}</dt>
-            <dd className="text-text-primary">{value ?? "—"}</dd>
+            <dd className="text-text-primary">{value}</dd>
           </div>
         ))}
       </dl>
@@ -328,14 +351,19 @@ function CharactersSection({ characters }: { characters: CharacterCardDTO[] }) {
   return (
     <div className="flex gap-3 overflow-x-auto px-5 pb-2" style={{ scrollbarWidth: "none" }}>
       {characters.map((c) => (
-        <CharacterCard
+        <Link
           key={c.id}
-          name={c.name}
-          nameJp={c.nameJp}
-          imageUrl={c.imageUrl}
-          role={c.role}
-          voiceActor={c.voiceActor}
-        />
+          href={`/characters/${c.id}`}
+          className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+        >
+          <CharacterCard
+            name={c.name}
+            nameJp={c.nameJp}
+            imageUrl={c.imageUrl}
+            role={c.role}
+            voiceActor={c.voiceActor}
+          />
+        </Link>
       ))}
     </div>
   );
@@ -374,7 +402,7 @@ function EpisodesSection({
 
   return (
     <div className="px-5">
-      <div className="flex flex-col gap-px rounded-2xl border border-border bg-bg-surface px-1 py-2">
+      <div className="flex max-h-[70vh] flex-col gap-px overflow-y-auto rounded-2xl border border-border bg-bg-surface px-1 py-2">
         {episodes.map((ep) => (
           <EpisodeRow
             key={ep.id}
@@ -388,4 +416,18 @@ function EpisodesSection({
       </div>
     </div>
   );
+}
+
+/**
+ * Lowercase, accent-stripped, hyphenated slug for studio names. Kept local
+ * (and minimal) because we don't ship studioSlug from the API yet — when
+ * the API exposes it, drop this and use the field directly.
+ */
+function slugifyStudio(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }

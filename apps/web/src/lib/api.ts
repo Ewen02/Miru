@@ -1,4 +1,11 @@
-import type { AnimeCard, AnimeDetail, GenreCard } from "@miru/types";
+import type {
+  AnimeCard,
+  AnimeDetail,
+  CalendarWeek,
+  GenreCard,
+  GenreDetail,
+  UserProfile,
+} from "@miru/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -74,4 +81,40 @@ export async function fetchGenres(): Promise<GenreCard[]> {
     throw new Error(`Miru API ${res.status}: ${await res.text()}`);
   }
   return res.json() as Promise<GenreCard[]>;
+}
+
+export async function fetchCalendarWeek(from: Date, to: Date): Promise<CalendarWeek> {
+  const url = new URL("/calendar", API_URL);
+  url.searchParams.set("from", from.toISOString());
+  url.searchParams.set("to", to.toISOString());
+  const res = await fetch(url, { next: { revalidate: 300 } });
+  if (!res.ok) {
+    throw new Error(`Miru API ${res.status}: ${await res.text()}`);
+  }
+  return res.json() as Promise<CalendarWeek>;
+}
+
+export async function fetchUserProfile(handle: string): Promise<UserProfile | null> {
+  const url = new URL(`/users/${encodeURIComponent(handle)}`, API_URL);
+  const res = await fetch(url, { next: { revalidate: 30 } });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`Miru API ${res.status}: ${await res.text()}`);
+  }
+  return res.json() as Promise<UserProfile>;
+}
+
+export async function fetchGenreDetail(
+  slug: string,
+  options: { page?: number; pageSize?: number } = {},
+): Promise<GenreDetail | null> {
+  const url = new URL(`/genres/${encodeURIComponent(slug)}`, API_URL);
+  if (options.page) url.searchParams.set("page", String(options.page));
+  if (options.pageSize) url.searchParams.set("pageSize", String(options.pageSize));
+  const res = await fetch(url, { next: { revalidate: 60 } });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`Miru API ${res.status}: ${await res.text()}`);
+  }
+  return res.json() as Promise<GenreDetail>;
 }

@@ -85,6 +85,24 @@ export function AvatarMenu({ user }: AvatarMenuProps) {
             <AvatarMenuItem href="/watchlist" onClick={() => setOpen(false)}>
               Ma watchlist
             </AvatarMenuItem>
+            <AvatarMenuItem href="/lists" onClick={() => setOpen(false)}>
+              Mes listes
+            </AvatarMenuItem>
+            <AvatarMenuItem href="/lifetime-stats" onClick={() => setOpen(false)}>
+              Mes stats
+            </AvatarMenuItem>
+          </nav>
+
+          <nav className="flex flex-col border-t border-border-subtle py-1">
+            <AvatarMenuItem href="/notifications" onClick={() => setOpen(false)}>
+              Notifications
+            </AvatarMenuItem>
+            <AvatarMenuItem href="/settings" onClick={() => setOpen(false)}>
+              Paramètres
+            </AvatarMenuItem>
+            <AvatarMenuItem href="/security" onClick={() => setOpen(false)}>
+              Sécurité
+            </AvatarMenuItem>
           </nav>
 
           <div className="border-t border-border-subtle py-1">

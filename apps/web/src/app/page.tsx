@@ -151,7 +151,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
       {!isFiltered && trending && trending.data.length > 0 && (
         <div className="mx-auto mt-16 max-w-300">
           <HorizontalSlider
-            eyebrow="Saison en cours"
+            eyebrow={`Saison ${currentSeasonLabel()}`}
             title="Tendances cette saison"
             count={trending.data.length}
             action={{ label: "Voir tout", href: "/?status=AIRING" }}
@@ -252,4 +252,18 @@ function EmptyState({ message }: { message: string }) {
       <p className="font-body text-text-secondary">{message}</p>
     </div>
   );
+}
+
+/**
+ * Human-readable label for the current anime season, FR. AniList buckets:
+ * WINTER Jan-Mar, SPRING Apr-Jun, SUMMER Jul-Sep, FALL Oct-Dec.
+ */
+function currentSeasonLabel(): string {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+  const seasons = ["hiver", "printemps", "été", "automne"];
+  // Map month (0-11) → bucket index: 0,1,2 → 0 (winter); 3,4,5 → 1; …
+  const name = seasons[Math.floor(month / 3)];
+  return `${name} ${year}`;
 }

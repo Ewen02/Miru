@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import "./globals.css";
 import { AppHeader } from "@/components/app-header";
+import { HeaderProvider } from "@/components/app-header/header-context";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { SiteFooter } from "@/components/site-footer";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://miru.app";
 const DESCRIPTION =
@@ -52,41 +54,13 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
         />
       </head>
-      <body className="flex min-h-full flex-col bg-bg-base font-body text-text-primary">
-        <AppHeader />
-        <div className="flex-1">{children}</div>
-        <footer className="border-t border-border-subtle px-6 py-6">
-          <div className="mx-auto flex max-w-300 flex-wrap items-center justify-between gap-3 font-body text-xs text-text-tertiary">
-            <span>
-              Miru — données{" "}
-              <a
-                href="https://anilist.co"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-text-secondary underline-offset-2 hover:underline"
-              >
-                AniList
-              </a>{" "}
-              &amp;{" "}
-              <a
-                href="https://myanimelist.net"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-text-secondary underline-offset-2 hover:underline"
-              >
-                MyAnimeList
-              </a>
-            </span>
-            <nav className="flex gap-4">
-              <Link href="/about" className="hover:text-text-secondary">
-                À propos
-              </Link>
-              <Link href="/watchlist" className="hover:text-text-secondary">
-                Watchlist
-              </Link>
-            </nav>
-          </div>
-        </footer>
+      <body className="flex min-h-full flex-col bg-bg-base font-body text-text-primary pb-16 md:pb-0">
+        <HeaderProvider>
+          <AppHeader />
+          <div className="flex-1">{children}</div>
+        </HeaderProvider>
+        <MobileBottomNav />
+        <SiteFooter />
       </body>
     </html>
   );

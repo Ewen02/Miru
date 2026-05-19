@@ -10,7 +10,7 @@ interface ErrorProps {
 
 export default function Error({ reset }: ErrorProps) {
   return (
-    <main className="mx-auto flex min-h-[60vh] max-w-[720px] flex-col items-center justify-center gap-4 px-6 text-center">
+    <main className="mx-auto flex min-h-[60vh] max-w-180 flex-col items-center justify-center gap-4 px-6 text-center">
       <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-text-tertiary">Erreur</p>
       <h1 className="font-display text-3xl font-semibold text-text-primary">
         Impossible de charger cette fiche

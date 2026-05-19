@@ -40,8 +40,11 @@ export function WatchlistButton({
   const [entry, setEntry] = useState<WatchlistEntry | null>(initialEntry);
   const [error, setError] = useState<string | null>(null);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [rateOpen, setRateOpen] = useState(false);
+  const [draftRating, setDraftRating] = useState<number>(initialEntry?.rating ?? 7);
   const [pending, startTransition] = useTransition();
   const statusRef = useRef<HTMLDivElement>(null);
+  const rateRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!statusOpen) return;
@@ -58,6 +61,22 @@ export function WatchlistButton({
       document.removeEventListener("keydown", onKey);
     };
   }, [statusOpen]);
+
+  useEffect(() => {
+    if (!rateOpen) return;
+    const onPointer = (e: MouseEvent) => {
+      if (!rateRef.current?.contains(e.target as Node)) setRateOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setRateOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [rateOpen]);
 
   if (!isAuthenticated) {
     return (
@@ -102,6 +121,20 @@ export function WatchlistButton({
     startTransition(async () => {
       try {
         const updated = await watchlistApi.update(animeId, { currentEpisode: next });
+        setEntry(updated);
+        router.refresh();
+      } catch (err) {
+        setError((err as Error).message);
+      }
+    });
+  }
+
+  function saveRating(rating: number | null) {
+    setError(null);
+    setRateOpen(false);
+    startTransition(async () => {
+      try {
+        const updated = await watchlistApi.update(animeId, { rating });
         setEntry(updated);
         router.refresh();
       } catch (err) {
@@ -244,15 +277,100 @@ export function WatchlistButton({
           </div>
         )}
 
-        {/* Rating display (read-only here — the form below the page handles the edit). */}
-        <div className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-bg-surface px-3 font-body text-xs">
-          <span className="text-text-tertiary">Ma note</span>
-          <span
-            className="font-mono text-sm"
-            style={{ color: entry.rating != null ? "var(--color-accent)" : "var(--color-text-tertiary)" }}
+        {/* Rating — clickable opens a 1-10 slider popover. */}
+        <div ref={rateRef} className="relative">
+          <button
+            type="button"
+            onClick={() => {
+              setDraftRating(entry.rating ?? 7);
+              setRateOpen((o) => !o);
+            }}
+            disabled={pending}
+            aria-haspopup="dialog"
+            aria-expanded={rateOpen}
+            className={cn(
+              "inline-flex h-10 items-center gap-2 rounded-md border border-border bg-bg-surface px-3 font-body text-xs",
+              "transition-colors duration-150 hover:border-border hover:bg-bg-elevated",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+            )}
           >
-            {entry.rating != null ? `${entry.rating.toFixed(1)}/10` : "—"}
-          </span>
+            <span className="text-text-tertiary">Ma note</span>
+            <span
+              className="font-mono text-sm"
+              style={{ color: entry.rating != null ? "var(--color-accent)" : "var(--color-text-tertiary)" }}
+            >
+              {entry.rating != null ? `${entry.rating}/10` : "Noter"}
+            </span>
+          </button>
+
+          {rateOpen && (
+            <div
+              role="dialog"
+              aria-label="Noter cet anime"
+              className="absolute left-0 top-full z-30 mt-1 w-72 rounded-lg border border-border bg-bg-surface p-4"
+            >
+              <div className="mb-3 flex items-baseline justify-between">
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-text-tertiary">
+                  Ma note
+                </span>
+                <span
+                  className="font-mono text-base"
+                  style={{ color: "var(--color-accent)" }}
+                >
+                  {draftRating}
+                  <span className="text-text-tertiary">/10</span>
+                </span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={10}
+                step={1}
+                value={draftRating}
+                onChange={(e) => setDraftRating(Number(e.target.value))}
+                className="w-full accent-(--color-accent)"
+                aria-label="Note de 1 à 10"
+              />
+              <div className="mt-1 flex justify-between font-mono text-[9px] text-text-quaternary">
+                {[1, 3, 5, 7, 10].map((n) => (
+                  <span key={n}>{n}</span>
+                ))}
+              </div>
+              <div className="mt-4 flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => saveRating(null)}
+                  disabled={pending || entry.rating == null}
+                  className={cn(
+                    "font-body text-xs text-text-tertiary transition-colors duration-150 hover:text-error",
+                    "disabled:cursor-not-allowed disabled:opacity-40",
+                  )}
+                >
+                  Effacer
+                </button>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setRateOpen(false)}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => saveRating(draftRating)}
+                    disabled={pending}
+                    style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+                  >
+                    Enregistrer
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex-1" />

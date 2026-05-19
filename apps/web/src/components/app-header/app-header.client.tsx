@@ -1,11 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@miru/ui";
 import { CommandPalette } from "./command-palette";
 import { AvatarMenu } from "./avatar-menu";
+import { DiscoverDropdown } from "./discover-dropdown";
+import { useHeaderDetail } from "./header-context";
 
 interface AppHeaderClientProps {
   user: {
@@ -34,11 +37,20 @@ export function AppHeaderClient({ user, logo }: AppHeaderClientProps) {
     return null;
   }
   const activeTab = resolveActiveTab(pathname);
+  const detail = useHeaderDetail();
+  const isDetailRoute = pathname?.startsWith("/anime/") ?? false;
   const [scrolled, setScrolled] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16);
+    // Compact (border + blur) kicks in early; the detail context swap happens
+    // once the user has scrolled past the hero (~heroBannerH + cover gap ≈ 480px).
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 16);
+      setPastHero(y > 380);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -62,9 +74,15 @@ export function AppHeaderClient({ user, logo }: AppHeaderClientProps) {
     tabs.push({ key: "watchlist", label: "Watchlist", href: "/watchlist" });
   }
 
+  const showDetailContext = isDetailRoute && pastHero && detail != null;
+  const detailAccentStyle = showDetailContext && detail?.accentHex
+    ? ({ "--color-accent": detail.accentHex } as React.CSSProperties)
+    : undefined;
+
   return (
     <>
       <header
+        style={detailAccentStyle}
         className={cn(
           "sticky top-0 z-40 h-14 transition-all duration-200",
           scrolled
@@ -75,32 +93,58 @@ export function AppHeaderClient({ user, logo }: AppHeaderClientProps) {
         <div className="mx-auto flex h-full max-w-300 items-center gap-7 px-7">
           {logo}
 
-          <nav className="flex flex-1 items-center gap-1" aria-label="Sections">
-            {tabs.map((t) => {
-              const isActive = activeTab === t.key;
-              return (
-                <Link
-                  key={t.key}
-                  href={t.href}
-                  className={cn(
-                    "relative rounded-md px-3.5 py-2 font-body text-sm font-medium transition-colors duration-200",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
-                    isActive
-                      ? "text-text-primary"
-                      : "text-text-secondary hover:text-text-primary",
-                  )}
-                >
-                  {t.label}
-                  {isActive && (
-                    <span
-                      aria-hidden
-                      className="absolute right-3.5 -bottom-3 left-3.5 h-0.5 rounded-sm bg-text-primary"
-                    />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+          {showDetailContext ? (
+            <div className="flex min-w-0 flex-1 items-center gap-3 transition-opacity duration-200">
+              {detail!.coverUrl && (
+                <div className="relative h-7 w-5 shrink-0 overflow-hidden rounded-xs border border-border-subtle">
+                  <Image
+                    src={detail!.coverUrl}
+                    alt=""
+                    fill
+                    sizes="20px"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <p className="truncate font-display text-sm font-semibold text-text-primary">
+                {detail!.title}
+              </p>
+              {detail!.rating != null && (
+                <span className="font-mono text-xs text-text-tertiary">
+                  <span style={{ color: "var(--color-accent)" }}>★</span>{" "}
+                  {detail!.rating.toFixed(1)}
+                </span>
+              )}
+            </div>
+          ) : (
+            <nav className="flex flex-1 items-center gap-1" aria-label="Sections">
+              {tabs.map((t) => {
+                const isActive = activeTab === t.key;
+                return (
+                  <Link
+                    key={t.key}
+                    href={t.href}
+                    className={cn(
+                      "relative rounded-md px-3.5 py-2 font-body text-sm font-medium transition-colors duration-200",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
+                      isActive
+                        ? "text-text-primary"
+                        : "text-text-secondary hover:text-text-primary",
+                    )}
+                  >
+                    {t.label}
+                    {isActive && (
+                      <span
+                        aria-hidden
+                        className="absolute right-3.5 -bottom-3 left-3.5 h-0.5 rounded-sm bg-text-primary"
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+              <DiscoverDropdown />
+            </nav>
+          )}
 
           <div className="flex items-center gap-2">
             <button

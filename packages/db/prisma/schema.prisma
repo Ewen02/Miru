@@ -184,12 +184,13 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  sessions  Session[]
-  accounts  Account[]
-  watchlist WatchlistEntry[]
-  reviews   Review[]
-  lists     List[]
-  listLikes ListLike[]
+  sessions      Session[]
+  accounts      Account[]
+  watchlist     WatchlistEntry[]
+  reviews       Review[]
+  lists         List[]
+  listLikes     ListLike[]
+  notifications Notification[]
 }
 
 model Session {
@@ -333,4 +334,28 @@ model ListLike {
 
   @@id([userId, listId])
   @@index([listId])
+}
+
+// ---------------------------------------------------------------------------
+// Notifications — in-app bell notifications for episodes, replies, recaps.
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+
+  kind     String  @db.VarChar(16)
+  title    String  @db.VarChar(200)
+  excerpt  String? @db.Text
+  linkUrl  String? @db.VarChar(500)
+  coverUrl String? @db.VarChar(500)
+  payload  Json?
+
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
 }

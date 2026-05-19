@@ -31,8 +31,8 @@ model Anime {
   accentHex         String? @db.VarChar(7)
   averageRating     Float?
 
-  syncedAt          DateTime?
-  syncFailedAt      DateTime?
+  syncedAt     DateTime?
+  syncFailedAt DateTime?
 
   studioId   String?
   studio     Studio?           @relation(fields: [studioId], references: [id])
@@ -43,6 +43,7 @@ model Anime {
   platforms  AnimeOnPlatform[]
   watchlist  WatchlistEntry[]
   reviews    Review[]
+  listItems  ListItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -175,18 +176,20 @@ model AnimeOnPlatform {
 // ---------------------------------------------------------------------------
 
 model User {
-  id            String    @id
+  id            String   @id
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  sessions   Session[]
-  accounts   Account[]
-  watchlist  WatchlistEntry[]
-  reviews    Review[]
+  sessions  Session[]
+  accounts  Account[]
+  watchlist WatchlistEntry[]
+  reviews   Review[]
+  lists     List[]
+  listLikes ListLike[]
 }
 
 model Session {
@@ -243,14 +246,14 @@ model Verification {
 model WatchlistEntry {
   userId         String
   animeId        String
-  status         String   @db.VarChar(16)
-  currentEpisode Int      @default(0)
+  status         String    @db.VarChar(16)
+  currentEpisode Int       @default(0)
   rating         Int?
-  isFavorite     Boolean  @default(false)
+  isFavorite     Boolean   @default(false)
   startedAt      DateTime?
   completedAt    DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
@@ -280,4 +283,54 @@ model Review {
   @@unique([userId, animeId])
   @@index([animeId])
   @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Lists — user-curated anime lists with ordering, notes, and social likes.
+// ---------------------------------------------------------------------------
+
+model List {
+  id           String  @id @default(cuid())
+  userId       String
+  title        String  @db.VarChar(80)
+  description  String? @db.Text
+  slug         String  @db.VarChar(100)
+  isPublic     Boolean @default(true)
+  coverArtSeed Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items ListItem[]
+  likes ListLike[]
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
+
+model ListItem {
+  listId  String
+  animeId String
+  order   Int
+  note    String?  @db.Text
+  addedAt DateTime @default(now())
+
+  list  List  @relation(fields: [listId], references: [id], onDelete: Cascade)
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@id([listId, animeId])
+  @@index([listId, order])
+}
+
+model ListLike {
+  userId  String
+  listId  String
+  likedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@id([userId, listId])
+  @@index([listId])
 }

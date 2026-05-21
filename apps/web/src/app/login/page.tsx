@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Button, Logo } from "@miru/ui";
 import { authClient } from "@/lib/auth-client";
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
+  const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export default function LoginPage() {
     setLoading(true);
     const { error: err } = await authClient.signIn.email({ email, password });
     if (err) {
-      setError(err.message ?? "Identifiants incorrects.");
+      setError(err.message ?? t("invalidCredentials"));
       setLoading(false);
       return;
     }
@@ -39,34 +41,34 @@ export default function LoginPage() {
         <div className="mb-7 flex flex-col items-center gap-4 text-center">
           <Link
             href="/"
-            aria-label="Accueil Miru"
+            aria-label={t("logoAria")}
             className="rounded-md text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
           >
             <Logo size={24} />
           </Link>
           <div>
             <h1 className="m-0 mb-1.5 font-display text-3xl font-semibold tracking-tight text-text-primary">
-              Bon retour
+              {t("loginTitle")}
             </h1>
             <p className="m-0 font-body text-sm text-text-tertiary">
-              Reprends où tu en étais.
+              {t("loginSubtitle")}
             </p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <AuthField
-            label="Adresse e-mail"
+            label={t("email")}
             type="email"
             value={email}
             onChange={(v) => setEmail(v)}
-            placeholder="toi@exemple.fr"
+            placeholder={t("emailPlaceholder")}
             autoComplete="email"
             required
           />
 
           <AuthField
-            label="Mot de passe"
+            label={t("password")}
             type="password"
             value={password}
             onChange={(v) => setPassword(v)}
@@ -84,7 +86,7 @@ export default function LoginPage() {
             className="mt-2"
             style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
           >
-            {loading ? "Connexion…" : "Se connecter"}
+            {loading ? t("loginCtaLoading") : t("loginCta")}
           </Button>
         </form>
 
@@ -93,17 +95,17 @@ export default function LoginPage() {
             href="/forgot-password"
             className="text-text-secondary underline-offset-2 hover:text-text-primary hover:underline"
           >
-            Mot de passe oublié ?
+            {t("forgotPassword")}
           </Link>
         </p>
 
         <p className="mt-3 text-center font-body text-xs text-text-tertiary">
-          Pas encore de compte ?{" "}
+          {t("noAccount")}{" "}
           <Link
             href="/register"
             className="font-medium text-text-primary underline-offset-2 transition-opacity duration-200 hover:opacity-80"
           >
-            Inscris-toi
+            {t("register")}
           </Link>
         </p>
       </div>

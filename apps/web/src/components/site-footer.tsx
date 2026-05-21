@@ -1,53 +1,56 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Logo } from "@miru/ui";
 
 /**
  * Global footer rendered under every page. 4 columns of navigation
- * (Découvrir / Compte / Légal / Sources) + bottom bar with logo and
- * data attribution.
+ * (Discover / Account / Help / Legal) + bottom bar with logo and data
+ * attribution.
  *
  * Routes referenced here MUST exist — broken links erode trust. When a
  * route is removed, drop it from this list at the same time.
  */
-export function SiteFooter() {
+export async function SiteFooter() {
+  const t = await getTranslations("components.footer");
+  const year = new Date().getFullYear();
   return (
     <footer className="mt-20 border-t border-border-subtle bg-bg-surface/40 px-6 pt-12 pb-8">
       <div className="mx-auto max-w-300">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
           <FooterColumn
-            label="Découvrir"
+            label={t("discover")}
             links={[
-              { href: "/", label: "Catalogue" },
-              { href: "/search", label: "Recherche" },
-              { href: "/calendar", label: "Calendrier" },
-              { href: "/top", label: "Top 100" },
-              { href: "/seasons/" + new Date().getFullYear(), label: "Cette année" },
+              { href: "/", label: t("catalog") },
+              { href: "/search", label: t("search") },
+              { href: "/calendar", label: t("calendar") },
+              { href: "/top", label: t("top") },
+              { href: "/seasons/" + year, label: t("thisYear") },
             ]}
           />
           <FooterColumn
-            label="Compte"
+            label={t("account")}
             links={[
-              { href: "/watchlist", label: "Watchlist" },
-              { href: "/profile", label: "Profil" },
-              { href: "/settings", label: "Paramètres" },
-              { href: "/notifications", label: "Notifications" },
+              { href: "/watchlist", label: t("watchlist") },
+              { href: "/profile", label: t("profile") },
+              { href: "/settings", label: t("settings") },
+              { href: "/notifications", label: t("notifications") },
             ]}
           />
           <FooterColumn
-            label="Aide & infos"
+            label={t("helpInfo")}
             links={[
-              { href: "/about", label: "À propos" },
-              { href: "/help", label: "Aide" },
-              { href: "/changelog", label: "Changelog" },
-              { href: "/shortcuts", label: "Raccourcis" },
-              { href: "/status", label: "Statut" },
+              { href: "/about", label: t("about") },
+              { href: "/help", label: t("help") },
+              { href: "/changelog", label: t("changelog") },
+              { href: "/shortcuts", label: t("shortcuts") },
+              { href: "/status", label: t("status") },
             ]}
           />
           <FooterColumn
-            label="Légal"
+            label={t("legal")}
             links={[
-              { href: "/terms", label: "Conditions" },
-              { href: "/pricing", label: "Tarifs" },
+              { href: "/terms", label: t("terms") },
+              { href: "/pricing", label: t("pricing") },
             ]}
           />
         </div>
@@ -56,11 +59,11 @@ export function SiteFooter() {
           <div className="flex items-center gap-3 text-text-tertiary">
             <Logo size={16} />
             <span className="font-mono text-[10px] uppercase tracking-wider">
-              v0.5.0 · {new Date().getFullYear()}
+              v0.5.0 · {year}
             </span>
           </div>
           <p className="m-0 font-body text-xs text-text-tertiary">
-            Données{" "}
+            {t("dataFrom")}{" "}
             <a
               href="https://anilist.co"
               target="_blank"

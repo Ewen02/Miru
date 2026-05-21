@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Button, Logo } from "@miru/ui";
 import { authClient } from "@/lib/auth-client";
@@ -12,6 +13,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
+  const t = useTranslations("auth");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,8 +28,7 @@ export default function RegisterPage() {
     setLoading(true);
     const { error: err } = await authClient.signUp.email({ email, password, name });
     if (err) {
-      setError(err.message ?? "Inscription impossible.");
-      // Heuristic: Better Auth surfaces email-specific errors most often.
+      setError(err.message ?? t("registerFailed"));
       setErrorField("email");
       setLoading(false);
       return;
@@ -44,55 +45,53 @@ export default function RegisterPage() {
         <div className="mb-7 flex flex-col items-center gap-4 text-center">
           <Link
             href="/"
-            aria-label="Accueil Miru"
+            aria-label={t("logoAria")}
             className="rounded-md text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
           >
             <Logo size={24} />
           </Link>
           <div>
             <h1 className="m-0 mb-1.5 font-display text-3xl font-semibold tracking-tight text-text-primary">
-              Crée ton compte
+              {t("registerTitleShort")}
             </h1>
             <p className="m-0 font-body text-sm text-text-tertiary">
-              Suis tes anime préférés et partage tes avis.
+              {t("registerSubtitleShort")}
             </p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <AuthField
-            label="Nom d'affichage"
+            label={t("name")}
             value={name}
             onChange={setName}
-            placeholder="Ton pseudo"
+            placeholder={t("namePlaceholder")}
             autoComplete="name"
             required
             minLength={2}
-            hint="Visible publiquement sur tes avis."
+            hint={t("nameHint")}
             invalid={errorField === "name"}
           />
           <AuthField
-            label="Adresse e-mail"
+            label={t("email")}
             type="email"
             value={email}
             onChange={setEmail}
-            placeholder="toi@exemple.fr"
+            placeholder={t("emailPlaceholder")}
             autoComplete="email"
             required
             invalid={errorField === "email"}
             hint={errorField === "email" ? error ?? undefined : undefined}
           />
           <AuthField
-            label="Mot de passe"
+            label={t("password")}
             type="password"
             value={password}
             onChange={setPassword}
             autoComplete="new-password"
             required
             minLength={8}
-            hint={
-              errorField === "password" ? error ?? undefined : "8 caractères minimum."
-            }
+            hint={errorField === "password" ? error ?? undefined : t("passwordHint")}
             invalid={errorField === "password"}
           />
 
@@ -103,17 +102,17 @@ export default function RegisterPage() {
             className="mt-2"
             style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
           >
-            {loading ? "Création…" : "S'inscrire"}
+            {loading ? t("registerCtaLoading") : t("registerCta")}
           </Button>
         </form>
 
         <p className="mt-6 text-center font-body text-xs text-text-tertiary">
-          Déjà un compte ?{" "}
+          {t("hasAccount")}{" "}
           <Link
             href="/login"
             className="font-medium text-text-primary underline-offset-2 transition-opacity duration-200 hover:opacity-80"
           >
-            Connecte-toi
+            {t("login")}
           </Link>
         </p>
       </div>

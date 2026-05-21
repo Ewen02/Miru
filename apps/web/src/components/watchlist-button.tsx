@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { WatchStatus, WatchlistEntry } from "@miru/types";
 import { Button, cn } from "@miru/ui";
 import { watchlistApi } from "@/lib/watchlist-api";
@@ -15,12 +16,12 @@ interface WatchlistButtonProps {
   isAuthenticated: boolean;
 }
 
-const STATUS_LABELS: Record<WatchStatus, string> = {
-  WATCHING: "En cours",
-  PLANNED: "À voir",
-  ON_HOLD: "En pause",
-  COMPLETED: "Terminé",
-  DROPPED: "Abandonné",
+const STATUS_KEY: Record<WatchStatus, string> = {
+  WATCHING: "watching",
+  PLANNED: "planned",
+  ON_HOLD: "onHold",
+  COMPLETED: "completed",
+  DROPPED: "dropped",
 };
 
 const STATUS_ORDER: WatchStatus[] = ["WATCHING", "PLANNED", "ON_HOLD", "COMPLETED", "DROPPED"];
@@ -32,6 +33,7 @@ export function WatchlistButton({
   isAuthenticated,
 }: WatchlistButtonProps) {
   const router = useRouter();
+  const t = useTranslations("components.watchlist");
   const [entry, setEntry] = useState<WatchlistEntry | null>(initialEntry);
   const [error, setError] = useState<string | null>(null);
   const [statusOpen, setStatusOpen] = useState(false);
@@ -53,10 +55,10 @@ export function WatchlistButton({
             variant="outline"
             onClick={() => router.push(`/login?next=/anime/${animeId}`)}
           >
-            Se connecter pour suivre
+            {t("loginToTrack")}
           </Button>
           <span className="font-body text-xs text-text-tertiary">
-            Suis ton avancement, note et reçois les nouveaux épisodes.
+            {t("loginRationale")}
           </span>
         </div>
       </div>
@@ -181,7 +183,7 @@ export function WatchlistButton({
               className="h-1.5 w-1.5 rounded-sm"
               style={{ backgroundColor: "var(--color-accent)" }}
             />
-            {STATUS_LABELS[entry.status]}
+            {t(STATUS_KEY[entry.status])}
             <ChevronDownIcon />
           </button>
 
@@ -204,7 +206,7 @@ export function WatchlistButton({
                       : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary",
                   )}
                 >
-                  {STATUS_LABELS[s]}
+                  {t(STATUS_KEY[s])}
                 </button>
               ))}
             </div>

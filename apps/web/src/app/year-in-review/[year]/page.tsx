@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { YearInReviewDto } from "@miru/types";
 import { EditorialSectionHeader, StatCard } from "@miru/ui";
 import { fetchUserYearInReview } from "@/lib/server-year-in-review";
@@ -13,9 +14,10 @@ interface YearInReviewProps {
 
 export async function generateMetadata({ params }: YearInReviewProps): Promise<Metadata> {
   const { year } = await params;
+  const t = await getTranslations("yearInReview");
   return {
-    title: `Bilan ${year}`,
-    description: `Ton année anime sur Miru — bilan ${year}.`,
+    title: t("metaTitle", { year }),
+    description: t("metaDescription", { year }),
   };
 }
 
@@ -35,10 +37,26 @@ export default async function YearInReviewPage({ params }: YearInReviewProps) {
   return <YearInReviewContent year={year} data={data} />;
 }
 
-function YearInReviewContent({ year, data }: { year: number; data: YearInReviewDto }) {
+async function YearInReviewContent({ year, data }: { year: number; data: YearInReviewDto }) {
+  const [t, locale] = await Promise.all([getTranslations("yearInReview"), getLocale()]);
   const maxMonth = Math.max(...data.months.map((m) => m.completedCount), 1);
-  const yoy = computeYoY(data.completedCount, data.previousYearCompletedCount);
+  const yoy = computeYoY(data.completedCount, data.previousYearCompletedCount, t);
   const dominantGenre = data.genres[0]?.name ?? null;
+  const numFmt = (n: number) => n.toLocaleString(locale);
+  const monthLabels = [
+    t("monthJan"), t("monthFeb"), t("monthMar"), t("monthApr"),
+    t("monthMay"), t("monthJun"), t("monthJul"), t("monthAug"),
+    t("monthSep"), t("monthOct"), t("monthNov"), t("monthDec"),
+  ];
+
+  const moodCopy =
+    data.completedCount === 1
+      ? t("moodSingle")
+      : data.completedCount < 10
+        ? t("moodCalm")
+        : data.completedCount < 50
+          ? t("moodNice")
+          : t("moodIntense");
 
   return (
     <main className="mx-auto max-w-300 px-7 pb-20">
@@ -48,31 +66,25 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
           className="m-0 mb-6 font-mono text-xs uppercase tracking-[0.3em]"
           style={{ color: "var(--color-accent)" }}
         >
-          Bilan annuel
+          {t("heroEyebrow")}
         </p>
         <h1 className="m-0 mb-6 font-display font-bold leading-[0.85] tracking-[-0.04em] text-text-primary text-[120px] sm:text-[160px] lg:text-[200px]">
           {year}
         </h1>
         <p className="m-0 mb-8 max-w-180 font-body text-lg leading-snug text-text-secondary text-pretty sm:text-xl">
-          {data.completedCount === 1
-            ? "Une année plus tranquille."
-            : data.completedCount < 10
-            ? "Une année calme."
-            : data.completedCount < 50
-            ? "Une belle année."
-            : "Une année intense."}
-          {" "}Tu as terminé{" "}
-          <span className="text-text-primary">{data.completedCount} anime</span>
+          {moodCopy} {t("completedLine")}{" "}
+          <span className="text-text-primary">
+            {t("completedAnime", { count: data.completedCount })}
+          </span>
           {yoy && (
             <>
-              , soit <span className="text-text-primary">{yoy}</span>
+              {t("soit")} <span className="text-text-primary">{yoy}</span>
             </>
           )}
-          , pour un total de{" "}
+          , {t("totalLine")}{" "}
           <span className="text-text-primary">
-            {data.hoursWatched.toLocaleString("fr-FR")} heures
-          </span>{" "}
-          regardées.
+            {t("hours", { count: numFmt(data.hoursWatched) })}
+          </span>
         </p>
         <ShareButton
           year={data.year}
@@ -85,44 +97,48 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
       {/* Stats */}
       <section className="mt-16 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
-          label="Anime terminés"
-          value={data.completedCount.toLocaleString("fr-FR")}
+          label={t("statCompleted")}
+          value={numFmt(data.completedCount)}
           sub={yoy ?? undefined}
         />
         <StatCard
-          label="Heures regardées"
-          value={data.hoursWatched.toLocaleString("fr-FR")}
+          label={t("statHours")}
+          value={numFmt(data.hoursWatched)}
           sub={
             data.hoursWatched > 0
-              ? `≈ ${Math.round(data.hoursWatched / 24).toLocaleString("fr-FR")} jours`
+              ? t("statHoursSub", { days: numFmt(Math.round(data.hoursWatched / 24)) })
               : undefined
           }
         />
         <StatCard
-          label="Films"
-          value={data.moviesCount.toLocaleString("fr-FR")}
-          sub={dominantGenre ? `Genre dominant : ${dominantGenre}` : undefined}
+          label={t("statMovies")}
+          value={numFmt(data.moviesCount)}
+          sub={dominantGenre ? t("statMoviesSub", { genre: dominantGenre }) : undefined}
         />
         <StatCard
-          label="Avis publiés"
-          value={data.reviewCount.toLocaleString("fr-FR")}
+          label={t("statReviews")}
+          value={numFmt(data.reviewCount)}
           tone="accent"
         />
       </section>
 
       {/* Monthly bar chart */}
       <section className="mt-20">
-        <EditorialSectionHeader eyebrow="Rythme" title="Ton année, mois par mois" />
+        <EditorialSectionHeader eyebrow={t("rhythmEyebrow")} title={t("rhythmTitle")} />
         <div className="rounded-2xl border border-border-subtle bg-bg-surface p-8">
           <div className="flex h-50 items-end gap-3">
             {data.months.map((mo) => {
               const heightPct = (mo.completedCount / maxMonth) * 100;
               const isMax = mo.completedCount === maxMonth && mo.completedCount > 0;
+              const titleKey = mo.completedCount > 1 ? "monthsCompletedPlural" : "monthsCompleted";
               return (
                 <div
                   key={mo.month}
                   className="flex flex-1 flex-col items-center gap-2"
-                  title={`${MONTH_LABELS[mo.month - 1]} : ${mo.completedCount} terminé${mo.completedCount > 1 ? "s" : ""}`}
+                  title={t(titleKey, {
+                    month: monthLabels[mo.month - 1] ?? "",
+                    count: mo.completedCount,
+                  })}
                 >
                   <span className="font-mono text-[10px] text-text-tertiary">
                     {mo.completedCount}
@@ -149,7 +165,7 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
                 key={mo.month}
                 className="flex-1 text-center font-mono text-[10px] text-text-tertiary"
               >
-                {MONTH_LABELS[mo.month - 1]}
+                {monthLabels[mo.month - 1] ?? ""}
               </span>
             ))}
           </div>
@@ -159,7 +175,10 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
       {/* Top anime */}
       {data.topAnime.length > 0 && (
         <section className="mt-20">
-          <EditorialSectionHeader eyebrow="Tes coups de cœur" title={`Top ${data.topAnime.length} de l'année`} />
+          <EditorialSectionHeader
+            eyebrow={t("topEyebrow")}
+            title={t("topTitle", { n: data.topAnime.length })}
+          />
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-5">
             {data.topAnime.map((anime, idx) => (
               <Link
@@ -207,11 +226,11 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
       {/* Genres + Studios */}
       {(data.genres.length > 0 || data.studios.length > 0) && (
         <section className="mt-20">
-          <EditorialSectionHeader eyebrow="Tes préférences" title="Genres & studios de l'année" />
+          <EditorialSectionHeader eyebrow={t("prefsEyebrow")} title={t("prefsTitle")} />
           <div className="grid grid-cols-1 gap-12 rounded-2xl border border-border-subtle bg-bg-surface p-8 lg:grid-cols-2">
             <div>
               <p className="m-0 mb-5 font-mono text-[9px] uppercase tracking-[0.22em] text-text-tertiary">
-                Genres
+                {t("genresLabel")}
               </p>
               {data.genres.map((g, i) => {
                 const pct =
@@ -248,7 +267,7 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
 
             <div>
               <p className="m-0 mb-5 font-mono text-[9px] uppercase tracking-[0.22em] text-text-tertiary">
-                Studios les plus regardés
+                {t("studiosLabel")}
               </p>
               {data.studios.length > 0 ? (
                 data.studios.map((s, idx) => (
@@ -262,7 +281,9 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
                     />
                     <span className="flex-1 font-body text-sm text-text-primary">{s.name}</span>
                     <span className="font-mono text-[11px] text-text-tertiary">
-                      {s.count} titre{s.count > 1 ? "s" : ""}
+                      {s.count > 1
+                        ? t("studioTitleCountPlural", { count: s.count })
+                        : t("studioTitleCount", { count: s.count })}
                     </span>
                   </div>
                 ))
@@ -277,12 +298,12 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
       {/* Closing */}
       <section className="mt-20 border-t border-border-subtle px-6 py-12 text-center">
         <p className="m-0 mb-4 font-body text-sm text-text-tertiary">
-          Merci d'avoir passé {year} avec Miru.
+          {t("closingThanks", { year })}
         </p>
         <p className="mx-auto m-0 max-w-140 font-display text-2xl font-semibold tracking-[-0.02em] text-text-primary">
-          On a hâte de voir{" "}
+          {t("closingPrefix")}{" "}
           <span style={{ color: "var(--color-accent)" }}>
-            ce que {year + 1} va t'apporter
+            {t("closingAccent", { year: year + 1 })}
           </span>
           .
         </p>
@@ -291,42 +312,40 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
   );
 }
 
-function EmptyYear({ year }: { year: number }) {
+async function EmptyYear({ year }: { year: number }) {
+  const t = await getTranslations("yearInReview");
   return (
     <main className="mx-auto max-w-3xl px-7 pb-20 pt-20 text-center">
       <p
         className="m-0 mb-6 font-mono text-xs uppercase tracking-[0.3em]"
         style={{ color: "var(--color-accent)" }}
       >
-        Bilan annuel
+        {t("heroEyebrow")}
       </p>
       <h1 className="m-0 mb-6 font-display font-bold leading-[0.9] tracking-[-0.04em] text-text-primary text-[120px] sm:text-[160px]">
         {year}
       </h1>
       <p className="mx-auto m-0 mb-8 max-w-160 font-body text-lg leading-snug text-text-secondary text-pretty">
-        Tu n'as encore rien terminé en {year}. Reviens ici quand tu auras quelques titres dans la liste — le bilan se construit automatiquement.
+        {t("emptyDescription", { year })}
       </p>
       <Link
         href="/watchlist"
         className="inline-flex h-11 items-center rounded-md px-5 font-body text-sm font-semibold"
         style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
       >
-        Ouvrir ma watchlist →
+        {t("emptyCta")}
       </Link>
     </main>
   );
 }
 
+type T = (key: string, values?: Record<string, string | number>) => string;
 
-const MONTH_LABELS = [
-  "Jan", "Fév", "Mar", "Avr", "Mai", "Juin",
-  "Jui", "Aoû", "Sep", "Oct", "Nov", "Déc",
-];
-
-function computeYoY(current: number, previous: number): string | null {
+function computeYoY(current: number, previous: number, t: T): string | null {
   if (previous === 0) return null;
   const pct = Math.round(((current - previous) / previous) * 100);
-  if (pct === 0) return "soit autant que l'an dernier";
-  if (pct > 0) return `+${pct} % vs ${new Date().getFullYear() - 1}`;
-  return `${pct} % vs ${new Date().getFullYear() - 1}`;
+  const lastYear = new Date().getFullYear() - 1;
+  if (pct === 0) return t("yoyEqual");
+  if (pct > 0) return t("yoyPositive", { pct, year: lastYear });
+  return t("yoyNegative", { pct, year: lastYear });
 }

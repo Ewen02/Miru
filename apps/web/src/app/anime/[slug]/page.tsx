@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import {
   AnimeDetailTemplate,
   AnimeHero,
@@ -37,8 +38,11 @@ interface AnimeDetailPageProps {
 
 export async function generateMetadata({ params }: AnimeDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const anime = await fetchAnimeDetail(slug).catch(() => null);
-  if (!anime) return { title: "Anime introuvable" };
+  const [anime, t] = await Promise.all([
+    fetchAnimeDetail(slug).catch(() => null),
+    getTranslations("animeDetail"),
+  ]);
+  if (!anime) return { title: t("notFound") };
   const description = anime.synopsis
     ? anime.synopsis.replace(/<[^>]+>/g, "").slice(0, 180)
     : undefined;
@@ -84,7 +88,11 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
 }
 
 async function AnimeDetailContent({ slug }: { slug: string }) {
-  const [anime, session] = await Promise.all([fetchAnimeDetail(slug), getServerSession()]);
+  const [anime, session, t] = await Promise.all([
+    fetchAnimeDetail(slug),
+    getServerSession(),
+    getTranslations("animeDetail"),
+  ]);
   if (!anime) notFound();
 
   const [watchlist, reviews, watchedEpisodes] = await Promise.all([
@@ -118,7 +126,7 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
           href="/"
           className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wide text-text-tertiary transition-colors duration-200 hover:text-text-secondary"
         >
-          ← Catalogue
+          {t("backCatalog")}
         </Link>
       }
       hero={
@@ -161,7 +169,7 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
         />
       ) : undefined}
       episodesCount={showEpisodes && anime.episodes.length > 0 ? anime.episodes.length : null}
-      synopsis={<SynopsisSection anime={anime} />}
+      synopsis={<SynopsisSection anime={anime} t={t} />}
       characters={
         anime.characters.length > 0 ? (
           <CharactersSection characters={anime.characters} />
@@ -169,7 +177,7 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
       }
       charactersCount={anime.characters.length > 0 ? anime.characters.length : null}
       relations={
-        anime.relations.length > 0 ? <RelationsSection relations={anime.relations} /> : undefined
+        anime.relations.length > 0 ? <RelationsSection relations={anime.relations} t={t} /> : undefined
       }
       relationsCount={anime.relations.length > 0 ? anime.relations.length : null}
       reviews={
@@ -193,7 +201,7 @@ function DetailSkeleton({ title }: { title: string }) {
           href="/"
           className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wide text-text-tertiary transition-colors duration-200 hover:text-text-secondary"
         >
-          ← Catalogue
+          ←
         </Link>
       </div>
       <div className="relative h-hero-banner-h w-full bg-bg-elevated" />
@@ -259,14 +267,16 @@ function shortSeasonLabel(title: string, year: number | null): string {
 }
 
 const RELATION_ORDER: RelationType[] = ["PREQUEL", "SEQUEL", "SIDE_STORY", "SPIN_OFF"];
-const RELATION_GROUP_LABEL: Record<RelationType, string> = {
-  PREQUEL: "Préquelle",
-  SEQUEL: "Suite",
-  SIDE_STORY: "Histoires annexes",
-  SPIN_OFF: "Spin-offs",
+const RELATION_KEY: Record<RelationType, string> = {
+  PREQUEL: "relationPrequel",
+  SEQUEL: "relationSequel",
+  SIDE_STORY: "relationSideStory",
+  SPIN_OFF: "relationSpinOff",
 };
 
-function RelationsSection({ relations }: { relations: AnimeRelationCardDTO[] }) {
+type T = (key: string, values?: Record<string, string | number>) => string;
+
+function RelationsSection({ relations, t }: { relations: AnimeRelationCardDTO[]; t: T }) {
   const grouped = new Map<RelationType, AnimeRelationCardDTO[]>();
   for (const r of relations) {
     const list = grouped.get(r.relationType) ?? [];
@@ -279,7 +289,7 @@ function RelationsSection({ relations }: { relations: AnimeRelationCardDTO[] }) 
       {RELATION_ORDER.filter((type) => grouped.has(type)).map((type) => (
         <div key={type} className="flex flex-col gap-2.5">
           <h3 className="font-body text-[10px] font-medium uppercase tracking-[0.18em] text-text-tertiary">
-            {RELATION_GROUP_LABEL[type]}
+            {t(RELATION_KEY[type])}
           </h3>
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {grouped.get(type)!.map((r, idx) => (
@@ -300,7 +310,7 @@ function RelationsSection({ relations }: { relations: AnimeRelationCardDTO[] }) 
   );
 }
 
-function SynopsisSection({ anime }: { anime: AnimeDetail }) {
+function SynopsisSection({ anime, t }: { anime: AnimeDetail; t: T }) {
   const studioSlug = anime.studioName ? slugifyStudio(anime.studioName) : null;
   const studioCell: React.ReactNode = anime.studioName
     ? studioSlug
@@ -316,12 +326,12 @@ function SynopsisSection({ anime }: { anime: AnimeDetail }) {
     : "—";
 
   const infoRows: Array<[string, React.ReactNode]> = [
-    ["Format", anime.format],
-    ["Statut", anime.status],
-    ["Année", anime.year?.toString() ?? "—"],
-    ["Épisodes", anime.episodeCount != null ? anime.episodeCount.toString() : "—"],
-    ["Studio", studioCell],
-    ["Titre EN", anime.titleEn ?? "—"],
+    [t("infoFormat"), anime.format],
+    [t("infoStatus"), anime.status],
+    [t("infoYear"), anime.year?.toString() ?? "—"],
+    [t("infoEpisodes"), anime.episodeCount != null ? anime.episodeCount.toString() : "—"],
+    [t("infoStudio"), studioCell],
+    [t("infoTitleEn"), anime.titleEn ?? "—"],
   ];
 
   return (
@@ -331,7 +341,7 @@ function SynopsisSection({ anime }: { anime: AnimeDetail }) {
           {anime.synopsis}
         </p>
       ) : (
-        <p className="font-body text-sm text-text-tertiary">Pas de synopsis disponible.</p>
+        <p className="font-body text-sm text-text-tertiary">{t("synopsisEmpty")}</p>
       )}
 
       {anime.genres.length > 0 && (

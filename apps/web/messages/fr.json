@@ -260,6 +260,38 @@
     "daySat": "Sam",
     "daySun": "Dim"
   },
+  "animeDetail": {
+    "notFound": "Anime introuvable",
+    "backCatalog": "← Catalogue",
+    "synopsisEmpty": "Pas de synopsis disponible.",
+    "infoFormat": "Format",
+    "infoStatus": "Statut",
+    "infoYear": "Année",
+    "infoEpisodes": "Épisodes",
+    "infoStudio": "Studio",
+    "infoTitleEn": "Titre EN",
+    "relationPrequel": "Préquelle",
+    "relationSequel": "Suite",
+    "relationSideStory": "Histoires annexes",
+    "relationSpinOff": "Spin-offs"
+  },
+  "seasonsPage": {
+    "metaTitle": "Saison {year}",
+    "metaDescription": "Les anime sortis en {year} dans le catalogue Miru.",
+    "eyebrow": "Année",
+    "titlesCount": "{total} titre indexé",
+    "titlesCountPlural": "{total} titres indexés",
+    "yearNavAria": "Navigation par année",
+    "formatAria": "Format",
+    "formatAll": "Tous",
+    "formatMovie": "Films",
+    "formatOva": "OVA",
+    "formatOna": "ONA",
+    "formatSpecial": "Spéciaux",
+    "apiUnreachable": "Impossible de joindre l'API.",
+    "emptyYear": "Aucun anime indexé en {year}.",
+    "emptyYearWithFormat": "Aucun anime indexé en {year} ({format})."
+  },
   "topPage": {
     "metaTitle": "Top 100",
     "metaDescription": "Les 100 anime les mieux notés du catalogue Miru.",

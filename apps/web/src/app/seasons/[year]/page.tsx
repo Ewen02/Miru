@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import { AnimeCard, Pagination } from "@miru/ui";
 import { fetchAnimeCatalog } from "@/lib/api";
 
@@ -10,25 +11,32 @@ interface SeasonPageProps {
 }
 
 const PAGE_SIZE = 20;
-const FORMAT_TABS = [
-  { key: "ALL", label: "Tous" },
-  { key: "TV", label: "TV" },
-  { key: "MOVIE", label: "Films" },
-  { key: "OVA", label: "OVA" },
-  { key: "ONA", label: "ONA" },
-  { key: "SPECIAL", label: "Spéciaux" },
+
+const FORMAT_KEYS = [
+  { key: "ALL", labelKey: "formatAll" },
+  { key: "TV", labelKey: null },
+  { key: "MOVIE", labelKey: "formatMovie" },
+  { key: "OVA", labelKey: "formatOva" },
+  { key: "ONA", labelKey: "formatOna" },
+  { key: "SPECIAL", labelKey: "formatSpecial" },
 ] as const;
 
 export async function generateMetadata({ params }: SeasonPageProps): Promise<Metadata> {
   const { year } = await params;
+  const t = await getTranslations("seasonsPage");
   return {
-    title: `Saison ${year}`,
-    description: `Les anime sortis en ${year} dans le catalogue Miru.`,
+    title: t("metaTitle", { year }),
+    description: t("metaDescription", { year }),
   };
 }
 
 export default async function SeasonPage({ params, searchParams }: SeasonPageProps) {
-  const [{ year: yearStr }, sp] = await Promise.all([params, searchParams]);
+  const [{ year: yearStr }, sp, t, locale] = await Promise.all([
+    params,
+    searchParams,
+    getTranslations("seasonsPage"),
+    getLocale(),
+  ]);
   const year = Number(yearStr);
   const currentYear = new Date().getFullYear();
   if (!Number.isInteger(year) || year < 1960 || year > currentYear + 2) notFound();
@@ -60,22 +68,30 @@ export default async function SeasonPage({ params, searchParams }: SeasonPagePro
   const prevYearHref = `/seasons/${year - 1}`;
   const nextYearHref = `/seasons/${year + 1}`;
   const activeFormat = sp.format ?? "ALL";
+  const totalLabel = total.toLocaleString(locale);
+  const subtitleKey = total > 1 ? "titlesCountPlural" : "titlesCount";
+  const emptyText =
+    catalog === null
+      ? t("apiUnreachable")
+      : format
+        ? t("emptyYearWithFormat", { year, format })
+        : t("emptyYear", { year });
 
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-            Année
+            {t("eyebrow")}
           </p>
           <h1 className="m-0 font-display text-4xl font-semibold tracking-[-0.025em] text-text-primary sm:text-5xl">
             {year}
           </h1>
           <p className="m-0 mt-2 font-body text-sm text-text-secondary">
-            {total.toLocaleString("fr-FR")} titre{total > 1 ? "s" : ""} indexé{total > 1 ? "s" : ""}
+            {t(subtitleKey, { total: totalLabel })}
           </p>
         </div>
-        <nav className="flex items-center gap-2" aria-label="Navigation par année">
+        <nav className="flex items-center gap-2" aria-label={t("yearNavAria")}>
           <Link
             href={prevYearHref}
             className="inline-flex h-9 items-center rounded-md border border-border bg-bg-surface px-3 font-mono text-xs text-text-secondary uppercase tracking-wider transition-colors duration-200 hover:bg-bg-elevated hover:text-text-primary"
@@ -98,10 +114,11 @@ export default async function SeasonPage({ params, searchParams }: SeasonPagePro
       <nav
         className="mb-8 flex flex-wrap gap-1 border-b border-border-subtle"
         role="tablist"
-        aria-label="Format"
+        aria-label={t("formatAria")}
       >
-        {FORMAT_TABS.map((tab) => {
+        {FORMAT_KEYS.map((tab) => {
           const isActive = activeFormat === tab.key;
+          const label = tab.labelKey ? t(tab.labelKey) : tab.key;
           return (
             <Link
               key={tab.key}
@@ -115,7 +132,7 @@ export default async function SeasonPage({ params, searchParams }: SeasonPagePro
                   : "var(--color-text-secondary)",
               }}
             >
-              {tab.label}
+              {label}
               {isActive && (
                 <span
                   aria-hidden
@@ -130,11 +147,7 @@ export default async function SeasonPage({ params, searchParams }: SeasonPagePro
 
       {items.length === 0 ? (
         <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
-          <p className="m-0 font-body text-sm text-text-tertiary">
-            {catalog === null
-              ? "Impossible de joindre l'API."
-              : `Aucun anime indexé en ${year}${format ? ` (${format})` : ""}.`}
-          </p>
+          <p className="m-0 font-body text-sm text-text-tertiary">{emptyText}</p>
         </div>
       ) : (
         <>

@@ -9,6 +9,7 @@ export interface MeDto {
   emailVerified: boolean;
   image: string | null;
   twoFactorEnabled: boolean;
+  bio: string | null;
 }
 
 export async function fetchMe(): Promise<MeDto | null> {

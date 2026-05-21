@@ -484,6 +484,21 @@
     "watchlistCardBody": "Find the anime you follow, pause, or plan to watch.",
     "watchlistCardCta": "View my watchlist →"
   },
+  "profilePublic": {
+    "shareLabel": "Share",
+    "shareCopied": "Copied",
+    "shareAria": "Share profile",
+    "bioPlaceholder": "One line about yourself (250 chars max)."
+  },
+  "settingsBio": {
+    "title": "Public bio",
+    "description": "Shown on your /u/{handle} page. 250 chars max.",
+    "placeholder": "MAPPA appreciation society. Slice of life over everything.",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "error": "Couldn't save — try again."
+  },
   "security": {
     "metaTitle": "Security",
     "metaDescription": "Miru account security — 2FA, active sessions.",

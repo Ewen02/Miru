@@ -21,5 +21,6 @@ export function makeUserRepoMock(): jest.Mocked<UserRepositoryPort> {
     preferencesByUserId: jest.fn(),
     updatePreferences: jest.fn(),
     deleteById: jest.fn(),
+    updateBio: jest.fn(),
   };
 }

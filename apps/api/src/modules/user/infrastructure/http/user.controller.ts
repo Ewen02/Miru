@@ -28,8 +28,10 @@ import { RevokeUserSessionUseCase } from "../../application/use-cases/revoke-use
 import { GetUserPreferencesUseCase } from "../../application/use-cases/get-user-preferences.use-case";
 import { UpdateUserPreferencesUseCase } from "../../application/use-cases/update-user-preferences.use-case";
 import { DeleteUserAccountUseCase } from "../../application/use-cases/delete-user-account.use-case";
+import { UpdateMyBioUseCase } from "../../application/use-cases/update-my-bio.use-case";
 import { UpdateUserPreferencesDto } from "../../application/dtos/update-preferences.dto";
 import { DeleteAccountDto } from "../../application/dtos/delete-account.dto";
+import { UpdateBioDto } from "../../application/dtos/update-bio.dto";
 
 interface UserDto {
   id: string;
@@ -38,6 +40,7 @@ interface UserDto {
   emailVerified: boolean;
   image: string | null;
   twoFactorEnabled: boolean;
+  bio: string | null;
 }
 
 @Controller("users")
@@ -52,6 +55,7 @@ export class UserController {
     private readonly getUserPreferences: GetUserPreferencesUseCase,
     private readonly updateUserPreferences: UpdateUserPreferencesUseCase,
     private readonly deleteUserAccount: DeleteUserAccountUseCase,
+    private readonly updateMyBio: UpdateMyBioUseCase,
   ) {}
 
   @Get("me")
@@ -65,6 +69,7 @@ export class UserController {
       emailVerified: user.emailVerified,
       image: user.image,
       twoFactorEnabled: user.twoFactorEnabled,
+      bio: user.bio,
     };
   }
 
@@ -152,6 +157,19 @@ export class UserController {
     await this.deleteUserAccount.execute({ userId });
   }
 
+  /**
+   * Public bio update. Empty string clears it. 250-char cap enforced
+   * by both the DTO and the use case.
+   */
+  @Patch("me/bio")
+  @UseGuards(AuthRequiredGuard)
+  bio(
+    @CurrentUserId() userId: string,
+    @Body() body: UpdateBioDto,
+  ): Promise<{ bio: string | null }> {
+    return this.updateMyBio.execute({ userId, bio: body.bio });
+  }
+
   @Get(":handle")
   async profile(@Param("handle") handle: string): Promise<UserProfile> {
     const { user, joinedAt, isPro, stats, favorites, reviews } =
@@ -162,6 +180,7 @@ export class UserController {
       handle: user.name,
       name: user.name,
       image: user.image,
+      bio: user.bio,
       joinedAt: joinedAt ? joinedAt.toISOString() : null,
       isPro,
       stats,

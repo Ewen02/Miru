@@ -391,6 +391,10 @@ export class PrismaUserRepository implements UserRepositoryPort {
     };
   }
 
+  async updateBio(userId: string, bio: string | null): Promise<void> {
+    await this.prisma.user.update({ where: { id: userId }, data: { bio } });
+  }
+
   async deleteById(userId: string): Promise<void> {
     // Cascades: WatchlistEntry, Review, List, ListItem, ListLike,
     // Notification, UserEpisode, PushSubscription, UserPreferences,
@@ -405,6 +409,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
     emailVerified: boolean;
     image: string | null;
     twoFactorEnabled: boolean | null;
+    bio: string | null;
   }): UserEntity {
     return UserEntity.create(record.id, {
       email: record.email,
@@ -412,6 +417,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
       emailVerified: record.emailVerified,
       image: record.image,
       twoFactorEnabled: record.twoFactorEnabled ?? false,
+      bio: record.bio,
     });
   }
 }

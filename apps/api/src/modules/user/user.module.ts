@@ -9,6 +9,7 @@ import { RevokeUserSessionUseCase } from "./application/use-cases/revoke-user-se
 import { GetUserPreferencesUseCase } from "./application/use-cases/get-user-preferences.use-case";
 import { UpdateUserPreferencesUseCase } from "./application/use-cases/update-user-preferences.use-case";
 import { DeleteUserAccountUseCase } from "./application/use-cases/delete-user-account.use-case";
+import { UpdateMyBioUseCase } from "./application/use-cases/update-my-bio.use-case";
 import { USER_REPOSITORY } from "./application/tokens";
 import { PrismaUserRepository } from "./infrastructure/persistence/prisma-user.repository";
 import { UserController } from "./infrastructure/http/user.controller";
@@ -26,6 +27,7 @@ import { UserController } from "./infrastructure/http/user.controller";
     GetUserPreferencesUseCase,
     UpdateUserPreferencesUseCase,
     DeleteUserAccountUseCase,
+    UpdateMyBioUseCase,
     { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
   ],
   exports: [USER_REPOSITORY, GetCurrentUserUseCase, GetUserPreferencesUseCase],

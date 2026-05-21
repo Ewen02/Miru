@@ -342,6 +342,8 @@ export interface UserProfile {
   handle: string;
   name: string;
   image: string | null;
+  /** Free-form 250-char public bio. Null when not set. */
+  bio: string | null;
   /** ISO string or null when join date is unknown. */
   joinedAt: string | null;
   /** Sympathisant — for the profile badge. */

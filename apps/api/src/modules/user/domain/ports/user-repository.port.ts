@@ -122,6 +122,8 @@ export interface UserRepositoryPort {
   updatePreferences(userId: string, patch: UserPreferencesPatch): Promise<UserPreferences>;
   /** Hard delete. Cascades to all owned rows (watchlist, reviews, …). */
   deleteById(userId: string): Promise<void>;
+  /** Updates the user's public bio. `null` clears it. */
+  updateBio(userId: string, bio: string | null): Promise<void>;
 }
 
 export interface UserPreferences {

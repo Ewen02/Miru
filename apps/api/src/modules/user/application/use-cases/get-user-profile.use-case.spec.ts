@@ -27,6 +27,7 @@ describe("GetUserProfileUseCase", () => {
       emailVerified: true,
       image: null,
       twoFactorEnabled: false,
+      bio: null,
     });
     repo.findByHandle.mockResolvedValue(user);
     repo.joinedAt.mockResolvedValue(new Date("2024-09-12T00:00:00Z"));

@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { AnimeCard, EditorialSectionHeader, RatingHistogram, StatCard } from "@miru/ui";
 import { fetchUserProfile } from "@/lib/api";
 import type { UserProfileReview } from "@miru/types";
+import { ShareProfileButton } from "./share-profile-button";
 
 interface ProfilePageProps {
   params: Promise<{ handle: string }>;
@@ -50,15 +51,14 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </span>
             )}
           </h1>
+          {profile.bio && (
+            <p className="m-0 mt-3 max-w-160 font-body text-sm leading-relaxed text-text-secondary text-pretty">
+              {profile.bio}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-bg-surface px-3 font-body text-sm text-text-secondary transition-colors duration-200 hover:bg-bg-elevated hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
-            aria-label="Partager le profil"
-          >
-            <ShareIcon /> Partager
-          </button>
+          <ShareProfileButton name={profile.name} />
         </div>
       </header>
 
@@ -228,11 +228,3 @@ function formatReviewDate(iso: string): string {
   return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
 }
 
-function ShareIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M7 17 17 7" />
-      <path d="M7 7h10v10" />
-    </svg>
-  );
-}

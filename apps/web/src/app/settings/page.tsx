@@ -7,8 +7,10 @@ import { NotificationsSection } from "./notifications-section";
 import { QuietHoursSection } from "./quiet-hours-section";
 import { DeleteAccountSection } from "./delete-account-section";
 import { SignOutButton } from "./sign-out-button";
+import { BioSection } from "./bio-section";
 import { fetchBillingStatus } from "@/lib/server-billing";
 import { fetchUserPreferences } from "@/lib/server-preferences";
+import { fetchMe } from "@/lib/server-me";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,11 +21,13 @@ export async function generateMetadata(): Promise<Metadata> {
 const TAB_KEYS = ["account", "notifications", "privacy", "appearance", "advanced"] as const;
 
 export default async function SettingsPage() {
-  const [billing, prefs, t] = await Promise.all([
+  const [billing, prefs, me, t] = await Promise.all([
     fetchBillingStatus(),
     fetchUserPreferences(),
+    fetchMe(),
     getTranslations("settings"),
   ]);
+  const handleSlug = (me?.name ?? "").toLowerCase().replace(/\s+/g, "");
 
   const tabs = TAB_KEYS.map((key) => ({
     key,
@@ -59,7 +63,8 @@ export default async function SettingsPage() {
         </nav>
 
         <div className="flex flex-col gap-10">
-          <section id="account" className="flex flex-col gap-6">
+          <section id="account" className="flex flex-col gap-10">
+            {me && <BioSection initial={me.bio} handle={handleSlug} />}
             <BillingSection isPro={billing.isPro} proSince={billing.proSince} />
             <div className="flex justify-end">
               <SignOutButton />

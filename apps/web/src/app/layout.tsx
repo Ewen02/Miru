@@ -7,30 +7,62 @@ import { SiteFooter } from "@/components/site-footer";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://miru.app";
 const DESCRIPTION =
-  "Plateforme anime — explorer les trending, organiser ta watchlist, partager tes découvertes.";
+  "Plateforme anime — explorer 4 500+ titres, organiser ta watchlist, partager tes avis. Gratuit, sans pub, sans tracker.";
+const KEYWORDS = [
+  "anime",
+  "tracker anime",
+  "watchlist anime",
+  "MyAnimeList alternative",
+  "AniList alternative",
+  "catalogue anime",
+  "calendrier anime",
+  "avis anime",
+];
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Miru — Explorer, Organiser, Partager",
+    default: "Miru — Explorer, organiser, partager",
     template: "%s — Miru",
   },
   description: DESCRIPTION,
+  keywords: KEYWORDS,
+  applicationName: "Miru",
+  authors: [{ name: "Miru" }],
+  creator: "Miru",
+  publisher: "Miru",
+  // No /og.png referenced — Next picks up the file-system convention from
+  // app/opengraph-image.tsx and the per-route overrides automatically.
   openGraph: {
-    title: "Miru — Explorer, Organiser, Partager",
+    title: "Miru — Explorer, organiser, partager",
     description: DESCRIPTION,
     url: SITE_URL,
     siteName: "Miru",
-    images: ["/og.png"],
     locale: "fr_FR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Miru — Explorer, Organiser, Partager",
+    title: "Miru — Explorer, organiser, partager",
     description: DESCRIPTION,
-    images: ["/og.png"],
   },
+  // Tells iOS Safari to render the address bar in the same accent as the
+  // theme (and PWAs to use it as the splash chrome).
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Miru",
+  },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
+};
+
+export const viewport: import("next").Viewport = {
+  themeColor: "#08080c",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({

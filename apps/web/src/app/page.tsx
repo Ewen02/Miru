@@ -10,10 +10,12 @@ import {
   type HomeHeroSlide,
 } from "@miru/ui";
 import { fetchAnimeCatalog, fetchAnimeDetail, fetchGenres, type CatalogFilters } from "@/lib/api";
+import { fetchLists } from "@/lib/server-lists";
 import { fetchUserWatchlist } from "@/lib/server-watchlist";
 import { getServerSession } from "@/lib/server-auth";
 import { currentSeasonLabel } from "@/lib/dates";
 import type { WatchlistItem } from "@miru/types";
+import { Landing } from "./landing";
 
 interface CatalogPageProps {
   searchParams: Promise<{
@@ -87,6 +89,18 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
       : fetchAnimeCatalog({ status: "AIRING", pageSize: TRENDING_SLIDER }).catch(() => null),
     getServerSession(),
   ]);
+
+  // Anonymous visitors with no active filter see the landing page instead of
+  // the catalog grid. Filters/search keep working — useful for shared links.
+  if (!session && !isFiltered) {
+    const [featuredAnime, featuredLists] = await Promise.all([
+      fetchAnimeCatalog({ pageSize: 6 })
+        .then((res) => res?.data ?? [])
+        .catch(() => []),
+      fetchLists("public").catch(() => []),
+    ]);
+    return <Landing featuredAnime={featuredAnime} featuredLists={featuredLists} />;
+  }
 
   // Hero needs full detail (synopsis) for the top picks. Fetch in parallel.
   const heroSlides: HomeHeroSlide[] = trending

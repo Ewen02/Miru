@@ -88,7 +88,16 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center font-body text-xs text-text-tertiary">
+        <p className="mt-4 text-center font-body text-xs text-text-tertiary">
+          <Link
+            href="/forgot-password"
+            className="text-text-secondary underline-offset-2 hover:text-text-primary hover:underline"
+          >
+            Mot de passe oublié ?
+          </Link>
+        </p>
+
+        <p className="mt-3 text-center font-body text-xs text-text-tertiary">
           Pas encore de compte ?{" "}
           <Link
             href="/register"

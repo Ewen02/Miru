@@ -85,10 +85,43 @@ model Episode {
   duration    Int?
   airedAt     DateTime?
 
-  watchers UserEpisode[]
+  watchers      UserEpisode[]
+  platformLinks EpisodePlatformLink[]
 
   @@unique([animeId, number])
   @@index([animeId])
+}
+
+/**
+ * Per-episode streaming links scraped from external platforms (Phase 4).
+ * Inert when ENABLE_SCRAPERS=false: rows may exist in dev but the use
+ * case that exposes them to the UI filters them out at the application
+ * layer.
+ */
+model EpisodePlatformLink {
+  id         String    @id @default(cuid())
+  episodeId  String
+  /**
+   * Enum-ish: "CRUNCHYROLL_SCRAPE" | "ADN_SCRAPE". Stored as VarChar to
+   * keep migrations simple; the application layer narrows the type.
+   */
+  source     String    @db.VarChar(32)
+  url        String    @db.VarChar(700)
+  /**
+   * Last time we re-verified the link still works (HEAD 2xx).
+   */
+  verifiedAt DateTime  @default(now())
+  /**
+   * Set when a verification probe found the link broken. NULL means OK.
+   */
+  brokenAt   DateTime?
+  createdAt  DateTime  @default(now())
+
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([episodeId, source])
+  @@index([episodeId])
+  @@index([source, brokenAt])
 }
 
 // ---------------------------------------------------------------------------

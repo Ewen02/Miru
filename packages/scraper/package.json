@@ -1,0 +1,21 @@
+{
+  "name": "@miru/scraper",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@miru/http-client": "workspace:*",
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@miru/config": "workspace:*",
+    "@types/node": "^20",
+    "typescript": "^5"
+  }
+}

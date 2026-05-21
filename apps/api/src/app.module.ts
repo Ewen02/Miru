@@ -19,6 +19,7 @@ import { NotificationModule } from "@modules/notification/notification.module";
 import { PlatformModule } from "@modules/platform/platform.module";
 import { PushModule } from "@modules/push/push.module";
 import { ReviewModule } from "@modules/review/review.module";
+import { StreamingLinkModule } from "@modules/streaming-link/streaming-link.module";
 import { StudioModule } from "@modules/studio/studio.module";
 import { SyncModule } from "@modules/sync/sync.module";
 import { UserModule } from "@modules/user/user.module";
@@ -80,6 +81,7 @@ const isDev = process.env.NODE_ENV !== "production";
     NotificationModule,
     PlatformModule,
     PushModule,
+    StreamingLinkModule,
     StudioModule,
     SyncModule,
     UserModule,

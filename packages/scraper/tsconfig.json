@@ -1,0 +1,7 @@
+{
+  "extends": "@miru/config/tsconfig.node16.json",
+  "compilerOptions": {
+    "outDir": "./dist"
+  },
+  "include": ["src"]
+}

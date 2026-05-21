@@ -6,6 +6,7 @@ import { BillingSection } from "./billing-section";
 import { NotificationsSection } from "./notifications-section";
 import { QuietHoursSection } from "./quiet-hours-section";
 import { DeleteAccountSection } from "./delete-account-section";
+import { SignOutButton } from "./sign-out-button";
 import { fetchBillingStatus } from "@/lib/server-billing";
 import { fetchUserPreferences } from "@/lib/server-preferences";
 import { LocaleSwitcher } from "@/components/locale-switcher";
@@ -58,8 +59,11 @@ export default async function SettingsPage() {
         </nav>
 
         <div className="flex flex-col gap-10">
-          <section id="account">
+          <section id="account" className="flex flex-col gap-6">
             <BillingSection isPro={billing.isPro} proSince={billing.proSince} />
+            <div className="flex justify-end">
+              <SignOutButton />
+            </div>
           </section>
 
           <section id="appearance">

@@ -1,64 +1,19 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { Logo } from "@miru/ui";
 import { getServerSession } from "@/lib/server-auth";
-import { SignOutButton } from "./sign-out-button";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("profile");
-  return { title: t("metaTitle") };
-}
-
-export default async function ProfilePage() {
-  const [session, t, tAuth] = await Promise.all([
-    getServerSession(),
-    getTranslations("profile"),
-    getTranslations("auth"),
-  ]);
-  if (!session) redirect("/login");
-
-  return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col px-6 py-12">
-      <Link
-        href="/"
-        aria-label={tAuth("logoAria")}
-        className="mb-12 inline-flex shrink-0 self-start text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
-      >
-        <Logo size={24} />
-      </Link>
-
-      <header className="mb-10">
-        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-text-tertiary">
-          {t("eyebrow")}
-        </p>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-text-primary">
-          {session.user.name}
-        </h1>
-        <p className="mt-2 font-body text-sm text-text-secondary">{session.user.email}</p>
-      </header>
-
-      <section className="flex flex-col gap-6">
-        <div className="rounded-xl border border-border bg-bg-surface p-6">
-          <h2 className="mb-3 font-display text-sm font-semibold text-text-primary">
-            {t("watchlistCardTitle")}
-          </h2>
-          <p className="font-body text-sm text-text-secondary">
-            {t("watchlistCardBody")}
-          </p>
-          <Link
-            href="/watchlist"
-            className="mt-4 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wide text-accent transition-colors duration-200 hover:text-text-primary"
-          >
-            {t("watchlistCardCta")}
-          </Link>
-        </div>
-
-        <div className="flex justify-end">
-          <SignOutButton />
-        </div>
-      </section>
-    </main>
-  );
+/**
+ * `/profile` is a redirect-only route. Historical callers (footer,
+ * avatar menu, mobile bottom nav, post-login push) keep working without
+ * changes: visiting /profile while signed-in lands you on your own
+ * public page `/u/[handle]`. Signed-out visitors go to /login.
+ *
+ * Mirrors the GitHub pattern: there's no "private profile" surface —
+ * /settings owns account preferences, and the public `/u/[handle]`
+ * page is what "your profile" actually means.
+ */
+export default async function ProfileRedirect() {
+  const session = await getServerSession();
+  if (!session) redirect("/login?next=/profile");
+  const handle = session.user.name.toLowerCase().replace(/\s+/g, "");
+  redirect(`/u/${handle}`);
 }

@@ -65,6 +65,7 @@ Les guides de setup initial (longs, one-shot) sont dans [.claude/docs/](.claude/
 
 - `monorepo-setup.md` — scaffold complet du repo (déjà exécuté)
 - `ui-setup.md` — init du package `@miru/ui`
+- `deploy.md` — Railway (API + Postgres) + Vercel (web) + smoke test prod
 
 ## Env
 

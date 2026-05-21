@@ -222,6 +222,12 @@ model User {
   stripeCustomerId String?   @unique
   stripeSubId      String?   @unique
   proSince         DateTime?
+
+  // Moderation. Default USER; ADMIN unlocks /admin and resolves reports.
+  role String @default("USER") @db.VarChar(16)
+
+  reportsFiled    Report[] @relation("ReportsFiled")
+  reportsResolved Report[] @relation("ReportsResolved")
 }
 
 model Session {
@@ -400,6 +406,28 @@ model Notification {
 
   @@index([userId, readAt])
   @@index([userId, createdAt])
+}
+
+// Moderation — signaler une review ou une list. Resolved=true means an
+// admin has already acted (delete, dismiss, ban). targetKind+targetId form
+// a discriminated reference (no foreign key — keeps the schema simple).
+model Report {
+  id           String    @id @default(cuid())
+  reporterId   String
+  resolvedById String?
+  targetKind   String    @db.VarChar(16) // "REVIEW" | "LIST"
+  targetId     String    @db.VarChar(60)
+  reason       String    @db.VarChar(40) // "SPAM" | "ABUSE" | "OFFTOPIC" | "OTHER"
+  details      String?   @db.Text
+  resolved     Boolean   @default(false)
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  reporter   User  @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("ReportsResolved", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([resolved, createdAt])
+  @@index([targetKind, targetId])
 }
 
 // Web Push subscription. One row per (user × browser). Endpoint is unique

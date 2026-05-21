@@ -14,6 +14,7 @@ import { BillingModule } from "@modules/billing/billing.module";
 import { CharacterModule } from "@modules/character/character.module";
 import { GenreModule } from "@modules/genre/genre.module";
 import { ListModule } from "@modules/list/list.module";
+import { ModerationModule } from "@modules/moderation/moderation.module";
 import { NotificationModule } from "@modules/notification/notification.module";
 import { PlatformModule } from "@modules/platform/platform.module";
 import { PushModule } from "@modules/push/push.module";
@@ -75,6 +76,7 @@ const isDev = process.env.NODE_ENV !== "production";
     CharacterModule,
     GenreModule,
     ListModule,
+    ModerationModule,
     NotificationModule,
     PlatformModule,
     PushModule,

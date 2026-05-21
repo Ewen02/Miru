@@ -423,6 +423,27 @@ export interface WatchlistItem extends WatchlistEntry {
   };
 }
 
+export type ReportTargetKind = "REVIEW" | "LIST";
+export type ReportReason = "SPAM" | "ABUSE" | "OFFTOPIC" | "OTHER";
+
+export interface ReportTargetPreview {
+  label: string;
+  href: string | null;
+  authorName: string | null;
+}
+
+export interface AdminReportItem {
+  id: string;
+  targetKind: ReportTargetKind;
+  targetId: string;
+  reason: ReportReason;
+  details: string | null;
+  /** ISO string. */
+  createdAt: string;
+  reporterName: string;
+  target: ReportTargetPreview;
+}
+
 export interface ReviewItem {
   id: string;
   userId: string;

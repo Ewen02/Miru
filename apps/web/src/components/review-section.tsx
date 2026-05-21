@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ReviewItem } from "@miru/types";
 import { Button, cn } from "@miru/ui";
 import { reviewApi } from "@/lib/review-api";
+import { ReportButton } from "@/components/report-button";
 
 interface ReviewSectionProps {
   animeId: string;
@@ -284,6 +285,9 @@ function ReviewCard({ review }: { review: ReviewItem }) {
           </p>
         )
       )}
+      <div className="mt-2 flex justify-end">
+        <ReportButton targetKind="REVIEW" targetId={review.id} />
+      </div>
     </li>
   );
 }

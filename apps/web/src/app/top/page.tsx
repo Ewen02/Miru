@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Pagination } from "@miru/ui";
 import { fetchAnimeCatalog } from "@/lib/api";
 
@@ -11,13 +12,13 @@ interface TopPageProps {
 const PAGE_SIZE = 20;
 const TOP_LIMIT = 100;
 
-export const metadata: Metadata = {
-  title: "Top 100",
-  description: "Les 100 anime les mieux notés du catalogue Miru.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("topPage");
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
 
 export default async function TopPage({ searchParams }: TopPageProps) {
-  const sp = await searchParams;
+  const [sp, t] = await Promise.all([searchParams, getTranslations("topPage")]);
   const requestedPage = Math.max(1, Number(sp.page) || 1);
 
   const catalog = await fetchAnimeCatalog({ page: requestedPage, pageSize: PAGE_SIZE }).catch(
@@ -34,28 +35,30 @@ export default async function TopPage({ searchParams }: TopPageProps) {
       <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-            Classement
+            {t("eyebrow")}
           </p>
           <h1 className="m-0 font-display text-4xl font-semibold tracking-[-0.025em] text-text-primary sm:text-5xl">
-            Top 100
+            {t("title")}
           </h1>
           <p className="m-0 mt-2 font-body text-sm text-text-secondary">
-            Calculé sur la note moyenne agrégée AniList & avis Miru.
+            {t("subtitle")}
           </p>
         </div>
         <p className="font-mono text-[11px] text-text-tertiary">
           {totalAvailable === 0
             ? "—"
-            : `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, totalAvailable)} sur ${totalAvailable}`}
+            : t("range", {
+                from: (page - 1) * PAGE_SIZE + 1,
+                to: Math.min(page * PAGE_SIZE, totalAvailable),
+                total: totalAvailable,
+              })}
         </p>
       </header>
 
       {items.length === 0 ? (
         <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
           <p className="m-0 font-body text-sm text-text-tertiary">
-            {catalog === null
-              ? "Impossible de joindre l'API."
-              : "Aucun résultat à afficher."}
+            {catalog === null ? t("apiUnreachable") : t("noResults")}
           </p>
         </div>
       ) : (
@@ -65,11 +68,11 @@ export default async function TopPage({ searchParams }: TopPageProps) {
               <thead>
                 <tr className="border-b border-border-subtle">
                   <Th className="w-16 text-center">#</Th>
-                  <Th>Titre</Th>
-                  <Th className="hidden md:table-cell">Studio</Th>
-                  <Th className="hidden sm:table-cell w-20">Année</Th>
-                  <Th className="hidden lg:table-cell w-20">Format</Th>
-                  <Th className="w-24 text-right">Note ↓</Th>
+                  <Th>{t("colTitle")}</Th>
+                  <Th className="hidden md:table-cell">{t("colStudio")}</Th>
+                  <Th className="hidden sm:table-cell w-20">{t("colYear")}</Th>
+                  <Th className="hidden lg:table-cell w-20">{t("colFormat")}</Th>
+                  <Th className="w-24 text-right">{t("colRating")}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -170,4 +173,3 @@ function Th({ children, className }: { children: React.ReactNode; className?: st
     </th>
   );
 }
-

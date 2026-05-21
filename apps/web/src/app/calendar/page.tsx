@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { CalendarEpisode } from "@miru/types";
 import { fetchCalendarWeek } from "@/lib/api";
 import { addDays, formatDateRange, startOfDay, startOfWeek, timeZoneLabel } from "@/lib/dates";
@@ -9,13 +10,19 @@ interface CalendarPageProps {
   searchParams: Promise<{ from?: string }>;
 }
 
-export const metadata: Metadata = {
-  title: "Calendrier",
-  description: "Calendrier de diffusion des anime en cours sur Miru.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("calendarPage");
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
+
+const DAY_KEYS = ["dayMon", "dayTue", "dayWed", "dayThu", "dayFri", "daySat", "daySun"];
 
 export default async function CalendarPage({ searchParams }: CalendarPageProps) {
-  const sp = await searchParams;
+  const [sp, t, locale] = await Promise.all([
+    searchParams,
+    getTranslations("calendarPage"),
+    getLocale(),
+  ]);
   const monday = startOfWeek(sp.from ? new Date(sp.from) : new Date());
   const sunday = addDays(monday, 7);
 
@@ -28,39 +35,35 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
   const nextHref = `/calendar?from=${addDays(monday, 7).toISOString()}`;
   const todayHref = `/calendar`;
 
-  // Live episode: airing within the last 30 min or upcoming in the next 30 min.
   const now = Date.now();
   const liveEp = episodes.find((e) => {
-    const t = new Date(e.airedAt).getTime();
-    return t > now - 30 * 60 * 1000 && t < now + 30 * 60 * 1000;
+    const ts = new Date(e.airedAt).getTime();
+    return ts > now - 30 * 60 * 1000 && ts < now + 30 * 60 * 1000;
   });
 
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
-      {/* Hero */}
       <header className="mb-10 flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-            Diffusion
+            {t("eyebrow")}
           </p>
           <h1 className="m-0 font-display text-4xl font-semibold tracking-[-0.025em] text-text-primary sm:text-5xl">
-            Calendrier
+            {t("title")}
           </h1>
           <p className="m-0 mt-2 font-body text-sm text-text-secondary">
-            {formatDateRange(monday, sunday)} · fuseau {timeZoneLabel()}
+            {t("rangeTimezone", { range: formatDateRange(monday, sunday), tz: timeZoneLabel() })}
           </p>
         </div>
-        <nav className="flex gap-2" aria-label="Navigation hebdomadaire">
-          <NavButton href={prevHref} label="‹ Semaine précédente" />
-          <NavButton href={todayHref} label="Aujourd'hui" primary />
-          <NavButton href={nextHref} label="Semaine suivante ›" />
+        <nav className="flex gap-2" aria-label={t("navAria")}>
+          <NavButton href={prevHref} label={t("prevWeek")} />
+          <NavButton href={todayHref} label={t("today")} primary />
+          <NavButton href={nextHref} label={t("nextWeek")} />
         </nav>
       </header>
 
-      {/* Live spotlight */}
-      {liveEp && <LiveSpotlight episode={liveEp} />}
+      {liveEp && <LiveSpotlight episode={liveEp} t={t} locale={locale} />}
 
-      {/* 7-day grid */}
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7">
         {byDay.map((day) => {
           const isToday = day.date.getTime() === today.getTime();
@@ -79,7 +82,7 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
               <header className="mb-3 flex items-baseline justify-between">
                 <div>
                   <p className="m-0 font-mono text-[10px] uppercase tracking-[0.18em] text-text-tertiary">
-                    {DAY_LABELS[day.dow]}
+                    {t(DAY_KEYS[day.dow]!)}
                   </p>
                   <p
                     className="m-0 font-display text-2xl font-semibold tracking-[-0.02em] text-text-primary"
@@ -89,14 +92,16 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
                   </p>
                 </div>
                 <span className="font-mono text-[10px] text-text-tertiary">
-                  {day.episodes.length} ép.
+                  {t("epShort", { n: day.episodes.length })}
                 </span>
               </header>
               <div className="flex flex-col gap-2">
                 {day.episodes.length === 0 ? (
                   <p className="font-body text-xs text-text-quaternary">—</p>
                 ) : (
-                  day.episodes.map((e) => <EpisodeChip key={e.animeId + e.episodeNumber} episode={e} />)
+                  day.episodes.map((e) => (
+                    <EpisodeChip key={e.animeId + e.episodeNumber} episode={e} t={t} locale={locale} />
+                  ))
                 )}
               </div>
             </article>
@@ -106,9 +111,7 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
 
       {!week && (
         <div className="mt-10 rounded-xl border border-border-subtle bg-bg-surface p-6 text-center">
-          <p className="m-0 font-body text-sm text-text-tertiary">
-            Impossible de joindre l'API. Le calendrier réapparaîtra quand le service redémarrera.
-          </p>
+          <p className="m-0 font-body text-sm text-text-tertiary">{t("apiUnreachable")}</p>
         </div>
       )}
     </main>
@@ -139,8 +142,18 @@ function NavButton({
   );
 }
 
-function EpisodeChip({ episode }: { episode: CalendarEpisode }) {
-  const time = new Date(episode.airedAt).toLocaleTimeString("fr-FR", {
+type T = (key: string, values?: Record<string, string | number>) => string;
+
+function EpisodeChip({
+  episode,
+  t,
+  locale,
+}: {
+  episode: CalendarEpisode;
+  t: T;
+  locale: string;
+}) {
+  const time = new Date(episode.airedAt).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -153,13 +166,23 @@ function EpisodeChip({ episode }: { episode: CalendarEpisode }) {
       <span className="min-w-0 flex-1 truncate font-body text-xs text-text-primary group-hover:text-accent">
         {episode.animeTitle}
       </span>
-      <span className="font-mono text-[9px] text-text-quaternary">ÉP. {episode.episodeNumber}</span>
+      <span className="font-mono text-[9px] text-text-quaternary">
+        {t("epBadge", { n: episode.episodeNumber })}
+      </span>
     </Link>
   );
 }
 
-function LiveSpotlight({ episode }: { episode: CalendarEpisode }) {
-  const time = new Date(episode.airedAt).toLocaleTimeString("fr-FR", {
+function LiveSpotlight({
+  episode,
+  t,
+  locale,
+}: {
+  episode: CalendarEpisode;
+  t: T;
+  locale: string;
+}) {
+  const time = new Date(episode.airedAt).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -186,7 +209,7 @@ function LiveSpotlight({ episode }: { episode: CalendarEpisode }) {
           className="m-0 font-mono text-[10px] font-semibold uppercase tracking-[0.22em]"
           style={{ color: "var(--color-accent)" }}
         >
-          ● En direct
+          {t("live")}
         </p>
         <Link
           href={`/anime/${episode.animeSlug}`}
@@ -195,8 +218,10 @@ function LiveSpotlight({ episode }: { episode: CalendarEpisode }) {
           {episode.animeTitle}
         </Link>
         <p className="m-0 font-mono text-xs text-text-secondary">
-          Épisode {episode.episodeNumber}
-          {episode.episodeCount && <span className="text-text-tertiary"> / {episode.episodeCount}</span>}
+          {t("episode", { n: episode.episodeNumber })}
+          {episode.episodeCount && (
+            <span className="text-text-tertiary"> / {episode.episodeCount}</span>
+          )}
           {" · "}
           {time} {timeZoneLabel()}
         </p>
@@ -204,8 +229,6 @@ function LiveSpotlight({ episode }: { episode: CalendarEpisode }) {
     </section>
   );
 }
-
-const DAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 function groupByDay(
   episodes: CalendarEpisode[],
@@ -223,4 +246,3 @@ function groupByDay(
   }
   return days;
 }
-

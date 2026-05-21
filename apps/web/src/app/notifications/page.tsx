@@ -1,38 +1,46 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { NotificationItemDto } from "@miru/types";
 import { fetchNotifications } from "@/lib/server-notifications";
 import { MarkAllReadButton } from "./mark-all-read-button";
 
-export const metadata: Metadata = {
-  title: "Notifications",
-  description: "Tes notifications Miru.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("notificationsPage");
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
 
 export default async function NotificationsPage() {
-  const data = await fetchNotifications();
+  const [data, t, locale] = await Promise.all([
+    fetchNotifications(),
+    getTranslations("notificationsPage"),
+    getLocale(),
+  ]);
   if (!data) redirect("/login?next=/notifications");
+
+  const unreadLine =
+    data.unreadCount > 1
+      ? t("unreadPlural", { unread: data.unreadCount, total: data.items.length })
+      : t("unread", { unread: data.unreadCount, total: data.items.length });
 
   return (
     <main className="mx-auto max-w-3xl px-7 pb-20 pt-12">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-            Boîte de réception
+            {t("eyebrow")}
           </p>
           <h1 className="m-0 font-display text-4xl font-semibold tracking-[-0.025em] text-text-primary sm:text-5xl">
-            Notifications
+            {t("title")}
           </h1>
-          <p className="m-0 mt-2 font-body text-sm text-text-secondary">
-            {data.unreadCount} non lue{data.unreadCount > 1 ? "s" : ""} sur {data.items.length}
-          </p>
+          <p className="m-0 mt-2 font-body text-sm text-text-secondary">{unreadLine}</p>
         </div>
         <div className="flex items-center gap-2">
           {data.unreadCount > 0 && <MarkAllReadButton />}
           <Link
             href="/settings"
-            aria-label="Paramètres notifications"
+            aria-label={t("settingsAria")}
             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-bg-surface text-text-secondary transition-colors duration-200 hover:bg-bg-elevated hover:text-text-primary"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
@@ -46,17 +54,15 @@ export default async function NotificationsPage() {
       {data.items.length === 0 ? (
         <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
           <p className="m-0 mb-2 font-display text-base font-semibold text-text-primary">
-            Tu es à jour.
+            {t("emptyTitle")}
           </p>
-          <p className="m-0 font-body text-sm text-text-tertiary">
-            Aucune notification pour l'instant. Les nouveautés (nouveaux épisodes, récaps) apparaîtront ici.
-          </p>
+          <p className="m-0 font-body text-sm text-text-tertiary">{t("emptyBody")}</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
           {data.items.map((n) => (
             <li key={n.id}>
-              <NotificationCard notification={n} />
+              <NotificationCard notification={n} t={t} locale={locale} />
             </li>
           ))}
         </ul>
@@ -65,7 +71,17 @@ export default async function NotificationsPage() {
   );
 }
 
-function NotificationCard({ notification: n }: { notification: NotificationItemDto }) {
+type T = (key: string, values?: Record<string, string | number>) => string;
+
+function NotificationCard({
+  notification: n,
+  t,
+  locale,
+}: {
+  notification: NotificationItemDto;
+  t: T;
+  locale: string;
+}) {
   const isUnread = n.readAt == null;
   const Wrapper: React.ElementType = n.linkUrl ? Link : "div";
   const wrapperProps = n.linkUrl ? { href: n.linkUrl } : {};
@@ -98,7 +114,7 @@ function NotificationCard({ notification: n }: { notification: NotificationItemD
         )}
       </div>
       <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
-        {formatRelative(n.createdAt)}
+        {formatRelative(n.createdAt, t, locale)}
       </span>
     </Wrapper>
   );
@@ -136,15 +152,15 @@ function KindIcon({ kind }: { kind: NotificationItemDto["kind"] }) {
   );
 }
 
-function formatRelative(iso: string): string {
+function formatRelative(iso: string, t: T, locale: string): string {
   const date = new Date(iso);
   const diff = Date.now() - date.getTime();
   const min = Math.floor(diff / 60_000);
-  if (min < 1) return "À l'instant";
-  if (min < 60) return `${min} min`;
+  if (min < 1) return t("relJustNow");
+  if (min < 60) return t("relMin", { n: min });
   const hours = Math.floor(min / 60);
-  if (hours < 24) return `${hours}h`;
+  if (hours < 24) return t("relHour", { n: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}j`;
-  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  if (days < 7) return t("relDay", { n: days });
+  return date.toLocaleDateString(locale, { day: "numeric", month: "short" });
 }

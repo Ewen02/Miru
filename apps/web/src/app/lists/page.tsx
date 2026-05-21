@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import type { ListSummaryDto } from "@miru/types";
 import { fetchLists } from "@/lib/server-lists";
 import { getServerSession } from "@/lib/server-auth";
@@ -10,24 +11,28 @@ interface ListsPageProps {
   searchParams: Promise<{ tab?: string }>;
 }
 
-export const metadata: Metadata = {
-  title: "Listes",
-  description: "Tes listes Miru et les listes publiques de la communauté.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("listsPage");
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
+
+const TAB_KEYS = ["mine", "liked", "public"] as const;
+type Tab = (typeof TAB_KEYS)[number];
+
+const TAB_LABEL: Record<Tab, string> = {
+  mine: "tabMine",
+  liked: "tabLiked",
+  public: "tabPublic",
 };
 
-const TABS = [
-  { key: "mine", label: "Mes listes" },
-  { key: "liked", label: "Likées" },
-  { key: "public", label: "Communauté" },
-] as const;
-
-type Tab = (typeof TABS)[number]["key"];
-
 export default async function ListsPage({ searchParams }: ListsPageProps) {
-  const sp = await searchParams;
-  const session = await getServerSession();
+  const [sp, session, t] = await Promise.all([
+    searchParams,
+    getServerSession(),
+    getTranslations("listsPage"),
+  ]);
   const requestedTab = (sp.tab as Tab) ?? (session ? "mine" : "public");
-  const activeTab = TABS.find((t) => t.key === requestedTab)?.key ?? "mine";
+  const activeTab = TAB_KEYS.includes(requestedTab) ? requestedTab : "mine";
 
   const lists = await fetchLists(activeTab).catch(() => [] as ListSummaryDto[]);
 
@@ -36,10 +41,10 @@ export default async function ListsPage({ searchParams }: ListsPageProps) {
       <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-            Curated
+            {t("eyebrow")}
           </p>
           <h1 className="m-0 font-display text-4xl font-semibold tracking-[-0.025em] text-text-primary sm:text-5xl">
-            Listes
+            {t("title")}
           </h1>
         </div>
         {session && <CreateListButton />}
@@ -47,16 +52,15 @@ export default async function ListsPage({ searchParams }: ListsPageProps) {
 
       <nav
         className="mb-8 flex flex-wrap gap-1 border-b border-border-subtle"
-        aria-label="Onglets"
+        aria-label={t("tabsAria")}
       >
-        {TABS.map((tab) => {
-          // Hide "mine"/"liked" for anonymous visitors.
-          if (!session && (tab.key === "mine" || tab.key === "liked")) return null;
-          const isActive = activeTab === tab.key;
+        {TAB_KEYS.map((key) => {
+          if (!session && (key === "mine" || key === "liked")) return null;
+          const isActive = activeTab === key;
           return (
             <Link
-              key={tab.key}
-              href={tab.key === "public" ? "/lists?tab=public" : `/lists?tab=${tab.key}`}
+              key={key}
+              href={key === "public" ? "/lists?tab=public" : `/lists?tab=${key}`}
               role="tab"
               aria-selected={isActive}
               className="relative inline-flex h-10 items-center rounded-t-md px-4 font-body text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
@@ -64,7 +68,7 @@ export default async function ListsPage({ searchParams }: ListsPageProps) {
                 color: isActive ? "var(--color-text-primary)" : "var(--color-text-secondary)",
               }}
             >
-              {tab.label}
+              {t(TAB_LABEL[key])}
               {isActive && (
                 <span
                   aria-hidden
@@ -78,11 +82,11 @@ export default async function ListsPage({ searchParams }: ListsPageProps) {
       </nav>
 
       {lists.length === 0 ? (
-        <EmptyState tab={activeTab} authenticated={session !== null} />
+        <EmptyState tab={activeTab} authenticated={session !== null} t={t} />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {lists.map((list) => (
-            <ListCard key={list.id} list={list} />
+            <ListCard key={list.id} list={list} t={t} />
           ))}
         </div>
       )}
@@ -90,36 +94,46 @@ export default async function ListsPage({ searchParams }: ListsPageProps) {
   );
 }
 
-function EmptyState({ tab, authenticated }: { tab: Tab; authenticated: boolean }) {
+type T = (key: string, values?: Record<string, string | number>) => string;
+
+function EmptyState({
+  tab,
+  authenticated,
+  t,
+}: {
+  tab: Tab;
+  authenticated: boolean;
+  t: T;
+}) {
   if (!authenticated && tab !== "public") {
     return (
       <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
         <p className="m-0 mb-4 font-body text-sm text-text-tertiary">
-          Connecte-toi pour gérer tes listes et likes.
+          {t("emptyAnonymous")}
         </p>
         <Link
           href="/login?next=/lists"
           className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
           style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
         >
-          Se connecter
+          {t("emptyAnonymousCta")}
         </Link>
       </div>
     );
   }
-  const messages: Record<Tab, string> = {
-    mine: "Tu n'as pas encore de liste. Clique sur « Créer une liste » pour commencer.",
-    liked: "Tu n'as pas encore liké de liste publique.",
-    public: "Aucune liste publique pour l'instant.",
+  const messageKey: Record<Tab, string> = {
+    mine: "emptyMine",
+    liked: "emptyLiked",
+    public: "emptyPublic",
   };
   return (
     <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
-      <p className="m-0 font-body text-sm text-text-tertiary">{messages[tab]}</p>
+      <p className="m-0 font-body text-sm text-text-tertiary">{t(messageKey[tab])}</p>
     </div>
   );
 }
 
-function ListCard({ list }: { list: ListSummaryDto }) {
+function ListCard({ list, t }: { list: ListSummaryDto; t: T }) {
   return (
     <Link
       href={`/lists/${list.id}`}
@@ -156,7 +170,7 @@ function ListCard({ list }: { list: ListSummaryDto }) {
           <span
             className="absolute left-3 top-3 rounded-xs border border-border bg-bg-base/80 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-text-secondary backdrop-blur-sm"
           >
-            Privée
+            {t("privateBadge")}
           </span>
         )}
       </div>
@@ -170,11 +184,11 @@ function ListCard({ list }: { list: ListSummaryDto }) {
           </p>
         )}
         <div className="flex items-center gap-3 font-mono text-[10px] text-text-tertiary">
-          <span>{list.itemCount} titres</span>
+          <span>{t("titlesCount", { count: list.itemCount })}</span>
           <span aria-hidden>·</span>
           <span>{list.likeCount} ❤</span>
           <span aria-hidden>·</span>
-          <span>par {list.ownerName}</span>
+          <span>{t("byOwner", { name: list.ownerName })}</span>
         </div>
       </div>
     </Link>

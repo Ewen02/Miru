@@ -1,13 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { EmptyState, WatchlistCard } from "@miru/ui";
 import { WatchStatus, type WatchStatus as WatchStatusType } from "@miru/types";
 import { fetchUserWatchlist } from "@/lib/server-watchlist";
 import { getServerSession } from "@/lib/server-auth";
 
-export const metadata = {
-  title: "Ma watchlist",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("watchlistPage");
+  return { title: t("metaTitle") };
+}
 
 interface WatchlistPageProps {
   searchParams: Promise<{ status?: string }>;
@@ -21,35 +24,28 @@ const STATUS_ORDER: WatchStatusType[] = [
   WatchStatus.DROPPED,
 ];
 
-const STATUS_LABELS: Record<WatchStatusType, string> = {
-  WATCHING: "En cours",
-  PLANNED: "À voir",
-  ON_HOLD: "En pause",
-  COMPLETED: "Terminés",
-  DROPPED: "Abandonnés",
+const STATUS_KEY: Record<WatchStatusType, string> = {
+  WATCHING: "statusWatching",
+  PLANNED: "statusPlanned",
+  ON_HOLD: "statusOnHold",
+  COMPLETED: "statusCompleted",
+  DROPPED: "statusDropped",
 };
 
-const EMPTY_COPY: Record<WatchStatusType, { title: string; description: string }> = {
-  WATCHING: {
-    title: "Aucun anime en cours.",
-    description: "Trouve un anime qui te plaît et ajoute-le pour suivre tes épisodes ici.",
-  },
-  PLANNED: {
-    title: "Aucun anime prévu.",
-    description: "Marque les fiches qui t'intriguent en « À voir » pour les retrouver ici.",
-  },
-  ON_HOLD: {
-    title: "Aucun anime en pause.",
-    description: "Quand tu prends une pause sur un anime, il apparaît ici en attendant la suite.",
-  },
-  COMPLETED: {
-    title: "Aucun anime terminé.",
-    description: "Tes finis s'affichent ici, prêts à être notés et partagés.",
-  },
-  DROPPED: {
-    title: "Aucun abandon (pour l'instant).",
-    description: "Les animes que tu lâches en route atterrissent ici, sans jugement.",
-  },
+const EMPTY_KEY: Record<WatchStatusType, { title: string; desc: string }> = {
+  WATCHING: { title: "emptyWatchingTitle", desc: "emptyWatchingDesc" },
+  PLANNED: { title: "emptyPlannedTitle", desc: "emptyPlannedDesc" },
+  ON_HOLD: { title: "emptyOnHoldTitle", desc: "emptyOnHoldDesc" },
+  COMPLETED: { title: "emptyCompletedTitle", desc: "emptyCompletedDesc" },
+  DROPPED: { title: "emptyDroppedTitle", desc: "emptyDroppedDesc" },
+};
+
+const BADGE_KEY: Record<WatchStatusType, string | null> = {
+  WATCHING: null,
+  PLANNED: "badgePlanned",
+  ON_HOLD: "badgeOnHold",
+  COMPLETED: "badgeCompleted",
+  DROPPED: "badgeDropped",
 };
 
 function isWatchStatus(value: string | undefined): value is WatchStatusType {
@@ -57,10 +53,13 @@ function isWatchStatus(value: string | undefined): value is WatchStatusType {
 }
 
 export default async function WatchlistPage({ searchParams }: WatchlistPageProps) {
-  const session = await getServerSession();
+  const [session, sp, t] = await Promise.all([
+    getServerSession(),
+    searchParams,
+    getTranslations("watchlistPage"),
+  ]);
   if (!session) redirect("/login?next=/watchlist");
 
-  const sp = await searchParams;
   const activeStatus = isWatchStatus(sp.status) ? sp.status : WatchStatus.WATCHING;
 
   const [items, totalAll] = await Promise.all([
@@ -72,7 +71,7 @@ export default async function WatchlistPage({ searchParams }: WatchlistPageProps
     <main className="mx-auto max-w-300 px-7 py-14">
       <header className="mb-10">
         <p className="mb-2 font-mono text-[10px] tracking-[0.22em] text-text-tertiary uppercase">
-          Watchlist
+          {t("eyebrow")}
         </p>
         <h1 className="font-display text-4xl font-semibold tracking-tight text-text-primary sm:text-5xl">
           {session.user.name}
@@ -81,7 +80,7 @@ export default async function WatchlistPage({ searchParams }: WatchlistPageProps
 
       <nav
         className="mb-10 flex flex-wrap gap-1.5 border-b border-border-subtle pb-1"
-        aria-label="Filtrer par statut"
+        aria-label={t("filterAria")}
       >
         {STATUS_ORDER.map((status) => {
           const active = status === activeStatus;
@@ -99,7 +98,7 @@ export default async function WatchlistPage({ searchParams }: WatchlistPageProps
                   : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary",
               ].join(" ")}
             >
-              {STATUS_LABELS[status]}
+              {t(STATUS_KEY[status])}
               <span className="font-mono text-[10px] text-text-tertiary">
                 {String(count).padStart(2, "0")}
               </span>
@@ -117,19 +116,22 @@ export default async function WatchlistPage({ searchParams }: WatchlistPageProps
 
       {items.length === 0 ? (
         <EmptyState
-          title={EMPTY_COPY[activeStatus].title}
-          description={EMPTY_COPY[activeStatus].description}
-          primaryAction={{ label: "Découvrir le catalogue", href: "/" }}
+          title={t(EMPTY_KEY[activeStatus].title)}
+          description={t(EMPTY_KEY[activeStatus].desc)}
+          primaryAction={{ label: t("discoverCatalog"), href: "/" }}
         />
       ) : (
         <section className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {items.map((item) => {
             const watching = item.status === WatchStatus.WATCHING;
+            const badgeKey = BADGE_KEY[item.status];
             const badge = watching
               ? item.anime.episodeCount
                 ? `ÉP. ${item.currentEpisode}/${item.anime.episodeCount}`
                 : `ÉP. ${item.currentEpisode}`
-              : statusBadge(item.status);
+              : badgeKey
+                ? t(badgeKey)
+                : "";
             return (
               <WatchlistCard
                 key={item.animeId}
@@ -156,19 +158,4 @@ async function countAllStatuses(): Promise<Map<WatchStatusType, number>> {
     counts.set(item.status, (counts.get(item.status) ?? 0) + 1);
   }
   return counts;
-}
-
-function statusBadge(status: WatchStatusType): string {
-  switch (status) {
-    case WatchStatus.PLANNED:
-      return "À VOIR";
-    case WatchStatus.ON_HOLD:
-      return "EN PAUSE";
-    case WatchStatus.COMPLETED:
-      return "TERMINÉ";
-    case WatchStatus.DROPPED:
-      return "ABANDONNÉ";
-    default:
-      return "";
-  }
 }

@@ -76,3 +76,35 @@ Each Railway deploy is a tagged image. Promoting the previous build is
 one click in the Deployments tab. Migrations are not auto-reverted — keep
 them additive and run a manual `prisma migrate resolve --rolled-back` if
 something destructive ships by accident.
+
+## 6. Observabilité (Sentry + /status)
+
+### Sentry — capture des erreurs
+
+API et web sont câblés sur Sentry mais le DSN est vide en dev. Pour activer
+en prod :
+
+1. **Créer un projet Sentry** (un pour API Node.js, un pour Next.js).
+2. **Récupérer les deux DSN** :
+   - `SENTRY_DSN` côté API (Railway)
+   - `NEXT_PUBLIC_SENTRY_DSN` côté web (Vercel)
+3. **Source maps** — l'upload est automatique côté web via
+   `withSentryConfig` dans `next.config.ts`. Il faut fournir :
+   - `SENTRY_ORG`
+   - `SENTRY_PROJECT`
+   - `SENTRY_AUTH_TOKEN` (Settings → Account → Auth Tokens, scope
+     `project:releases`)
+   Sans ces 3 variables, Sentry est wrappé mais ne uploade pas les maps.
+4. **Sampling** — `SENTRY_TRACES_SAMPLE_RATE` et
+   `SENTRY_PROFILES_SAMPLE_RATE` à 0.1 (10%) par défaut.
+   `NEXT_PUBLIC_SENTRY_REPLAYS_RATE` à 0 par défaut (replays activés
+   uniquement sur erreur). Mettre à 0.05 pour 5% de replays full session
+   si le quota le permet.
+
+### Page /status
+
+Sondes live contre `/health`, `/health/ready` et AniList GraphQL toutes
+les 30 secondes (ISR). Pas de stockage d'historique d'incidents — c'est
+intentionnel, le service `/status` est un smoke check, pas un Statuspage.
+Pour de l'historique, brancher [Better Stack Uptime](https://betterstack.com/uptime)
+ou [UptimeRobot](https://uptimerobot.com/) en parallèle.

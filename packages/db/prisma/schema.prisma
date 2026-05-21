@@ -85,8 +85,27 @@ model Episode {
   duration    Int?
   airedAt     DateTime?
 
+  watchers UserEpisode[]
+
   @@unique([animeId, number])
   @@index([animeId])
+}
+
+// ---------------------------------------------------------------------------
+// UserEpisode — per-episode watch tracking (one row per user × episode).
+// ---------------------------------------------------------------------------
+
+model UserEpisode {
+  userId    String
+  episodeId String
+  watchedAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, episodeId])
+  @@index([userId])
+  @@index([episodeId])
 }
 
 model Character {
@@ -184,14 +203,16 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  sessions      Session[]
-  accounts      Account[]
-  twoFactor     TwoFactor[]
-  watchlist     WatchlistEntry[]
-  reviews       Review[]
-  lists         List[]
-  listLikes     ListLike[]
-  notifications Notification[]
+  sessions        Session[]
+  accounts        Account[]
+  twoFactor       TwoFactor[]
+  watchlist       WatchlistEntry[]
+  reviews         Review[]
+  lists           List[]
+  listLikes       ListLike[]
+  notifications   Notification[]
+  episodesWatched UserEpisode[]
+  pushSubs        PushSubscription[]
 
   twoFactorEnabled Boolean? @default(false)
 }
@@ -372,4 +393,20 @@ model Notification {
 
   @@index([userId, readAt])
   @@index([userId, createdAt])
+}
+
+// Web Push subscription. One row per (user × browser). Endpoint is unique
+// across users — re-subscribing on the same browser upserts.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique @db.VarChar(700)
+  p256dh    String   @db.VarChar(200)
+  auth      String   @db.VarChar(50)
+  userAgent String?  @db.VarChar(300)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

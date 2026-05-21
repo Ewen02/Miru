@@ -1,40 +1,42 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { EditorialHero } from "@miru/ui";
 
-export const metadata = {
-  title: "À propos",
-  description:
-    "Miru — plateforme anime pour explorer, organiser et partager. Open source, sans pub, propulsé par AniList et MyAnimeList.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("aboutPage");
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const t = await getTranslations("aboutPage");
+
+  const stack = [
+    { label: t("stackFramework"), value: "Next.js 16" },
+    { label: t("stackApi"), value: "NestJS 11" },
+    { label: t("stackDb"), value: "PostgreSQL + Prisma 6" },
+    { label: t("stackAuth"), value: "BetterAuth" },
+    { label: t("stackUi"), value: "Tailwind v4" },
+    { label: t("stackTypeSystem"), value: t("stackTypeSystemValue") },
+    { label: t("stackMonorepo"), value: "Turborepo + pnpm" },
+    { label: t("stackArchitecture"), value: t("stackArchitectureValue") },
+  ];
+
   return (
     <>
       <EditorialHero
         decorative
-        eyebrow="À propos"
-        title="Le contenu est le design."
-        description="Miru est une plateforme anime conçue pour disparaître derrière les œuvres. Pas de fioritures décoratives, pas de pubs, pas de tracking — juste un catalogue propre, une fiche éditoriale par anime, et une watchlist personnelle."
+        eyebrow={t("heroEyebrow")}
+        title={t("heroTitle")}
+        description={t("heroDescription")}
       />
 
       <main className="mx-auto max-w-300 px-7 pb-24 pt-16">
         {/* Pillars — three editorial blocks */}
         <section className="mb-20 grid grid-cols-1 gap-8 md:grid-cols-3">
-          <Pillar
-            eyebrow="01"
-            title="Explorer"
-            body="Un catalogue construit sur AniList et enrichi via Jikan. Recherche, filtres, tri par note communautaire — pas de scroll infini, pas d'autoplay."
-          />
-          <Pillar
-            eyebrow="02"
-            title="Organiser"
-            body="Watchlist personnelle avec 5 statuts, progression épisode par épisode, et une note privée. Tes données t'appartiennent."
-          />
-          <Pillar
-            eyebrow="03"
-            title="Partager"
-            body="Publie des avis publics, lis ceux des autres, suis ton historique. La note communautaire de chaque anime est calculée à partir des avis Miru — distincte de la note AniList importée."
-          />
+          <Pillar eyebrow="01" title={t("pillar1Title")} body={t("pillar1Body")} />
+          <Pillar eyebrow="02" title={t("pillar2Title")} body={t("pillar2Body")} />
+          <Pillar eyebrow="03" title={t("pillar3Title")} body={t("pillar3Body")} />
         </section>
 
         {/* Tech stack */}
@@ -46,18 +48,13 @@ export default function AboutPage() {
                 className="inline-block h-0.5 w-6 rounded-sm"
                 style={{ backgroundColor: "var(--color-accent)" }}
               />
-              Stack
+              {t("stackHeading")}
             </h2>
           </header>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-            <StackItem label="Framework" value="Next.js 16" />
-            <StackItem label="API" value="NestJS 11" />
-            <StackItem label="DB" value="PostgreSQL + Prisma 6" />
-            <StackItem label="Auth" value="BetterAuth" />
-            <StackItem label="UI" value="Tailwind v4" />
-            <StackItem label="Type system" value="TypeScript strict" />
-            <StackItem label="Monorepo" value="Turborepo + pnpm" />
-            <StackItem label="Architecture" value="Hexagonal (DDD)" />
+            {stack.map((s) => (
+              <StackItem key={s.label} label={s.label} value={s.value} />
+            ))}
           </div>
         </section>
 
@@ -70,37 +67,36 @@ export default function AboutPage() {
                 className="inline-block h-0.5 w-6 rounded-sm"
                 style={{ backgroundColor: "var(--color-accent)" }}
               />
-              Sources de données
+              {t("sourcesHeading")}
             </h2>
           </header>
           <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-bg-surface p-6">
             <SourceRow
-              label="Catalogue"
+              label={t("sourceCatalog")}
               value="AniList GraphQL"
               href="https://anilist.gitbook.io/anilist-apiv2-docs/"
             />
             <SourceRow
-              label="Métadonnées étendues"
+              label={t("sourceMetadata")}
               value="Jikan (MyAnimeList)"
               href="https://docs.api.jikan.moe/"
             />
-            <SourceRow label="Liens streaming" value="AniList externalLinks (filtrés type=STREAMING)" />
-            <SourceRow label="Images" value="CDN AniList / MAL via next/image" />
-            <SourceRow label="Accent par anime" value="Calculé côté API via sharp (extraction de teinte cover)" />
+            <SourceRow label={t("sourceStreaming")} value={t("sourceStreamingValue")} />
+            <SourceRow label={t("sourceImages")} value={t("sourceImagesValue")} />
+            <SourceRow label={t("sourceAccent")} value={t("sourceAccentValue")} />
           </div>
         </section>
 
         {/* Closing CTA */}
         <section className="rounded-2xl border border-border-subtle bg-bg-surface px-8 py-12 text-center">
           <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-            Open source
+            {t("openSourceEyebrow")}
           </p>
           <h2 className="m-0 mb-3 font-display text-3xl font-semibold tracking-[-0.02em] text-text-primary">
-            Le code est sur GitHub.
+            {t("openSourceTitle")}
           </h2>
           <p className="mx-auto mb-6 max-w-140 font-body text-sm leading-relaxed text-text-secondary">
-            Issues, PRs et suggestions bienvenues. Miru est un projet personnel
-            qui grandit en public — chaque release est documentée.
+            {t("openSourceBody")}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
@@ -110,13 +106,13 @@ export default function AboutPage() {
               className="inline-flex h-10 items-center gap-2 rounded-md px-4 font-body text-sm font-semibold"
               style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
             >
-              Voir le repo →
+              {t("openSourceCta")}
             </a>
             <Link
               href="/"
               className="inline-flex h-10 items-center font-mono text-xs tracking-wider text-text-secondary uppercase transition-colors duration-200 hover:text-text-primary"
             >
-              ← Catalogue
+              {t("backCatalog")}
             </Link>
           </div>
         </section>

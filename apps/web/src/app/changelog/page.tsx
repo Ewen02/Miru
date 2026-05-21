@@ -1,60 +1,59 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Changelog",
-  description: "Toutes les mises à jour de Miru.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("changelogPage");
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
 
-const RELEASES = [
-  {
-    version: "0.5.0",
-    date: "19 mai 2026",
-    title: "Pages éditoriales & système de découverte",
-    items: [
-      "Nouvelle page /genre/[slug] avec stats et description curée",
-      "Page profil public /u/[handle] avec histogram",
-      "Refonte éditoriale de /about",
-      "Calendar /calendar, Top /top, Saisons /seasons/[year]",
-      "Foundation modals (ModalShell, Toast)",
-    ],
-  },
-  {
-    version: "0.4.2",
-    date: "12 mai 2026",
-    title: "Anti-spam AniList & filtre NSFW",
-    items: [
-      "Circuit breaker AniList — fin du spam de logs lors d'outages",
-      "Filtre Hentai (3 couches : GraphQL, adapter, repo)",
-      "Sticky-header anime detail avec swap au scroll",
-    ],
-  },
-  {
-    version: "0.4.0",
-    date: "5 mai 2026",
-    title: "Design system Claude Design + auth",
-    items: [
-      "Implémentation du design Claude (Phase E1-E7)",
-      "Auth BetterAuth complet (signup, login, session)",
-      "Reviews avec slider 1-10 et spoiler toggle",
-      "Watchlist avec stepper d'épisode et mini-slider de note",
-    ],
-  },
-];
+export default async function ChangelogPage() {
+  const t = await getTranslations("changelogPage");
 
-export default function ChangelogPage() {
+  const releases = [
+    {
+      version: "0.5.0",
+      date: t("v050Date"),
+      title: t("v050Title"),
+      items: [
+        t("v050Item1"),
+        t("v050Item2"),
+        t("v050Item3"),
+        t("v050Item4"),
+        t("v050Item5"),
+      ],
+    },
+    {
+      version: "0.4.2",
+      date: t("v042Date"),
+      title: t("v042Title"),
+      items: [t("v042Item1"), t("v042Item2"), t("v042Item3")],
+    },
+    {
+      version: "0.4.0",
+      date: t("v040Date"),
+      title: t("v040Title"),
+      items: [
+        t("v040Item1"),
+        t("v040Item2"),
+        t("v040Item3"),
+        t("v040Item4"),
+      ],
+    },
+  ];
+
   return (
     <main className="mx-auto max-w-3xl px-7 pb-20 pt-12">
       <header className="mb-10">
         <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-          Releases
+          {t("eyebrow")}
         </p>
         <h1 className="m-0 font-display text-4xl font-semibold tracking-[-0.025em] text-text-primary sm:text-5xl">
-          Changelog
+          {t("title")}
         </h1>
       </header>
 
       <div className="flex flex-col gap-10">
-        {RELEASES.map((rel) => (
+        {releases.map((rel) => (
           <article key={rel.version}>
             <header className="mb-4 flex items-baseline gap-3">
               <h2

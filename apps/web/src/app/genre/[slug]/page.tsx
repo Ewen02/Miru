@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import { AnimeCard, EditorialHero, Pagination } from "@miru/ui";
 import { fetchGenreDetail } from "@/lib/api";
 
@@ -11,42 +12,80 @@ interface GenrePageProps {
 
 const PAGE_SIZE = 20;
 
+const KNOWN_GENRE_SLUGS = new Set([
+  "action",
+  "adventure",
+  "comedy",
+  "drama",
+  "ecchi",
+  "fantasy",
+  "horror",
+  "mahou-shoujo",
+  "mecha",
+  "music",
+  "mystery",
+  "psychological",
+  "romance",
+  "sci-fi",
+  "slice-of-life",
+  "sports",
+  "supernatural",
+  "thriller",
+]);
+
 export async function generateMetadata({ params }: GenrePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const detail = await fetchGenreDetail(slug).catch(() => null);
-  if (!detail) return { title: "Genre introuvable" };
+  const [detail, t] = await Promise.all([
+    fetchGenreDetail(slug).catch(() => null),
+    getTranslations("genrePage"),
+  ]);
+  if (!detail) return { title: t("notFound") };
   return {
     title: detail.name,
-    description: `Catalogue des anime ${detail.name} sur Miru — ${detail.stats.totalAnimes} titres.`,
+    description: t("metaDescription", {
+      name: detail.name,
+      total: detail.stats.totalAnimes,
+    }),
   };
 }
 
 export default async function GenrePage({ params, searchParams }: GenrePageProps) {
-  const [{ slug }, sp] = await Promise.all([params, searchParams]);
+  const [{ slug }, sp, t, locale] = await Promise.all([
+    params,
+    searchParams,
+    getTranslations("genrePage"),
+    getLocale(),
+  ]);
   const page = Number(sp.page) > 0 ? Number(sp.page) : 1;
 
   const detail = await fetchGenreDetail(slug, { page, pageSize: PAGE_SIZE }).catch(() => null);
   if (!detail) notFound();
 
   const totalPages = Math.max(1, Math.ceil(detail.animes.total / PAGE_SIZE));
+  const description = KNOWN_GENRE_SLUGS.has(detail.slug)
+    ? t(detail.slug)
+    : t("defaultDescription");
 
   return (
     <>
       <EditorialHero
         decorative
-        breadcrumbs={[{ href: "/", label: "Catalogue" }]}
-        eyebrow="Genre"
+        breadcrumbs={[{ href: "/", label: t("breadcrumbCatalog") }]}
+        eyebrow={t("eyebrow")}
         title={detail.name}
-        description={DESCRIPTIONS[detail.slug] ?? DEFAULT_DESCRIPTION}
+        description={description}
         aside={
           <>
-            <StatBlock label="Titres" value={detail.stats.totalAnimes.toLocaleString("fr-FR")} />
             <StatBlock
-              label="Cette année"
-              value={detail.stats.thisYearAnimes.toLocaleString("fr-FR")}
+              label={t("statTitles")}
+              value={detail.stats.totalAnimes.toLocaleString(locale)}
             />
             <StatBlock
-              label="Note moy."
+              label={t("statThisYear")}
+              value={detail.stats.thisYearAnimes.toLocaleString(locale)}
+            />
+            <StatBlock
+              label={t("statAvgRating")}
               value={
                 detail.stats.averageRating != null
                   ? detail.stats.averageRating.toFixed(1)
@@ -65,17 +104,17 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
               className="inline-block h-0.5 w-6 rounded-sm"
               style={{ backgroundColor: "var(--color-accent)" }}
             />
-            Tous les {detail.name.toLowerCase()}
+            {t("allOf", { name: detail.name.toLowerCase() })}
           </h2>
           <span className="font-mono text-[11px] text-text-tertiary">
-            {detail.animes.total.toLocaleString("fr-FR")} titres
+            {t("titlesCount", { total: detail.animes.total.toLocaleString(locale) })}
           </span>
         </header>
 
         {detail.animes.data.length === 0 ? (
           <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
             <p className="font-body text-text-secondary">
-              Aucun anime indexé pour ce genre.
+              {t("emptyGenre")}
             </p>
           </div>
         ) : (
@@ -124,50 +163,3 @@ function StatBlock({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
-const DEFAULT_DESCRIPTION =
-  "Tous les titres de ce genre dans notre catalogue, triés par note communautaire.";
-
-/**
- * Curated editorial copy for the main genres. Falls back to a neutral
- * sentence when an unknown slug shows up — better than empty space.
- * Slugs match what AniList sends via `slugify`.
- */
-const DESCRIPTIONS: Record<string, string> = {
-  action:
-    "Bagarres, traques, urgences chorégraphiées. L'action porte la cadence — combats au sabre, courses, batailles d'écoles surnaturelles.",
-  adventure:
-    "Voyages au long cours, mondes vastes, équipes qui se forment en route. L'aventure prend son temps et récompense la patience.",
-  comedy:
-    "Du gag à la sitcom otaku — la comédie traverse tous les sous-genres, du slice of life moelleux au parodique débridé.",
-  drama:
-    "Récits d'introspection, conflits intimes et grandes émotions. Slice of life, coming-of-age, drames sociaux confondus.",
-  ecchi:
-    "Suggestif sans franchir la ligne. Fanservice assumé, comédies romantiques pimentées, harems légers.",
-  fantasy:
-    "Magie, mondes parallèles, mythologies. Heroic fantasy classique, isekai contemporain, et tout ce qui ouvre un portail.",
-  horror:
-    "Tension, surnaturel, atmosphère oppressante. De la maison hantée à l'angoisse cosmique en passant par le body horror.",
-  "mahou-shoujo":
-    "Magical girls, transformations, amitiés qui sauvent le monde. Le genre qui défie les codes depuis Sailor Moon.",
-  mecha:
-    "Robots géants, pilotes adolescents, conflits politiques en arrière-plan. Real robot ou super robot, le mecha encadre une génération.",
-  music:
-    "Idols, groupes, conservatoires. Quand la musique est le moteur narratif, pas juste la bande-son.",
-  mystery:
-    "Énigmes, enquêtes, révélations tardives. Du polar classique au thriller psychologique.",
-  psychological:
-    "L'intérieur du personnage est le vrai décor. Manipulation, paranoïa, dissociation — la tension vient de la tête.",
-  romance:
-    "Du shojo lycéen au josei adulte, le sentiment amoureux comme moteur principal. Comédies, drames, et tout ce qu'il y a entre.",
-  "sci-fi":
-    "Futur proche ou lointain, idées scientifiques poussées jusqu'au bout. Cyberpunk, hard SF, space opera.",
-  "slice-of-life":
-    "Le quotidien comme matière. Petits rituels, conversations longues, saisons qui passent.",
-  sports:
-    "Du tennis au volley en passant par le cyclisme. Discipline, équipe, et la satisfaction très précise du sport bien filmé.",
-  supernatural:
-    "Yokais, esprits, capacités inexpliquées. Quand l'extraordinaire s'invite dans l'ordinaire sans demander permission.",
-  thriller:
-    "Tension constante, enjeux mortels, courses contre la montre. Survival, conspiration, chasse à l'homme.",
-};

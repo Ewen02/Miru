@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import type { UserActiveSessionDto } from "@miru/types";
 import { fetchUserSessions } from "@/lib/server-sessions";
+import { fetchMe } from "@/lib/server-me";
 import { RevokeSessionButton } from "./revoke-session-button";
+import { TwoFactorPanel } from "./two-factor-panel";
 
 export const metadata: Metadata = {
   title: "Sécurité",
@@ -10,8 +12,8 @@ export const metadata: Metadata = {
 };
 
 export default async function SecurityPage() {
-  const sessions = await fetchUserSessions();
-  if (sessions === null) redirect("/login?next=/security");
+  const [sessions, me] = await Promise.all([fetchUserSessions(), fetchMe()]);
+  if (sessions === null || me === null) redirect("/login?next=/security");
 
   return (
     <main className="mx-auto max-w-3xl px-7 pb-20 pt-12">
@@ -28,19 +30,7 @@ export default async function SecurityPage() {
         <h2 className="m-0 mb-4 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
           Authentification à deux facteurs
         </h2>
-        <article className="flex items-center justify-between rounded-2xl border border-border-subtle bg-bg-surface p-5">
-          <div>
-            <p className="m-0 font-display text-base font-semibold text-text-primary">
-              2FA · Application d'authentification
-            </p>
-            <p className="m-0 mt-0.5 font-body text-xs text-text-tertiary">
-              Pas encore disponible — fonctionnalité prévue dans une prochaine mise à jour.
-            </p>
-          </div>
-          <span className="rounded-xs border border-border bg-bg-base px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-text-tertiary">
-            À venir
-          </span>
-        </article>
+        <TwoFactorPanel enabled={me.twoFactorEnabled} />
       </section>
 
       <section>

@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Logo, cn } from "@miru/ui";
+import { API_URL } from "@/lib/env";
 
 interface StarterPick {
   id: string;
@@ -26,11 +27,11 @@ const STEPS = ["Import", "Favoris", "Genres"] as const;
 const TOTAL_STEPS = STEPS.length;
 const PICKS_REQUIRED = 3;
 
-const SERVICES = [
-  { id: "anilist", name: "AniList", connected: true },
-  { id: "mal", name: "MyAnimeList", connected: false },
-  { id: "kitsu", name: "Kitsu", connected: false },
-];
+interface ImportResult {
+  totalFetched: number;
+  imported: number;
+  skipped: number;
+}
 
 const DEFAULT_PRESELECTED_GENRES = new Set([
   "slice-of-life",
@@ -44,6 +45,10 @@ const DEFAULT_PRESELECTED_GENRES = new Set([
 export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
   const [step, setStep] = useState(0);
   const [picks, setPicks] = useState<Set<string>>(new Set());
+  const [anilistUsername, setAnilistUsername] = useState("");
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importing, startImport] = useTransition();
   const [selectedGenres, setSelectedGenres] = useState<Set<string>>(() => {
     // Preselect the curated default set, intersected with what the API
     // actually returned — avoids ticking a genre that no longer exists.
@@ -75,6 +80,39 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
   const canAdvance =
     step === 0 || (step === 1 && picks.size >= PICKS_REQUIRED) || step === 2;
   const isFinal = step === TOTAL_STEPS - 1;
+
+  function handleAniListImport(e: React.FormEvent) {
+    e.preventDefault();
+    setImportError(null);
+    setImportResult(null);
+    startImport(async () => {
+      try {
+        const res = await fetch(`${API_URL}/watchlist/import/anilist`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: anilistUsername.trim() }),
+        });
+        if (res.status === 401) {
+          setImportError("Connecte-toi pour importer.");
+          return;
+        }
+        if (!res.ok) {
+          const body = await res.text();
+          setImportError(
+            body.includes("not found") || body.includes("introuvable")
+              ? "Username introuvable, ou liste privée côté AniList."
+              : "L'import a échoué.",
+          );
+          return;
+        }
+        const data = (await res.json()) as ImportResult;
+        setImportResult(data);
+      } catch {
+        setImportError("Impossible de joindre l'API.");
+      }
+    });
+  }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-10">
@@ -110,39 +148,63 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
             On part de zéro ou on importe ta liste ?
           </h1>
           <p className="m-0 mb-8 font-body text-base text-text-secondary">
-            Bienvenue. Importe tes données depuis un service connecté, ou pars d'une feuille blanche.
+            Importe ta watchlist publique AniList en un clic, ou passe cette étape pour commencer à blanc.
           </p>
-          <div className="flex flex-col gap-3">
-            {SERVICES.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                className={cn(
-                  "flex items-center justify-between rounded-xl border px-5 py-4 text-left",
-                  "transition-colors duration-150",
-                  s.connected
-                    ? "border-accent/40 bg-accent/10"
-                    : "border-border bg-bg-surface hover:bg-bg-elevated",
-                )}
+
+          <form
+            onSubmit={handleAniListImport}
+            className="flex flex-col gap-3 rounded-xl border border-border bg-bg-surface p-5"
+          >
+            <label className="flex flex-col gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
+                Username AniList
+              </span>
+              <input
+                type="text"
+                value={anilistUsername}
+                onChange={(e) => setAnilistUsername(e.target.value)}
+                placeholder="ex. lea_anime"
+                maxLength={50}
+                className="h-11 rounded-md border border-border bg-bg-base px-3 font-body text-base text-text-primary placeholder:text-text-quaternary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+              />
+            </label>
+            <button
+              type="submit"
+              disabled={importing || anilistUsername.trim().length < 2}
+              className="inline-flex h-11 items-center justify-center rounded-md font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+              style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            >
+              {importing ? "Import en cours…" : "Importer depuis AniList"}
+            </button>
+            <p className="m-0 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
+              Ta liste AniList doit être publique. Aucune connexion à un compte AniList n'est requise.
+            </p>
+
+            {importError && (
+              <p
+                className="m-0 rounded-md border border-error/30 bg-error-muted px-3 py-2 font-body text-xs text-error"
+                role="alert"
               >
-                <span className="font-body text-base font-medium text-text-primary">
-                  {s.name}
-                </span>
-                {s.connected ? (
-                  <span
-                    className="font-mono text-[10px] uppercase tracking-wider"
-                    style={{ color: "var(--color-accent)" }}
-                  >
-                    ● Connecté
-                  </span>
-                ) : (
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
-                    Connecter
-                  </span>
+                {importError}
+              </p>
+            )}
+
+            {importResult && (
+              <p
+                className="m-0 rounded-md border px-3 py-2 font-body text-xs"
+                style={{
+                  borderColor: "color-mix(in srgb, var(--color-success) 30%, transparent)",
+                  backgroundColor: "color-mix(in srgb, var(--color-success) 8%, var(--color-bg-base))",
+                  color: "var(--color-success)",
+                }}
+              >
+                ✓ {importResult.imported} anime ajoutés à ta watchlist
+                {importResult.skipped > 0 && (
+                  <> · {importResult.skipped} ignorés (pas encore dans notre catalogue)</>
                 )}
-              </button>
-            ))}
-          </div>
+              </p>
+            )}
+          </form>
         </section>
       )}
 

@@ -186,11 +186,14 @@ model User {
 
   sessions      Session[]
   accounts      Account[]
+  twoFactor     TwoFactor[]
   watchlist     WatchlistEntry[]
   reviews       Review[]
   lists         List[]
   listLikes     ListLike[]
   notifications Notification[]
+
+  twoFactorEnabled Boolean? @default(false)
 }
 
 model Session {
@@ -238,6 +241,17 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier])
+}
+
+model TwoFactor {
+  id          String @id @default(cuid())
+  userId      String
+  secret      String @db.VarChar(64)
+  backupCodes String @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // ---------------------------------------------------------------------------

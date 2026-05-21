@@ -12,9 +12,11 @@ import {
 import { fetchAnimeCatalog, fetchAnimeDetail, fetchGenres, type CatalogFilters } from "@/lib/api";
 import { fetchLists } from "@/lib/server-lists";
 import { fetchUserWatchlist } from "@/lib/server-watchlist";
+import { fetchUserLifetimeStats } from "@/lib/server-lifetime-stats";
+import { fetchRecommendations } from "@/lib/server-recommendations";
 import { getServerSession } from "@/lib/server-auth";
 import { currentSeasonLabel } from "@/lib/dates";
-import type { WatchlistItem } from "@miru/types";
+import type { AnimeCard as AnimeCardDTO, WatchlistItem } from "@miru/types";
 import { Landing } from "./landing";
 
 interface CatalogPageProps {
@@ -128,6 +130,20 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
     ? await fetchUserWatchlist("WATCHING").catch(() => [])
     : [];
 
+  // "Pour toi" — server-side recommendations scored by genre + studio
+  // overlap with the user's WATCHING/COMPLETED entries. Already-tracked
+  // anime are excluded by the API.
+  let recommendations: AnimeCardDTO[] = [];
+  let topGenreLabel: string | null = null;
+  if (session && !isFiltered) {
+    const [recos, lifetime] = await Promise.all([
+      fetchRecommendations(8).catch(() => null),
+      fetchUserLifetimeStats().catch(() => null),
+    ]);
+    recommendations = recos ?? [];
+    topGenreLabel = lifetime?.stats.topGenre?.name ?? null;
+  }
+
   const totalPages = catalog ? Math.max(1, Math.ceil(catalog.total / PAGE_SIZE)) : 1;
 
   return (
@@ -159,6 +175,37 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                     : null
                 }
               />
+            ))}
+          </HorizontalSlider>
+        </div>
+      )}
+
+      {!isFiltered && recommendations.length > 0 && (
+        <div className="mx-auto mt-16 max-w-300">
+          <HorizontalSlider
+            eyebrow={
+              topGenreLabel
+                ? `Tu regardes du ${topGenreLabel.toLowerCase()}`
+                : "Calibré sur ta watchlist"
+            }
+            title="Pour toi"
+            count={recommendations.length}
+            action={{ label: "Voir tout", href: "/for-you" }}
+          >
+            {recommendations.map((anime) => (
+              <Link
+                key={anime.id}
+                href={`/anime/${anime.slug}`}
+                className="w-44 shrink-0 snap-start rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+              >
+                <AnimeCard
+                  title={anime.title}
+                  coverUrl={anime.coverUrl}
+                  studioName={anime.studioName}
+                  year={anime.year}
+                  rating={anime.averageRating}
+                />
+              </Link>
             ))}
           </HorizontalSlider>
         </div>

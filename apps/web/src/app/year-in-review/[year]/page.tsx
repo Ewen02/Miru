@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import type { YearInReviewDto } from "@miru/types";
 import { EditorialSectionHeader, StatCard } from "@miru/ui";
 import { fetchUserYearInReview } from "@/lib/server-year-in-review";
+import { ShareButton } from "./share-button";
 
 interface YearInReviewProps {
   params: Promise<{ year: string }>;
@@ -73,6 +74,12 @@ function YearInReviewContent({ year, data }: { year: number; data: YearInReviewD
           </span>{" "}
           regardées.
         </p>
+        <ShareButton
+          year={data.year}
+          completedCount={data.completedCount}
+          hoursWatched={data.hoursWatched}
+          topGenreLabel={dominantGenre}
+        />
       </section>
 
       {/* Stats */}

@@ -63,6 +63,20 @@ export default async function LifetimeStatsPage() {
           value={stats.watchlistTotal.toLocaleString("fr-FR")}
           sub={`dont ${stats.watchlistPlanned.toLocaleString("fr-FR")} à voir`}
         />
+        <StatCard
+          label="Série en cours"
+          value={
+            stats.currentStreakDays > 0
+              ? `${stats.currentStreakDays} jour${stats.currentStreakDays > 1 ? "s" : ""}`
+              : "—"
+          }
+          tone={stats.currentStreakDays >= 7 ? "accent" : "default"}
+          sub={
+            stats.longestStreakDays > 0
+              ? `Record : ${stats.longestStreakDays} jour${stats.longestStreakDays > 1 ? "s" : ""}`
+              : undefined
+          }
+        />
         {stats.topGenre && (
           <StatCard
             label="Genre le plus regardé"

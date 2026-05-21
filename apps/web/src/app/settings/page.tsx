@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { PushToggle } from "./push-toggle";
 
 export const metadata: Metadata = {
   title: "Paramètres",
@@ -72,9 +73,9 @@ export default function SettingsPage() {
               </h2>
             </header>
             <div className="rounded-2xl border border-border-subtle bg-bg-surface divide-y divide-border-subtle">
+              <PushToggle />
               <ToggleRow label="Épisodes diffusés" description="Pip rouge sur la cloche." defaultOn />
               <ToggleRow label="Recommandations personnalisées" defaultOn />
-              <ToggleRow label="Fil d'activité" />
               <ToggleRow label="Mentions @" defaultOn />
             </div>
           </section>

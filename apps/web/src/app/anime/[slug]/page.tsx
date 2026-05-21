@@ -7,7 +7,6 @@ import {
   AnimeDetailTemplate,
   AnimeHero,
   CharacterCard,
-  EpisodeRow,
   PlatformBadge,
   RelationCard,
   SeasonSwitcher,
@@ -17,9 +16,11 @@ import {
 import { fetchAnimeAccent, fetchAnimeDetail } from "@/lib/api";
 import { fetchUserWatchlist } from "@/lib/server-watchlist";
 import { fetchAnimeReviews } from "@/lib/server-reviews";
+import { fetchWatchedEpisodes } from "@/lib/server-watched-episodes";
 import { getServerSession } from "@/lib/server-auth";
 import { WatchlistButton } from "@/components/watchlist-button";
 import { AddToListButton } from "@/components/add-to-list-button";
+import { EpisodesTracker } from "@/components/episodes-tracker";
 import { ReviewSection } from "@/components/review-section";
 import { HeaderDetailBridge } from "@/components/app-header/header-context";
 import type {
@@ -86,11 +87,13 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
   const [anime, session] = await Promise.all([fetchAnimeDetail(slug), getServerSession()]);
   if (!anime) notFound();
 
-  const [watchlist, reviews] = await Promise.all([
+  const [watchlist, reviews, watchedEpisodes] = await Promise.all([
     session ? fetchUserWatchlist() : Promise.resolve([]),
     fetchAnimeReviews(anime.id),
+    session ? fetchWatchedEpisodes(anime.id) : Promise.resolve([]),
   ]);
   const existingEntry = watchlist.find((item) => item.animeId === anime.id) ?? null;
+  const watchedEpisodeIds = watchedEpisodes.map((e) => e.episodeId);
 
   const seasons = buildSeasonList(anime);
 
@@ -150,7 +153,12 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
         anime.platforms.length > 0 ? <PlatformsSection platforms={anime.platforms} /> : undefined
       }
       episodes={showEpisodes ? (
-        <EpisodesSection episodes={anime.episodes} animeTitle={anime.title} />
+        <EpisodesTracker
+          episodes={anime.episodes}
+          animeTitle={anime.title}
+          initialWatchedIds={watchedEpisodeIds}
+          isAuthenticated={session !== null}
+        />
       ) : undefined}
       episodesCount={showEpisodes && anime.episodes.length > 0 ? anime.episodes.length : null}
       synopsis={<SynopsisSection anime={anime} />}
@@ -385,39 +393,6 @@ function PlatformsSection({ platforms }: { platforms: PlatformLink[] }) {
           color={p.color}
         />
       ))}
-    </div>
-  );
-}
-
-function EpisodesSection({
-  episodes,
-  animeTitle,
-}: {
-  episodes: AnimeDetail["episodes"];
-  animeTitle: string;
-}) {
-  if (episodes.length === 0) {
-    return (
-      <div className="mx-5 rounded-lg border border-border-subtle bg-bg-surface p-6 text-center font-body text-sm text-text-tertiary">
-        Aucun épisode enregistré pour cet anime.
-      </div>
-    );
-  }
-
-  return (
-    <div className="px-5">
-      <div className="flex max-h-[70vh] flex-col gap-px overflow-y-auto rounded-2xl border border-border bg-bg-surface px-1 py-2">
-        {episodes.map((ep) => (
-          <EpisodeRow
-            key={ep.id}
-            number={ep.number}
-            title={ep.title}
-            duration={ep.duration}
-            url={ep.url}
-            searchQuery={`${animeTitle} episode ${ep.number}`}
-          />
-        ))}
-      </div>
     </div>
   );
 }

@@ -191,9 +191,15 @@
     "quietTimezone": "Timezone: Europe/Paris",
     "dangerTitle": "Danger zone",
     "dangerDescription": "Deleting your account erases watchlist, reviews and history. Irreversible.",
-    "dangerCta": "Delete my account"
+    "dangerCta": "Delete my account",
+    "dangerConfirm": "Type DELETE in uppercase to confirm the deletion.",
+    "dangerConfirmCta": "Confirm deletion",
+    "dangerCancel": "Cancel",
+    "dangerPending": "Deleting…",
+    "quietEnable": "Enable quiet hours",
+    "quietDisable": "Disable",
+    "privacyHint": "Data export and other controls ship in the next release. In the meantime, write to contact@miru.app."
   },
-  "lifetimePage": {
     "metaTitle": "Lifetime stats",
     "metaDescription": "Your stats since day one on Miru.",
     "eyebrow": "All-time",

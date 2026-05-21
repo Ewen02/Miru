@@ -2,9 +2,12 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { UserEntity } from "../../domain/entities/user.entity";
 import {
+  DEFAULT_USER_PREFERENCES,
   UserActiveSession,
   UserFavoriteAnime,
   UserLifetimeStats,
+  UserPreferences,
+  UserPreferencesPatch,
   UserProfileStats,
   UserPublicReview,
   UserRepositoryPort,
@@ -346,6 +349,53 @@ export class PrismaUserRepository implements UserRepositoryPort {
     await this.prisma.session.deleteMany({
       where: { id: sessionId, userId },
     });
+  }
+
+  async preferencesByUserId(userId: string): Promise<UserPreferences> {
+    const row = await this.prisma.userPreferences.findUnique({
+      where: { userId },
+    });
+    if (!row) return DEFAULT_USER_PREFERENCES;
+    return {
+      emailNewEpisodes: row.emailNewEpisodes,
+      emailWeeklyRecap: row.emailWeeklyRecap,
+      emailReviewReply: row.emailReviewReply,
+      emailNewFollower: row.emailNewFollower,
+      inAppEpisodeAired: row.inAppEpisodeAired,
+      inAppRecommendation: row.inAppRecommendation,
+      inAppMention: row.inAppMention,
+      quietFromHour: row.quietFromHour,
+      quietToHour: row.quietToHour,
+    };
+  }
+
+  async updatePreferences(
+    userId: string,
+    patch: UserPreferencesPatch,
+  ): Promise<UserPreferences> {
+    const row = await this.prisma.userPreferences.upsert({
+      where: { userId },
+      create: { userId, ...DEFAULT_USER_PREFERENCES, ...patch },
+      update: patch,
+    });
+    return {
+      emailNewEpisodes: row.emailNewEpisodes,
+      emailWeeklyRecap: row.emailWeeklyRecap,
+      emailReviewReply: row.emailReviewReply,
+      emailNewFollower: row.emailNewFollower,
+      inAppEpisodeAired: row.inAppEpisodeAired,
+      inAppRecommendation: row.inAppRecommendation,
+      inAppMention: row.inAppMention,
+      quietFromHour: row.quietFromHour,
+      quietToHour: row.quietToHour,
+    };
+  }
+
+  async deleteById(userId: string): Promise<void> {
+    // Cascades: WatchlistEntry, Review, List, ListItem, ListLike,
+    // Notification, UserEpisode, PushSubscription, UserPreferences,
+    // Session, Account, TwoFactor, Report (filed).
+    await this.prisma.user.delete({ where: { id: userId } });
   }
 
   private toEntity(record: {

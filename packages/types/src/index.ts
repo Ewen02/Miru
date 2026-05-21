@@ -279,6 +279,19 @@ export interface UserLifetime {
   stats: UserLifetimeStats;
 }
 
+export interface UserPreferencesDto {
+  emailNewEpisodes: boolean;
+  emailWeeklyRecap: boolean;
+  emailReviewReply: boolean;
+  emailNewFollower: boolean;
+  inAppEpisodeAired: boolean;
+  inAppRecommendation: boolean;
+  inAppMention: boolean;
+  /** 0-23, or null when quiet hours disabled. */
+  quietFromHour: number | null;
+  quietToHour: number | null;
+}
+
 export interface UserActiveSessionDto {
   id: string;
   userAgent: string | null;

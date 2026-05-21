@@ -1,15 +1,18 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   Param,
   ParseIntPipe,
+  Patch,
   UseGuards,
 } from "@nestjs/common";
 import type {
   UserActiveSessionDto,
   UserLifetime,
+  UserPreferencesDto,
   UserProfile,
   YearInReviewDto,
 } from "@miru/types";
@@ -22,6 +25,11 @@ import { GetUserLifetimeStatsUseCase } from "../../application/use-cases/get-use
 import { GetUserYearInReviewUseCase } from "../../application/use-cases/get-user-year-in-review.use-case";
 import { ListUserSessionsUseCase } from "../../application/use-cases/list-user-sessions.use-case";
 import { RevokeUserSessionUseCase } from "../../application/use-cases/revoke-user-session.use-case";
+import { GetUserPreferencesUseCase } from "../../application/use-cases/get-user-preferences.use-case";
+import { UpdateUserPreferencesUseCase } from "../../application/use-cases/update-user-preferences.use-case";
+import { DeleteUserAccountUseCase } from "../../application/use-cases/delete-user-account.use-case";
+import { UpdateUserPreferencesDto } from "../../application/dtos/update-preferences.dto";
+import { DeleteAccountDto } from "../../application/dtos/delete-account.dto";
 
 interface UserDto {
   id: string;
@@ -41,6 +49,9 @@ export class UserController {
     private readonly getUserYearInReview: GetUserYearInReviewUseCase,
     private readonly listUserSessions: ListUserSessionsUseCase,
     private readonly revokeUserSession: RevokeUserSessionUseCase,
+    private readonly getUserPreferences: GetUserPreferencesUseCase,
+    private readonly updateUserPreferences: UpdateUserPreferencesUseCase,
+    private readonly deleteUserAccount: DeleteUserAccountUseCase,
   ) {}
 
   @Get("me")
@@ -109,6 +120,36 @@ export class UserController {
     @CurrentUserId() userId: string,
   ): Promise<YearInReviewDto> {
     return this.getUserYearInReview.execute({ userId, year });
+  }
+
+  @Get("me/preferences")
+  @UseGuards(AuthRequiredGuard)
+  preferences(@CurrentUserId() userId: string): Promise<UserPreferencesDto> {
+    return this.getUserPreferences.execute({ userId });
+  }
+
+  @Patch("me/preferences")
+  @UseGuards(AuthRequiredGuard)
+  updatePreferences(
+    @CurrentUserId() userId: string,
+    @Body() patch: UpdateUserPreferencesDto,
+  ): Promise<UserPreferencesDto> {
+    return this.updateUserPreferences.execute({ userId, patch });
+  }
+
+  /**
+   * Hard delete. Requires the user to literally type "DELETE" in the
+   * body (see DeleteAccountDto). Cascades to every row owned by the
+   * user — there's no soft-delete recovery window in our model.
+   */
+  @Delete("me")
+  @UseGuards(AuthRequiredGuard)
+  @HttpCode(204)
+  async deleteAccount(
+    @CurrentUserId() userId: string,
+    @Body() _body: DeleteAccountDto,
+  ): Promise<void> {
+    await this.deleteUserAccount.execute({ userId });
   }
 
   @Get(":handle")

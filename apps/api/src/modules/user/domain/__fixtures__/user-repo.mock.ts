@@ -18,5 +18,8 @@ export function makeUserRepoMock(): jest.Mocked<UserRepositoryPort> {
     yearInReviewByUserId: jest.fn(),
     activeSessionsByUserId: jest.fn(),
     revokeSession: jest.fn(),
+    preferencesByUserId: jest.fn(),
+    updatePreferences: jest.fn(),
+    deleteById: jest.fn(),
   };
 }

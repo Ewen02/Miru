@@ -191,7 +191,14 @@
     "quietTimezone": "Fuseau : Europe/Paris",
     "dangerTitle": "Zone dangereuse",
     "dangerDescription": "Supprimer ton compte efface watchlist, avis et historique. C'est irréversible.",
-    "dangerCta": "Supprimer mon compte"
+    "dangerCta": "Supprimer mon compte",
+    "dangerConfirm": "Tape DELETE en majuscules pour confirmer la suppression.",
+    "dangerConfirmCta": "Confirmer la suppression",
+    "dangerCancel": "Annuler",
+    "dangerPending": "Suppression…",
+    "quietEnable": "Activer les heures calmes",
+    "quietDisable": "Désactiver",
+    "privacyHint": "Export de tes données et autres contrôles arrivent dans la prochaine release. En attendant, écris-nous à contact@miru.app."
   },
   "lifetimePage": {
     "metaTitle": "Stats lifetime",

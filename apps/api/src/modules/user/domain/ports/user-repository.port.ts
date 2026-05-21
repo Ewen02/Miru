@@ -113,4 +113,40 @@ export interface UserRepositoryPort {
   activeSessionsByUserId(userId: string): Promise<Omit<UserActiveSession, "current">[]>;
   /** Revoke a single session by id. Scoped by userId for safety. */
   revokeSession(userId: string, sessionId: string): Promise<void>;
+  /**
+   * Preferences. Read returns defaults when no row exists yet
+   * (UX matches the "default" toggles shown pre-fetch). Update
+   * upserts and returns the new state.
+   */
+  preferencesByUserId(userId: string): Promise<UserPreferences>;
+  updatePreferences(userId: string, patch: UserPreferencesPatch): Promise<UserPreferences>;
+  /** Hard delete. Cascades to all owned rows (watchlist, reviews, …). */
+  deleteById(userId: string): Promise<void>;
 }
+
+export interface UserPreferences {
+  emailNewEpisodes: boolean;
+  emailWeeklyRecap: boolean;
+  emailReviewReply: boolean;
+  emailNewFollower: boolean;
+  inAppEpisodeAired: boolean;
+  inAppRecommendation: boolean;
+  inAppMention: boolean;
+  /** 0-23, or null when quiet hours disabled. */
+  quietFromHour: number | null;
+  quietToHour: number | null;
+}
+
+export type UserPreferencesPatch = Partial<UserPreferences>;
+
+export const DEFAULT_USER_PREFERENCES: UserPreferences = {
+  emailNewEpisodes: true,
+  emailWeeklyRecap: true,
+  emailReviewReply: false,
+  emailNewFollower: false,
+  inAppEpisodeAired: true,
+  inAppRecommendation: true,
+  inAppMention: true,
+  quietFromHour: null,
+  quietToHour: null,
+};

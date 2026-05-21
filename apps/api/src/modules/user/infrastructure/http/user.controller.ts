@@ -29,6 +29,7 @@ interface UserDto {
   name: string;
   emailVerified: boolean;
   image: string | null;
+  twoFactorEnabled: boolean;
 }
 
 @Controller("users")
@@ -52,6 +53,7 @@ export class UserController {
       name: user.name,
       emailVerified: user.emailVerified,
       image: user.image,
+      twoFactorEnabled: user.twoFactorEnabled,
     };
   }
 

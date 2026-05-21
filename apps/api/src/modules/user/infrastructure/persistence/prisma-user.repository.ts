@@ -328,12 +328,14 @@ export class PrismaUserRepository implements UserRepositoryPort {
     name: string;
     emailVerified: boolean;
     image: string | null;
+    twoFactorEnabled: boolean | null;
   }): UserEntity {
     return UserEntity.create(record.id, {
       email: record.email,
       name: record.name,
       emailVerified: record.emailVerified,
       image: record.image,
+      twoFactorEnabled: record.twoFactorEnabled ?? false,
     });
   }
 }

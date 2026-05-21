@@ -15,6 +15,7 @@ import { AuthRequiredGuard } from "@auth/auth-required.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
 import { AddToWatchlistUseCase } from "../../application/use-cases/add-to-watchlist.use-case";
 import { GetUserWatchlistUseCase } from "../../application/use-cases/get-user-watchlist.use-case";
+import { ImportAniListWatchlistUseCase } from "../../application/use-cases/import-anilist-watchlist.use-case";
 import { RemoveFromWatchlistUseCase } from "../../application/use-cases/remove-from-watchlist.use-case";
 import { UpdateWatchlistEntryUseCase } from "../../application/use-cases/update-watchlist-entry.use-case";
 import {
@@ -32,6 +33,7 @@ export class WatchlistController {
     private readonly updateEntry: UpdateWatchlistEntryUseCase,
     private readonly removeEntry: RemoveFromWatchlistUseCase,
     private readonly getWatchlist: GetUserWatchlistUseCase,
+    private readonly importAniList: ImportAniListWatchlistUseCase,
   ) {}
 
   @Post("watchlist")
@@ -79,6 +81,23 @@ export class WatchlistController {
       ...toEntryDto(item.entry),
       anime: item.anime,
     }));
+  }
+
+  /**
+   * Import the authenticated user's public AniList list. Idempotent: re-runs
+   * upsert existing rows (the user can re-import to refresh progress/scores).
+   */
+  @Post("watchlist/import/anilist")
+  async importFromAniList(
+    @CurrentUserId() userId: string,
+    @Body() body: { username: string },
+  ): Promise<{
+    totalFetched: number;
+    imported: number;
+    skipped: number;
+    unknownAnilistIds: number[];
+  }> {
+    return this.importAniList.execute({ userId, username: body.username ?? "" });
   }
 }
 

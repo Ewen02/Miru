@@ -5,6 +5,7 @@ interface UserProps {
   name: string;
   emailVerified: boolean;
   image: string | null;
+  twoFactorEnabled: boolean;
 }
 
 export class UserEntity extends Entity<UserProps> {
@@ -22,6 +23,10 @@ export class UserEntity extends Entity<UserProps> {
 
   get image(): string | null {
     return this.props.image;
+  }
+
+  get twoFactorEnabled(): boolean {
+    return this.props.twoFactorEnabled;
   }
 
   static create(id: string, props: UserProps): UserEntity {

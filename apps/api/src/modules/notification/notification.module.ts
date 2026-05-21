@@ -7,6 +7,7 @@ import { NotificationService } from "./application/notification.service";
 import { NOTIFICATION_REPOSITORY } from "./application/tokens";
 import { PrismaNotificationRepository } from "./infrastructure/persistence/prisma-notification.repository";
 import { NotificationController } from "./infrastructure/http/notification.controller";
+import { NotificationScheduler } from "./infrastructure/scheduler/notification.scheduler";
 
 @Module({
   imports: [PrismaModule],
@@ -16,6 +17,7 @@ import { NotificationController } from "./infrastructure/http/notification.contr
     MarkNotificationReadUseCase,
     MarkAllNotificationsReadUseCase,
     NotificationService,
+    NotificationScheduler,
     { provide: NOTIFICATION_REPOSITORY, useClass: PrismaNotificationRepository },
   ],
   // NotificationService is exported so other modules can push notifications

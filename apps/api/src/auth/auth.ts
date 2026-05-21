@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { twoFactor } from "better-auth/plugins";
 import { prisma } from "@miru/db";
 
 const SECRET = process.env.BETTER_AUTH_SECRET;
@@ -36,6 +37,11 @@ export const auth = betterAuth({
   },
   account: { modelName: "Account" },
   verification: { modelName: "Verification" },
+  plugins: [
+    twoFactor({
+      issuer: "Miru",
+    }),
+  ],
 });
 
 export type Auth = typeof auth;

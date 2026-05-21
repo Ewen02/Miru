@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -8,37 +9,37 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HelpPage() {
   const t = await getTranslations("helpPage");
-  const CATEGORIES = [
+  const categories = [
     {
       title: t("categoryGettingStarted"),
       articles: [
-        t("articleCreateAccount"),
-        t("articleImportAniList"),
-        t("articleUnderstandStatuses"),
+        { slug: "create-account", label: t("articleCreateAccount") },
+        { slug: "import-anilist", label: t("articleImportAniList") },
+        { slug: "understand-statuses", label: t("articleUnderstandStatuses") },
       ],
     },
     {
       title: t("categoryWatchlist"),
       articles: [
-        t("articleRateAnime"),
-        t("articleMarkWatched"),
-        t("articleScoreDiff"),
+        { slug: "rate-anime", label: t("articleRateAnime") },
+        { slug: "mark-watched", label: t("articleMarkWatched") },
+        { slug: "score-diff", label: t("articleScoreDiff") },
       ],
     },
     {
       title: t("categoryProfile"),
       articles: [
-        t("articleMakeProfilePublic"),
-        t("articleFollow"),
-        t("articleBlock"),
+        { slug: "make-profile-public", label: t("articleMakeProfilePublic") },
+        { slug: "follow", label: t("articleFollow") },
+        { slug: "block", label: t("articleBlock") },
       ],
     },
     {
       title: t("categoryAccount"),
       articles: [
-        t("articleChangeEmail"),
-        t("articleExport"),
-        t("articleDeleteAccount"),
+        { slug: "change-email", label: t("articleChangeEmail") },
+        { slug: "export", label: t("articleExport") },
+        { slug: "delete-account", label: t("articleDeleteAccount") },
       ],
     },
   ];
@@ -63,20 +64,20 @@ export default async function HelpPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        {CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <article key={cat.title} className="rounded-2xl border border-border-subtle bg-bg-surface p-5">
             <h2 className="m-0 mb-4 font-display text-lg font-semibold tracking-tight text-text-primary">
               {cat.title}
             </h2>
             <ul className="m-0 flex flex-col gap-2 p-0">
               {cat.articles.map((a) => (
-                <li key={a} className="font-body text-sm">
-                  <a
-                    href="#"
+                <li key={a.slug} className="font-body text-sm">
+                  <Link
+                    href={`/help/${a.slug}`}
                     className="text-text-secondary transition-colors duration-200 hover:text-accent"
                   >
-                    → {a}
-                  </a>
+                    → {a.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -89,7 +90,7 @@ export default async function HelpPage() {
           {t("notFoundQ")}
         </p>
         <a
-          href="mailto:support@miru.app"
+          href="mailto:contact@miru.app"
           className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
           style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
         >

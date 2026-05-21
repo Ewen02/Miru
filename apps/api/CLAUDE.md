@@ -101,17 +101,25 @@ Pour les side effects cross-modules, utiliser `EventEmitter2`.
 
 ## Modules du projet
 
-| Module      | Responsabilité                            | Ports sortants                 |
-| ----------- | ----------------------------------------- | ------------------------------ |
-| `anime`     | CRUD anime, catalogue, recherche, fiches  | AnimeRepositoryPort            |
-| `user`      | Auth, profil, préférences                 | UserRepositoryPort             |
-| `watchlist` | Statuts, progression, favoris             | WatchlistRepositoryPort        |
-| `review`    | Notes, reviews, modération                | ReviewRepositoryPort           |
-| `sync`      | Import AniList, sync data, enrichissement | AnimeSyncPort, AnimeRepository |
-| `character` | Personnages, VA, liens anime              | CharacterRepositoryPort        |
-| `platform`  | Plateformes de streaming, liens           | PlatformRepositoryPort         |
+| Module         | Responsabilité                                                    | Ports sortants                                |
+| -------------- | ----------------------------------------------------------------- | --------------------------------------------- |
+| `anime`        | Catalogue, fiches, recherche, accent, recommandations perso       | AnimeRepositoryPort                           |
+| `user`         | Profil public, stats, lifetime, year-in-review, sessions          | UserRepositoryPort                            |
+| `watchlist`    | Statuts, progression, favoris, watched-episodes per-user          | WatchlistRepositoryPort                       |
+| `review`       | Reviews + agrégation note communautaire                           | ReviewRepositoryPort                          |
+| `list`         | Listes custom partageables, likes                                 | ListRepositoryPort                            |
+| `sync`         | Import AniList trending + cron horaire, episodes Jikan            | AnimeSyncPort, EpisodeSyncPort                |
+| `character`    | Personnages, liens anime, fiche `/characters/[id]`                | CharacterRepositoryPort                       |
+| `voice-actor`  | Doubleurs, rôles, fiche `/people/[id]`                            | VoiceActorRepositoryPort                      |
+| `studio`       | Studios, agrégations, fiche `/studios/[slug]`                     | StudioRepositoryPort                          |
+| `genre`        | Genres, stats par genre, fiche `/genre/[slug]`                    | GenreRepositoryPort                           |
+| `platform`     | Plateformes streaming (badges sur fiche anime)                    | PlatformRepositoryPort                        |
+| `notification` | Notifications DB (kinds + cron producers), facade `push`          | NotificationRepositoryPort                    |
+| `push`         | Web Push (VAPID) — fan-out via `NotificationService`              | PushSubscriptionRepositoryPort, WebPushSender |
+| `billing`      | Stripe Sympathisant (checkout, portal, webhook, status)           | BillingRepositoryPort, BillingProviderPort    |
+| `moderation`   | Reports utilisateurs + queue admin (`AdminRequiredGuard`)         | ReportRepositoryPort                          |
 
-Seul `anime` est scaffoldé pour l'instant comme template de référence. Les autres suivront le même pattern.
+Tous les modules respectent le pattern hexagonal du module `anime` (domain/application/infrastructure). Ajouter un module : `/new-module <nom>` ou voir le scaffold de `anime` comme référence.
 
 ## Tests
 

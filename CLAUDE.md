@@ -5,10 +5,14 @@ Plateforme anime — Explorer, Organiser, Partager.
 ## Stack
 
 - **Monorepo** : Turborepo + pnpm workspaces
-- **Frontend** : Next.js 16 (App Router, RSC) — note : breaking changes vs Next 15, lire `apps/web/AGENTS.md`
+- **Frontend** : Next.js 16 (App Router, RSC, next-intl v4 FR/EN) — note : breaking changes vs Next 15, lire `apps/web/AGENTS.md`
 - **Backend** : NestJS 11 (architecture hexagonale, voir [apps/api/CLAUDE.md](apps/api/CLAUDE.md))
 - **DB** : PostgreSQL + Prisma 6
-- **Auth** : BetterAuth (non câblé au MVP)
+- **Auth** : BetterAuth (+ 2FA TOTP, email verification, password reset, sessions)
+- **Mail** : Resend (transactional)
+- **Billing** : Stripe (abonnement Sympathisant — donation-style, pas de feature gating)
+- **Push** : Web Push VAPID + service worker
+- **Observabilité** : Sentry (api + web), Pino, healthchecks, page `/status` live
 - **UI** : Tailwind v4 + design system custom `@miru/ui` (voir [packages/ui/CLAUDE.md](packages/ui/CLAUDE.md))
 - **TypeScript** strict partout
 
@@ -16,7 +20,7 @@ Plateforme anime — Explorer, Organiser, Partager.
 
 ```
 apps/{web,api}
-packages/{config,types,db,ui,anilist}
+packages/{config,types,db,ui,anilist,jikan,http-client}
 ```
 
 Imports inter-packages via `@miru/*`. Barrel exports dans chaque `src/index.ts`.
@@ -29,6 +33,7 @@ Imports inter-packages via `@miru/*`. Barrel exports dans chaque `src/index.ts`.
 - **Pas de `default export`** sauf pages/layouts Next.js
 - **Pas de `console.log`** — utiliser `Logger` NestJS côté api
 - **Pas de `any` implicite** ; les `any` explicites doivent être justifiés (frontières Prisma/AniList)
+- **i18n** : nouvelles strings user-facing → ajouter aux dictionnaires `apps/web/messages/{fr,en}.json` et consommer via `useTranslations()` / `getTranslations()`
 
 ## Commandes
 
@@ -57,7 +62,7 @@ Imports inter-packages via `@miru/*`. Barrel exports dans chaque `src/index.ts`.
 ## Roadmap
 
 Plan produit complet sur 6 phases : [ROADMAP.md](ROADMAP.md).
-Prochaine action : Phase 1.1 — fiche anime `/anime/[id]`.
+**État actuel : Phases 1, 2, 3, 5, 6 toutes livrées.** Reste à trancher la Phase 4 (scraping Crunchyroll/ADN) + opérations de déploiement réel.
 
 ## Archives
 
@@ -65,8 +70,18 @@ Les guides de setup initial (longs, one-shot) sont dans [.claude/docs/](.claude/
 
 - `monorepo-setup.md` — scaffold complet du repo (déjà exécuté)
 - `ui-setup.md` — init du package `@miru/ui`
-- `deploy.md` — Railway (API + Postgres) + Vercel (web) + smoke test prod
+- `deploy.md` — Railway (API + Postgres) + Vercel (web) + smoke test prod + Sentry config
 
 ## Env
 
-Variables dans `.env` (template : `.env.example`) : `DATABASE_URL`, `BETTER_AUTH_SECRET`, `NEXT_PUBLIC_API_URL`, `ENABLE_SCHEDULER` (cron sync automatique, default `false`).
+Variables dans `.env` (template complet : `.env.example`). Groupes :
+
+- **Requis** : `DATABASE_URL`, `BETTER_AUTH_SECRET`
+- **URLs** : `WEB_ORIGIN`, `API_BASE_URL`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`
+- **Cron** : `ENABLE_SCHEDULER` (default `false` en dev)
+- **Mail** : `RESEND_API_KEY`, `MAIL_FROM`
+- **Stripe** : `STRIPE_SECRET_KEY`, `STRIPE_PRO_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`
+- **Push** : `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
+- **Sentry** : `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` (+ traces/profiles sample rates)
+
+Tous les services externes sont **optionnels en dev** : si la clé est vide, la feature dégrade proprement (push toggle disabled, mails loggés, billing désactivé…).

@@ -110,6 +110,14 @@ export class PrismaUserRepository implements UserRepositoryPort {
     return record?.createdAt ?? null;
   }
 
+  async isProByUserId(userId: string): Promise<boolean> {
+    const record = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { proSince: true },
+    });
+    return !!record?.proSince;
+  }
+
   async lifetimeStatsByUserId(userId: string): Promise<UserLifetimeStats> {
     const [
       completedCount,

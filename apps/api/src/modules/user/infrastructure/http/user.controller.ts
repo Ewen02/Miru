@@ -113,7 +113,7 @@ export class UserController {
 
   @Get(":handle")
   async profile(@Param("handle") handle: string): Promise<UserProfile> {
-    const { user, joinedAt, stats, favorites, reviews } =
+    const { user, joinedAt, isPro, stats, favorites, reviews } =
       await this.getUserProfile.execute({ handle });
 
     return {
@@ -122,6 +122,7 @@ export class UserController {
       name: user.name,
       image: user.image,
       joinedAt: joinedAt ? joinedAt.toISOString() : null,
+      isPro,
       stats,
       favorites,
       reviews: reviews.map((r) => ({

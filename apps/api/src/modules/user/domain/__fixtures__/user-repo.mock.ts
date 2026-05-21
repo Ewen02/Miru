@@ -13,6 +13,7 @@ export function makeUserRepoMock(): jest.Mocked<UserRepositoryPort> {
     favoritesByUserId: jest.fn(),
     reviewsByUserId: jest.fn(),
     joinedAt: jest.fn(),
+    isProByUserId: jest.fn(),
     lifetimeStatsByUserId: jest.fn(),
     yearInReviewByUserId: jest.fn(),
     activeSessionsByUserId: jest.fn(),

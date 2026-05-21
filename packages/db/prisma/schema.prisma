@@ -215,6 +215,13 @@ model User {
   pushSubs        PushSubscription[]
 
   twoFactorEnabled Boolean? @default(false)
+
+  // Sympathisant — soutien volontaire via Stripe. No feature gating, just a
+  // badge on the profile. `proSince` doubles as a "is currently active" check
+  // (set when subscription becomes active, cleared on cancellation).
+  stripeCustomerId String?   @unique
+  stripeSubId      String?   @unique
+  proSince         DateTime?
 }
 
 model Session {

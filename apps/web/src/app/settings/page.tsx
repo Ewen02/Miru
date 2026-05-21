@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PushToggle } from "./push-toggle";
+import { BillingSection } from "./billing-section";
+import { fetchBillingStatus } from "@/lib/server-billing";
 
 export const metadata: Metadata = {
   title: "Paramètres",
@@ -15,7 +17,8 @@ const TABS = [
   { key: "advanced", label: "Avancé" },
 ];
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const billing = await fetchBillingStatus();
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
       <header className="mb-10">
@@ -49,6 +52,8 @@ export default function SettingsPage() {
         </nav>
 
         <div className="flex flex-col gap-10">
+          <BillingSection isPro={billing.isPro} proSince={billing.proSince} />
+
           <section>
             <header className="mb-5">
               <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">

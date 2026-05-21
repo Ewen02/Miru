@@ -4,6 +4,7 @@ import "./instrument";
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { Logger } from "nestjs-pino";
+import { raw } from "express";
 import { AppModule } from "./app.module";
 import { DomainExceptionFilter } from "@shared/infrastructure/filters/domain-exception.filter";
 
@@ -24,6 +25,10 @@ async function bootstrap() {
     origin: WEB_ORIGIN,
     credentials: true,
   });
+
+  // Stripe webhook needs the raw body to verify the signature. Must be
+  // mounted before the better-auth module wires its JSON parser elsewhere.
+  app.use("/billing/webhook", raw({ type: "application/json" }));
 
   app.useGlobalFilters(new DomainExceptionFilter());
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));

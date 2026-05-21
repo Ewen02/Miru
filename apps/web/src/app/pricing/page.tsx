@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { fetchBillingStatus } from "@/lib/server-billing";
+import { CheckoutButton } from "./checkout-button";
 
 export const metadata: Metadata = {
   title: "Tarifs",
@@ -32,9 +35,29 @@ const PLANS = [
   },
 ];
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const billing = await fetchBillingStatus();
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
+      {billing.isPro && (
+        <div className="mx-auto mb-10 max-w-160 rounded-xl border border-accent/40 bg-accent-subtle p-5 text-center">
+          <p className="m-0 font-body text-sm text-text-primary">
+            Tu es Sympathisant depuis le{" "}
+            {billing.proSince
+              ? new Date(billing.proSince).toLocaleDateString("fr-FR", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : "—"}{" "}
+            — merci. Tu peux gérer ton abonnement depuis les{" "}
+            <Link href="/settings" className="underline hover:text-text-secondary">
+              paramètres
+            </Link>
+            .
+          </p>
+        </div>
+      )}
       <header className="mb-12 text-center">
         <p className="m-0 mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
           Tarifs
@@ -91,17 +114,24 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <button
-              type="button"
-              className="mt-auto inline-flex h-11 items-center justify-center rounded-md font-body text-sm font-semibold"
-              style={
-                plan.primary
-                  ? { backgroundColor: "var(--color-accent)", color: "#08080c" }
-                  : { border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }
-              }
-            >
-              {plan.cta}
-            </button>
+            <div className="mt-auto">
+              {plan.primary ? (
+                billing.isPro ? (
+                  <span className="inline-flex h-11 items-center justify-center rounded-md border border-accent/40 px-5 font-body text-sm font-medium text-accent">
+                    Actif
+                  </span>
+                ) : (
+                  <CheckoutButton label={plan.cta} variant="primary" />
+                )
+              ) : (
+                <Link
+                  href="/register"
+                  className="inline-flex h-11 items-center justify-center rounded-md border border-border px-5 font-body text-sm font-semibold text-text-secondary transition-colors duration-200 hover:border-accent/40 hover:text-text-primary"
+                >
+                  {plan.cta}
+                </Link>
+              )}
+            </div>
           </article>
         ))}
       </section>

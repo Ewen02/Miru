@@ -17,6 +17,7 @@ interface GetUserProfileInput {
 interface GetUserProfileOutput {
   user: UserEntity;
   joinedAt: Date | null;
+  isPro: boolean;
   stats: UserProfileStats;
   favorites: UserFavoriteAnime[];
   reviews: UserPublicReview[];
@@ -35,13 +36,14 @@ export class GetUserProfileUseCase
     const user = await this.users.findByHandle(handle);
     if (!user) throw new NotFoundException(`User "${handle}" not found`);
 
-    const [joinedAt, stats, favorites, reviews] = await Promise.all([
+    const [joinedAt, isPro, stats, favorites, reviews] = await Promise.all([
       this.users.joinedAt(user.id),
+      this.users.isProByUserId(user.id),
       this.users.statsByUserId(user.id),
       this.users.favoritesByUserId(user.id, FAVORITES_LIMIT),
       this.users.reviewsByUserId(user.id, REVIEWS_LIMIT),
     ]);
 
-    return { user, joinedAt, stats, favorites, reviews };
+    return { user, joinedAt, isPro, stats, favorites, reviews };
   }
 }

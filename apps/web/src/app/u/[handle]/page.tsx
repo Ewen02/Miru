@@ -39,8 +39,16 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             @{handleSlug}
             {joinedLabel && <span> · membre depuis {joinedLabel}</span>}
           </p>
-          <h1 className="m-0 mb-2 font-display text-4xl font-semibold leading-none tracking-[-0.025em] text-text-primary sm:text-5xl">
+          <h1 className="m-0 mb-2 flex items-center gap-3 font-display text-4xl font-semibold leading-none tracking-[-0.025em] text-text-primary sm:text-5xl">
             {profile.name}
+            {profile.isPro && (
+              <span
+                className="inline-flex h-6 items-center rounded-md border border-accent/40 bg-accent-subtle px-2 font-mono text-[10px] uppercase tracking-[0.18em] text-accent"
+                title="Sympathisant — soutient le projet"
+              >
+                Sympathisant
+              </span>
+            )}
           </h1>
         </div>
         <div className="flex items-center gap-2">

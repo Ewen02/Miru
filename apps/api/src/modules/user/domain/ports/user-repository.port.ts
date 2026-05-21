@@ -103,6 +103,8 @@ export interface UserRepositoryPort {
   favoritesByUserId(userId: string, limit: number): Promise<UserFavoriteAnime[]>;
   reviewsByUserId(userId: string, limit: number): Promise<UserPublicReview[]>;
   joinedAt(userId: string): Promise<Date | null>;
+  /** Sympathisant (Pro) flag — derived from the billing fields on User. */
+  isProByUserId(userId: string): Promise<boolean>;
   /** Heavier aggregation for the personal /lifetime-stats page. */
   lifetimeStatsByUserId(userId: string): Promise<UserLifetimeStats>;
   /** Per-user year-in-review aggregation. Bounded to a single calendar year. */

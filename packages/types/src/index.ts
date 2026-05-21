@@ -331,6 +331,8 @@ export interface UserProfile {
   image: string | null;
   /** ISO string or null when join date is unknown. */
   joinedAt: string | null;
+  /** Sympathisant — for the profile badge. */
+  isPro: boolean;
   stats: UserProfileStats;
   favorites: UserProfileFavorite[];
   reviews: UserProfileReview[];

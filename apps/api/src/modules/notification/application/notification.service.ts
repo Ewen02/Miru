@@ -3,6 +3,7 @@ import {
   CreateNotificationInput,
   NotificationRepositoryPort,
 } from "../domain/ports/notification-repository.port";
+import { PushService } from "@modules/push/application/push.service";
 import { NOTIFICATION_REPOSITORY } from "./tokens";
 
 /**
@@ -18,6 +19,7 @@ export class NotificationService {
 
   constructor(
     @Inject(NOTIFICATION_REPOSITORY) private readonly repo: NotificationRepositoryPort,
+    private readonly pushService: PushService,
   ) {}
 
   async push(input: CreateNotificationInput): Promise<void> {
@@ -27,6 +29,14 @@ export class NotificationService {
       this.logger.warn(
         `Notification dropped for user ${input.userId} (${input.kind}): ${(err as Error).message}`,
       );
+      return;
     }
+    // Fire-and-forget web push fan-out. Failures are swallowed by PushService.
+    void this.pushService.pushToUser(input.userId, {
+      title: input.title,
+      body: input.excerpt ?? null,
+      url: input.linkUrl ?? null,
+      icon: input.coverUrl ?? null,
+    });
   }
 }

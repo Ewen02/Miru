@@ -37,12 +37,16 @@ export interface UserLifetimeStats {
   /** Watchlist totals across all statuses. */
   watchlistTotal: number;
   watchlistPlanned: number;
-  /** Most-watched genre slug + count, null when user has no completed anime. */
-  topGenre: { name: string; count: number } | null;
+  /** Most-watched genre + count, null when user has no completed anime. */
+  topGenre: { name: string; slug: string; count: number } | null;
   /** Most-watched studio name + count. */
   topStudio: { name: string; count: number } | null;
   /** Earliest watchlist entry creation date — proxy for "first anime added". */
   firstAddedAt: Date | null;
+  /** Current streak: consecutive days up to today with at least one episode watched. */
+  currentStreakDays: number;
+  /** Longest streak ever — used as a personal best. */
+  longestStreakDays: number;
 }
 
 export interface YearInReviewMonth {

@@ -120,6 +120,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
       topGenreRow,
       topStudioRow,
       firstAdded,
+      watchDayRows,
     ] = await Promise.all([
       this.prisma.watchlistEntry.count({
         where: { userId, status: COMPLETED_STATUS },
@@ -135,13 +136,13 @@ export class PrismaUserRepository implements UserRepositoryPort {
       this.prisma.watchlistEntry.count({ where: { userId } }),
       this.prisma.watchlistEntry.count({ where: { userId, status: PLANNED_STATUS } }),
       // Top genre across COMPLETED anime — grouped via the join table.
-      this.prisma.$queryRaw<Array<{ name: string; count: bigint }>>`
-        SELECT g.name, COUNT(*)::bigint AS count
+      this.prisma.$queryRaw<Array<{ name: string; slug: string; count: bigint }>>`
+        SELECT g.name, g.slug, COUNT(*)::bigint AS count
         FROM "WatchlistEntry" w
         JOIN "_AnimeGenres" ag ON ag."A" = w."animeId"
         JOIN "Genre" g ON g.id = ag."B"
         WHERE w."userId" = ${userId} AND w.status = ${COMPLETED_STATUS}
-        GROUP BY g.id, g.name
+        GROUP BY g.id, g.name, g.slug
         ORDER BY count DESC
         LIMIT 1
       `,
@@ -160,7 +161,18 @@ export class PrismaUserRepository implements UserRepositoryPort {
         orderBy: { createdAt: "asc" },
         select: { createdAt: true },
       }),
+      // All distinct UTC days the user marked at least one episode watched.
+      // We compute streaks in JS on the dense list — Postgres-side GROUP BY
+      // saves us from loading every UserEpisode row.
+      this.prisma.$queryRaw<Array<{ day: Date }>>`
+        SELECT DISTINCT date_trunc('day', "watchedAt") AS day
+        FROM "UserEpisode"
+        WHERE "userId" = ${userId}
+        ORDER BY day DESC
+      `,
     ]);
+
+    const { current, longest } = computeStreaks(watchDayRows.map((r) => r.day));
 
     return {
       completedCount,
@@ -171,12 +183,18 @@ export class PrismaUserRepository implements UserRepositoryPort {
       watchlistTotal,
       watchlistPlanned,
       topGenre: topGenreRow[0]
-        ? { name: topGenreRow[0].name, count: Number(topGenreRow[0].count) }
+        ? {
+            name: topGenreRow[0].name,
+            slug: topGenreRow[0].slug,
+            count: Number(topGenreRow[0].count),
+          }
         : null,
       topStudio: topStudioRow[0]
         ? { name: topStudioRow[0].name, count: Number(topStudioRow[0].count) }
         : null,
       firstAddedAt: firstAdded?.createdAt ?? null,
+      currentStreakDays: current,
+      longestStreakDays: longest,
     };
   }
 
@@ -338,4 +356,61 @@ export class PrismaUserRepository implements UserRepositoryPort {
       twoFactorEnabled: record.twoFactorEnabled ?? false,
     });
   }
+}
+
+/**
+ * Given a list of distinct UTC days the user marked at least one episode
+ * watched (newest first), returns the current streak (days up to today) and
+ * the longest streak ever.
+ */
+function computeStreaks(days: Date[]): { current: number; longest: number } {
+  if (days.length === 0) return { current: 0, longest: 0 };
+
+  const today = startOfUtcDay(new Date());
+  const yesterday = new Date(today);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+
+  // Set of unix-day numbers for O(1) "is this day watched?" check.
+  const dayNumbers = new Set(days.map((d) => unixDay(startOfUtcDay(d))));
+
+  // Current streak: walk back from today (or yesterday — if user hasn't watched
+  // yet today, the streak is still alive but doesn't count today itself).
+  let current = 0;
+  let cursor = dayNumbers.has(unixDay(today))
+    ? today
+    : dayNumbers.has(unixDay(yesterday))
+      ? yesterday
+      : null;
+  while (cursor) {
+    if (!dayNumbers.has(unixDay(cursor))) break;
+    current += 1;
+    cursor = new Date(cursor);
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
+  }
+
+  // Longest streak: sort ascending and scan for consecutive runs.
+  const sorted = Array.from(dayNumbers).sort((a, b) => a - b);
+  let longest = 0;
+  let run = 1;
+  for (let i = 1; i < sorted.length; i += 1) {
+    if (sorted[i] === sorted[i - 1] + 1) {
+      run += 1;
+    } else {
+      longest = Math.max(longest, run);
+      run = 1;
+    }
+  }
+  longest = Math.max(longest, run);
+
+  return { current, longest };
+}
+
+function startOfUtcDay(d: Date): Date {
+  const x = new Date(d);
+  x.setUTCHours(0, 0, 0, 0);
+  return x;
+}
+
+function unixDay(d: Date): number {
+  return Math.floor(d.getTime() / 86_400_000);
 }

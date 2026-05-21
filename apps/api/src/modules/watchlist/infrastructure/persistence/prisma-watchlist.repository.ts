@@ -61,6 +61,35 @@ export class PrismaWatchlistRepository implements WatchlistRepositoryPort {
   async remove(userId: string, animeId: string): Promise<void> {
     await this.prisma.watchlistEntry.deleteMany({ where: { userId, animeId } });
   }
+
+  async markEpisodeWatched(userId: string, episodeId: string): Promise<void> {
+    // Upsert is idempotent: re-marking is a no-op, original watchedAt stays.
+    await this.prisma.userEpisode.upsert({
+      where: { userId_episodeId: { userId, episodeId } },
+      create: { userId, episodeId },
+      update: {},
+    });
+  }
+
+  async unmarkEpisodeWatched(userId: string, episodeId: string): Promise<void> {
+    await this.prisma.userEpisode.deleteMany({ where: { userId, episodeId } });
+  }
+
+  async listWatchedEpisodes(
+    userId: string,
+    animeId: string,
+  ): Promise<{ episodeId: string; episodeNumber: number; watchedAt: Date }[]> {
+    const rows = await this.prisma.userEpisode.findMany({
+      where: { userId, episode: { animeId } },
+      orderBy: { watchedAt: "desc" },
+      include: { episode: { select: { number: true } } },
+    });
+    return rows.map((r) => ({
+      episodeId: r.episodeId,
+      episodeNumber: r.episode.number,
+      watchedAt: r.watchedAt,
+    }));
+  }
 }
 
 interface WatchlistRow {

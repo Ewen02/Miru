@@ -28,9 +28,11 @@ describe("GetUserLifetimeStatsUseCase", () => {
       reviewAverageRating: 8.2,
       watchlistTotal: 280,
       watchlistPlanned: 60,
-      topGenre: { name: "Drama", count: 45 },
+      topGenre: { name: "Drama", slug: "drama", count: 45 },
       topStudio: { name: "MAPPA", count: 18 },
       firstAddedAt: new Date("2024-09-12T00:00:00Z"),
+      currentStreakDays: 3,
+      longestStreakDays: 12,
     });
 
     const result = await useCase.execute({ userId: "u1" });

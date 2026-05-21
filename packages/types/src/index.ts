@@ -263,10 +263,14 @@ export interface UserLifetimeStats {
   reviewAverageRating: number | null;
   watchlistTotal: number;
   watchlistPlanned: number;
-  topGenre: { name: string; count: number } | null;
+  topGenre: { name: string; slug: string; count: number } | null;
   topStudio: { name: string; count: number } | null;
   /** ISO string — earliest watchlist entry creation date. */
   firstAddedAt: string | null;
+  /** Current streak: consecutive days up to today with at least one watched ep. */
+  currentStreakDays: number;
+  /** Longest streak ever. */
+  longestStreakDays: number;
 }
 
 export interface UserLifetime {

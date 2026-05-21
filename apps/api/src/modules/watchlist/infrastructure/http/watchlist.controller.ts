@@ -16,7 +16,10 @@ import { CurrentUserId } from "@auth/current-user.decorator";
 import { AddToWatchlistUseCase } from "../../application/use-cases/add-to-watchlist.use-case";
 import { GetUserWatchlistUseCase } from "../../application/use-cases/get-user-watchlist.use-case";
 import { ImportAniListWatchlistUseCase } from "../../application/use-cases/import-anilist-watchlist.use-case";
+import { ListWatchedEpisodesUseCase } from "../../application/use-cases/list-watched-episodes.use-case";
+import { MarkEpisodeWatchedUseCase } from "../../application/use-cases/mark-episode-watched.use-case";
 import { RemoveFromWatchlistUseCase } from "../../application/use-cases/remove-from-watchlist.use-case";
+import { UnmarkEpisodeWatchedUseCase } from "../../application/use-cases/unmark-episode-watched.use-case";
 import { UpdateWatchlistEntryUseCase } from "../../application/use-cases/update-watchlist-entry.use-case";
 import {
   AddToWatchlistDto,
@@ -34,6 +37,9 @@ export class WatchlistController {
     private readonly removeEntry: RemoveFromWatchlistUseCase,
     private readonly getWatchlist: GetUserWatchlistUseCase,
     private readonly importAniList: ImportAniListWatchlistUseCase,
+    private readonly markEpisode: MarkEpisodeWatchedUseCase,
+    private readonly unmarkEpisode: UnmarkEpisodeWatchedUseCase,
+    private readonly listWatchedEpisodes: ListWatchedEpisodesUseCase,
   ) {}
 
   @Post("watchlist")
@@ -98,6 +104,38 @@ export class WatchlistController {
     unknownAnilistIds: number[];
   }> {
     return this.importAniList.execute({ userId, username: body.username ?? "" });
+  }
+
+  /** List the episodes the user has marked watched for a given anime. */
+  @Get("watchlist/anime/:animeId/episodes")
+  async watchedEpisodes(
+    @CurrentUserId() userId: string,
+    @Param("animeId") animeId: string,
+  ): Promise<Array<{ episodeId: string; episodeNumber: number; watchedAt: string }>> {
+    const items = await this.listWatchedEpisodes.execute({ userId, animeId });
+    return items.map((it) => ({
+      episodeId: it.episodeId,
+      episodeNumber: it.episodeNumber,
+      watchedAt: it.watchedAt.toISOString(),
+    }));
+  }
+
+  @Post("watchlist/episodes/:episodeId/watched")
+  @HttpCode(204)
+  async markWatched(
+    @CurrentUserId() userId: string,
+    @Param("episodeId") episodeId: string,
+  ): Promise<void> {
+    await this.markEpisode.execute({ userId, episodeId });
+  }
+
+  @Delete("watchlist/episodes/:episodeId/watched")
+  @HttpCode(204)
+  async unmarkWatched(
+    @CurrentUserId() userId: string,
+    @Param("episodeId") episodeId: string,
+  ): Promise<void> {
+    await this.unmarkEpisode.execute({ userId, episodeId });
   }
 }
 

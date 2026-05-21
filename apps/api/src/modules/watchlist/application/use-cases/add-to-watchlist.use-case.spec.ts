@@ -9,6 +9,9 @@ function makeRepoMock(): jest.Mocked<WatchlistRepositoryPort> {
     findByUser: jest.fn(),
     save: jest.fn(),
     remove: jest.fn(),
+    markEpisodeWatched: jest.fn(),
+    unmarkEpisodeWatched: jest.fn(),
+    listWatchedEpisodes: jest.fn(),
   };
 }
 

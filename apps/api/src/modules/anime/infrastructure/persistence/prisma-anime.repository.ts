@@ -322,4 +322,67 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
         airedAt: r.airedAt as Date,
       }));
   }
+
+  async findRecommendedForUser(userId: string, limit: number): Promise<AnimeEntity[]> {
+    // Two-CTE scoring:
+    //   user_genre  → genres seen in the user's WATCHING/COMPLETED entries, with weight = count
+    //   user_studio → same for studios
+    // Then sum a per-anime score = SUM(matching genre weights) * 2 + studio weight,
+    // exclude anything in the watchlist (any status) and NSFW.
+    const rows = await this.prisma.$queryRaw<Array<{ id: string }>>`
+      WITH user_genre AS (
+        SELECT g.id, COUNT(*)::int AS weight
+        FROM "WatchlistEntry" w
+        JOIN "_AnimeGenres" ag ON ag."A" = w."animeId"
+        JOIN "Genre" g ON g.id = ag."B"
+        WHERE w."userId" = ${userId}
+          AND w.status IN ('WATCHING', 'COMPLETED')
+        GROUP BY g.id
+      ),
+      user_studio AS (
+        SELECT a."studioId" AS id, COUNT(*)::int AS weight
+        FROM "WatchlistEntry" w
+        JOIN "Anime" a ON a.id = w."animeId"
+        WHERE w."userId" = ${userId}
+          AND w.status IN ('WATCHING', 'COMPLETED')
+          AND a."studioId" IS NOT NULL
+        GROUP BY a."studioId"
+      ),
+      candidate AS (
+        SELECT
+          a.id,
+          COALESCE(SUM(ug.weight), 0) * 2 + COALESCE(MAX(us.weight), 0) AS score,
+          a."averageRating"
+        FROM "Anime" a
+        LEFT JOIN "_AnimeGenres" ag ON ag."A" = a.id
+        LEFT JOIN user_genre ug ON ug.id = ag."B"
+        LEFT JOIN user_studio us ON us.id = a."studioId"
+        WHERE a.id NOT IN (SELECT "animeId" FROM "WatchlistEntry" WHERE "userId" = ${userId})
+          AND a.id NOT IN (
+            SELECT ag2."A" FROM "_AnimeGenres" ag2
+            JOIN "Genre" g2 ON g2.id = ag2."B"
+            WHERE g2.slug = 'hentai'
+          )
+        GROUP BY a.id
+      )
+      SELECT id
+      FROM candidate
+      WHERE score > 0
+      ORDER BY score DESC, "averageRating" DESC NULLS LAST
+      LIMIT ${limit}
+    `;
+
+    if (rows.length === 0) return [];
+
+    // Hydrate via the card include so toDomainCard can build entities.
+    const records = await this.prisma.anime.findMany({
+      where: { id: { in: rows.map((r) => r.id) } },
+      include: INCLUDE_CARD,
+    });
+
+    // Preserve the score order from the raw query.
+    const indexById = new Map(rows.map((r, i) => [r.id, i]));
+    records.sort((a, b) => (indexById.get(a.id) ?? 0) - (indexById.get(b.id) ?? 0));
+    return records.map(toDomainCard);
+  }
 }

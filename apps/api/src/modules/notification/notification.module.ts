@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
+import { PushModule } from "@modules/push/push.module";
 import { ListNotificationsUseCase } from "./application/use-cases/list-notifications.use-case";
 import { MarkNotificationReadUseCase } from "./application/use-cases/mark-notification-read.use-case";
 import { MarkAllNotificationsReadUseCase } from "./application/use-cases/mark-all-notifications-read.use-case";
@@ -10,7 +11,7 @@ import { NotificationController } from "./infrastructure/http/notification.contr
 import { NotificationScheduler } from "./infrastructure/scheduler/notification.scheduler";
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, PushModule],
   controllers: [NotificationController],
   providers: [
     ListNotificationsUseCase,

@@ -4,7 +4,10 @@ import { AnimeModule } from "@modules/anime/anime.module";
 import { AddToWatchlistUseCase } from "./application/use-cases/add-to-watchlist.use-case";
 import { GetUserWatchlistUseCase } from "./application/use-cases/get-user-watchlist.use-case";
 import { ImportAniListWatchlistUseCase } from "./application/use-cases/import-anilist-watchlist.use-case";
+import { ListWatchedEpisodesUseCase } from "./application/use-cases/list-watched-episodes.use-case";
+import { MarkEpisodeWatchedUseCase } from "./application/use-cases/mark-episode-watched.use-case";
 import { RemoveFromWatchlistUseCase } from "./application/use-cases/remove-from-watchlist.use-case";
+import { UnmarkEpisodeWatchedUseCase } from "./application/use-cases/unmark-episode-watched.use-case";
 import { UpdateWatchlistEntryUseCase } from "./application/use-cases/update-watchlist-entry.use-case";
 import { WATCHLIST_REPOSITORY } from "./application/tokens";
 import { PrismaWatchlistRepository } from "./infrastructure/persistence/prisma-watchlist.repository";
@@ -19,6 +22,9 @@ import { WatchlistController } from "./infrastructure/http/watchlist.controller"
     RemoveFromWatchlistUseCase,
     GetUserWatchlistUseCase,
     ImportAniListWatchlistUseCase,
+    MarkEpisodeWatchedUseCase,
+    UnmarkEpisodeWatchedUseCase,
+    ListWatchedEpisodesUseCase,
     { provide: WATCHLIST_REPOSITORY, useClass: PrismaWatchlistRepository },
   ],
   exports: [WATCHLIST_REPOSITORY],

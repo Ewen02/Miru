@@ -63,4 +63,10 @@ export interface AnimeRepositoryPort extends RepositoryPort<AnimeEntity> {
   markSyncFailed(animeId: string): Promise<void>;
   /** Episodes airing in [from, to] for the airing calendar. NSFW excluded. */
   findAiringEpisodesBetween(from: Date, to: Date): Promise<EpisodeAiringRow[]>;
+  /**
+   * Personalized recommendations: scores each catalog anime by how much its
+   * genre + studio overlap with what the user has marked WATCHING/COMPLETED.
+   * Excludes anything already in their watchlist (any status). NSFW excluded.
+   */
+  findRecommendedForUser(userId: string, limit: number): Promise<AnimeEntity[]>;
 }

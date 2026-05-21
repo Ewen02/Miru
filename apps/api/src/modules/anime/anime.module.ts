@@ -8,6 +8,7 @@ import { GetAnimeDetailUseCase } from "./application/use-cases/get-anime-detail.
 import { GetAnimeAccentUseCase } from "./application/use-cases/get-anime-accent.use-case";
 import { GetAnimeCharactersUseCase } from "./application/use-cases/get-anime-characters.use-case";
 import { GetCalendarWeekUseCase } from "./application/use-cases/get-calendar-week.use-case";
+import { GetRecommendationsUseCase } from "./application/use-cases/get-recommendations.use-case";
 import {
   ANILIST_CLIENT,
   ANIME_REPOSITORY,
@@ -35,6 +36,7 @@ import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
     GetAnimeAccentUseCase,
     GetAnimeCharactersUseCase,
     GetCalendarWeekUseCase,
+    GetRecommendationsUseCase,
     { provide: ANILIST_CLIENT, useFactory: () => new AniListClient() },
     { provide: JIKAN_CLIENT, useFactory: () => new JikanClient() },
     { provide: ANIME_REPOSITORY, useClass: PrismaAnimeRepository },

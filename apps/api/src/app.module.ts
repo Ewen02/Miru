@@ -15,6 +15,7 @@ import { GenreModule } from "@modules/genre/genre.module";
 import { ListModule } from "@modules/list/list.module";
 import { NotificationModule } from "@modules/notification/notification.module";
 import { PlatformModule } from "@modules/platform/platform.module";
+import { PushModule } from "@modules/push/push.module";
 import { ReviewModule } from "@modules/review/review.module";
 import { StudioModule } from "@modules/studio/studio.module";
 import { SyncModule } from "@modules/sync/sync.module";
@@ -74,6 +75,7 @@ const isDev = process.env.NODE_ENV !== "production";
     ListModule,
     NotificationModule,
     PlatformModule,
+    PushModule,
     StudioModule,
     SyncModule,
     UserModule,

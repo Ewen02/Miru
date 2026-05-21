@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "home": "Home",
+    "calendar": "Calendar",
+    "lists": "Lists",
+    "pricing": "Pricing",
+    "settings": "Settings"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "language": "Language"
+  },
+  "locales": {
+    "fr": "Français",
+    "en": "English"
+  },
+  "pricing": {
+    "title": "Pay if you want.",
+    "subtitle": "Miru will always be free for the essentials. The Sympathisant plan exists for those who want to support the project — not to unlock features.",
+    "freeTitle": "Free",
+    "freePrice": "€0",
+    "freePeriod": "forever",
+    "freeDescription": "Everything essential. No ads, no limits.",
+    "freeCta": "Get started",
+    "proTitle": "Sympathisant",
+    "proPrice": "€4",
+    "proPeriod": "/ month",
+    "proDescription": "Support development without changing your experience.",
+    "proCta": "Become a supporter",
+    "noLock": "No lock-in, no paid features.",
+    "noLockBody": "The Sympathisant plan grants nothing the free version doesn't — it's a contribution, not a paywall. If in doubt, stick with free, all good.",
+    "alreadyActive": "You've been a Sympathisant since {date} — thank you.",
+    "manageInSettings": "You can manage your subscription from settings."
+  },
+  "settings": {
+    "title": "Settings",
+    "eyebrow": "Preferences",
+    "billingTitle": "Sympathisant subscription",
+    "billingActiveDescription": "Active since {date}. You can manage payment and cancel anytime.",
+    "billingInactiveDescription": "Support the project for €4/month. Nothing unlocks — it's purely a contribution.",
+    "manageBilling": "Manage my subscription",
+    "becomeSympathisant": "Become a supporter",
+    "language": "Interface language",
+    "languageDescription": "Pick the language shown across Miru. Changes apply immediately."
+  }
+}

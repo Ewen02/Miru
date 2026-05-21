@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "calendar": "Calendrier",
+    "lists": "Listes",
+    "pricing": "Tarifs",
+    "settings": "Paramètres"
+  },
+  "common": {
+    "loading": "Chargement…",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "language": "Langue"
+  },
+  "locales": {
+    "fr": "Français",
+    "en": "English"
+  },
+  "pricing": {
+    "title": "Tu paies si tu veux.",
+    "subtitle": "Miru sera toujours gratuit pour l'essentiel. L'abonnement Sympathisant existe pour celles et ceux qui veulent soutenir le projet — pas pour débloquer des features.",
+    "freeTitle": "Gratuit",
+    "freePrice": "0 €",
+    "freePeriod": "à vie",
+    "freeDescription": "Tout l'essentiel. Pas de pub, pas de limite.",
+    "freeCta": "Commencer",
+    "proTitle": "Sympathisant",
+    "proPrice": "4 €",
+    "proPeriod": "/ mois",
+    "proDescription": "Pour soutenir le développement sans changer d'expérience.",
+    "proCta": "Devenir sympathisant",
+    "noLock": "Aucun verrou, aucune feature payante.",
+    "noLockBody": "Le plan Sympathisant ne donne accès à rien que la version gratuite n'ait — c'est une contribution, pas un paywall. Si tu hésites, reste sur le gratuit, tout va bien.",
+    "alreadyActive": "Tu es Sympathisant depuis le {date} — merci.",
+    "manageInSettings": "Tu peux gérer ton abonnement depuis les paramètres."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "eyebrow": "Préférences",
+    "billingTitle": "Abonnement Sympathisant",
+    "billingActiveDescription": "Actif depuis le {date}. Tu peux gérer le paiement et résilier à tout moment.",
+    "billingInactiveDescription": "Soutiens le projet pour 4 €/mois. Aucun verrou ne s'ouvre — c'est uniquement pour aider.",
+    "manageBilling": "Gérer mon abonnement",
+    "becomeSympathisant": "Devenir sympathisant",
+    "language": "Langue de l'interface",
+    "languageDescription": "Choisis la langue affichée sur Miru. Le changement prend effet immédiatement."
+  }
+}

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import { AppHeader } from "@/components/app-header";
 import { HeaderProvider } from "@/components/app-header/header-context";
@@ -65,13 +67,14 @@ export const viewport: import("next").Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [locale, messages] = await Promise.all([getLocale(), getMessages()]);
   return (
-    <html lang="fr" className="h-full antialiased">
+    <html lang={locale} className="h-full antialiased">
       <head>
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
         <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="" />
@@ -87,12 +90,14 @@ export default function RootLayout({
         />
       </head>
       <body className="flex min-h-full flex-col bg-bg-base font-body text-text-primary pb-16 md:pb-0">
-        <HeaderProvider>
-          <AppHeader />
-          <div className="flex-1">{children}</div>
-        </HeaderProvider>
-        <MobileBottomNav />
-        <SiteFooter />
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <HeaderProvider>
+            <AppHeader />
+            <div className="flex-1">{children}</div>
+          </HeaderProvider>
+          <MobileBottomNav />
+          <SiteFooter />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

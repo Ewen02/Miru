@@ -1,8 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { PushToggle } from "./push-toggle";
 import { BillingSection } from "./billing-section";
 import { fetchBillingStatus } from "@/lib/server-billing";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 
 export const metadata: Metadata = {
   title: "Paramètres",
@@ -18,7 +20,7 @@ const TABS = [
 ];
 
 export default async function SettingsPage() {
-  const billing = await fetchBillingStatus();
+  const [billing, t] = await Promise.all([fetchBillingStatus(), getTranslations("settings")]);
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
       <header className="mb-10">
@@ -53,6 +55,20 @@ export default async function SettingsPage() {
 
         <div className="flex flex-col gap-10">
           <BillingSection isPro={billing.isPro} proSince={billing.proSince} />
+
+          <section>
+            <header className="mb-5">
+              <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">
+                {t("language")}
+              </h2>
+              <p className="m-0 mt-1 font-body text-sm text-text-tertiary">
+                {t("languageDescription")}
+              </p>
+            </header>
+            <div className="rounded-2xl border border-border-subtle bg-bg-surface p-5">
+              <LocaleSwitcher />
+            </div>
+          </section>
 
           <section>
             <header className="mb-5">

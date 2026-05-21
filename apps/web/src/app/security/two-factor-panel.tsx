@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@miru/ui";
 import { authClient } from "@/lib/auth-client";
 
@@ -14,11 +15,12 @@ type Step = "idle" | "password" | "scan" | "verify" | "backup";
 
 /**
  * Inline 2FA management. Three flows from the same panel:
- * - Disabled → button "Activer" → password confirm → QR scan → 6-digit verify → backup codes shown
- * - Enabled  → button "Désactiver" → password confirm → done
+ * - Disabled → button "Enable" → password confirm → QR scan → 6-digit verify → backup codes shown
+ * - Enabled  → button "Disable" → password confirm → done
  */
 export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
   const router = useRouter();
+  const t = useTranslations("security.tfa");
   const [step, setStep] = useState<Step>("idle");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -40,15 +42,13 @@ export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
     setError(null);
     setPending(true);
     try {
-      // Better Auth: enableTwoFactor returns the TOTP URI and backup codes.
-      // It requires the user's password as a re-auth challenge.
       const { data, error: err } = await authClient.twoFactor.enable({ password });
       if (err) {
-        setError(err.message ?? "Mot de passe incorrect.");
+        setError(err.message ?? t("passwordIncorrect"));
         return;
       }
       if (!data) {
-        setError("Réponse inattendue du serveur.");
+        setError(t("unexpectedResponse"));
         return;
       }
       setQrUri(data.totpURI);
@@ -65,7 +65,7 @@ export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
     try {
       const { error: err } = await authClient.twoFactor.verifyTotp({ code });
       if (err) {
-        setError(err.message ?? "Code invalide.");
+        setError(err.message ?? t("invalidCode"));
         return;
       }
       setStep("backup");
@@ -81,7 +81,7 @@ export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
     try {
       const { error: err } = await authClient.twoFactor.disable({ password });
       if (err) {
-        setError(err.message ?? "Mot de passe incorrect.");
+        setError(err.message ?? t("passwordIncorrect"));
         return;
       }
       reset();
@@ -96,10 +96,10 @@ export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
       <article className="flex items-center justify-between rounded-2xl border border-border-subtle bg-bg-surface p-5">
         <div>
           <p className="m-0 font-display text-base font-semibold text-text-primary">
-            2FA · Application d'authentification
+            {t("title")}
           </p>
           <p className="m-0 mt-0.5 font-body text-xs text-text-tertiary">
-            Activée — un code à 6 chiffres est demandé à chaque connexion.
+            {t("enabledHint")}
           </p>
         </div>
         <button
@@ -107,7 +107,7 @@ export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
           onClick={() => setStep("password")}
           className="inline-flex h-9 items-center rounded-md border border-error/30 bg-error-muted px-4 font-body text-sm font-medium text-error transition-colors duration-200 hover:bg-error/20"
         >
-          Désactiver
+          {t("disable")}
         </button>
       </article>
     );
@@ -118,10 +118,10 @@ export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
       <article className="flex items-center justify-between rounded-2xl border border-border-subtle bg-bg-surface p-5">
         <div>
           <p className="m-0 font-display text-base font-semibold text-text-primary">
-            2FA · Application d'authentification
+            {t("title")}
           </p>
           <p className="m-0 mt-0.5 font-body text-xs text-text-tertiary">
-            Ajoute une seconde étape avec Google Authenticator, 1Password, Authy…
+            {t("disabledHint")}
           </p>
         </div>
         <button
@@ -130,7 +130,7 @@ export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
           className="inline-flex h-9 items-center rounded-md px-4 font-body text-sm font-semibold"
           style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
         >
-          Activer
+          {t("enable")}
         </button>
       </article>
     );
@@ -147,6 +147,7 @@ export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
           onCancel={reset}
           pending={pending}
           error={error}
+          t={t}
         />
       )}
 
@@ -159,15 +160,18 @@ export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
           onCancel={reset}
           pending={pending}
           error={error}
+          t={t}
         />
       )}
 
       {step === "backup" && (
-        <BackupStep backupCodes={backupCodes} onDone={reset} />
+        <BackupStep backupCodes={backupCodes} onDone={reset} t={t} />
       )}
     </article>
   );
 }
+
+type T = (key: string) => string;
 
 function PasswordStep({
   enabled,
@@ -177,6 +181,7 @@ function PasswordStep({
   onCancel,
   pending,
   error,
+  t,
 }: {
   enabled: boolean;
   password: string;
@@ -185,6 +190,7 @@ function PasswordStep({
   onCancel: () => void;
   pending: boolean;
   error: string | null;
+  t: T;
 }) {
   return (
     <form
@@ -194,10 +200,10 @@ function PasswordStep({
       }}
     >
       <p className="m-0 mb-1 font-display text-base font-semibold text-text-primary">
-        {enabled ? "Désactiver la 2FA" : "Activer la 2FA"}
+        {enabled ? t("passwordTitleDisable") : t("passwordTitleEnable")}
       </p>
       <p className="m-0 mb-5 font-body text-xs text-text-tertiary">
-        Confirme ton mot de passe pour continuer.
+        {t("passwordSubtitle")}
       </p>
       <input
         type="password"
@@ -222,7 +228,7 @@ function PasswordStep({
           onClick={onCancel}
           className="font-mono text-xs uppercase tracking-wider text-text-tertiary hover:text-text-secondary"
         >
-          Annuler
+          {t("cancel")}
         </button>
         <button
           type="submit"
@@ -230,7 +236,7 @@ function PasswordStep({
           className="inline-flex h-9 items-center rounded-md px-4 font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
         >
-          {pending ? "…" : "Continuer"}
+          {pending ? "…" : t("continue")}
         </button>
       </div>
     </form>
@@ -245,6 +251,7 @@ function ScanStep({
   onCancel,
   pending,
   error,
+  t,
 }: {
   qrUri: string;
   code: string;
@@ -253,8 +260,8 @@ function ScanStep({
   onCancel: () => void;
   pending: boolean;
   error: string | null;
+  t: T;
 }) {
-  // Build a QR image via the Google Charts proxy — keeps the bundle dep-free.
   const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUri)}`;
   return (
     <form
@@ -264,13 +271,13 @@ function ScanStep({
       }}
     >
       <p className="m-0 mb-1 font-display text-base font-semibold text-text-primary">
-        Scanne le QR code
+        {t("scanTitle")}
       </p>
       <p className="m-0 mb-5 font-body text-xs text-text-tertiary">
-        Avec ton application d'authentification (Google Authenticator, 1Password, Authy, etc.), puis saisis le code à 6 chiffres affiché.
+        {t("scanSubtitle")}
       </p>
       <div className="mb-5 flex justify-center">
-        <Image src={qrImage} alt="QR code 2FA" width={200} height={200} unoptimized />
+        <Image src={qrImage} alt={t("qrAlt")} width={200} height={200} unoptimized />
       </div>
       <input
         type="text"
@@ -294,7 +301,7 @@ function ScanStep({
           onClick={onCancel}
           className="font-mono text-xs uppercase tracking-wider text-text-tertiary hover:text-text-secondary"
         >
-          Annuler
+          {t("cancel")}
         </button>
         <button
           type="submit"
@@ -302,24 +309,33 @@ function ScanStep({
           className="inline-flex h-9 items-center rounded-md px-4 font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
         >
-          {pending ? "Vérification…" : "Valider"}
+          {pending ? t("verifying") : t("verify")}
         </button>
       </div>
     </form>
   );
 }
 
-function BackupStep({ backupCodes, onDone }: { backupCodes: string[]; onDone: () => void }) {
+function BackupStep({
+  backupCodes,
+  onDone,
+  t,
+}: {
+  backupCodes: string[];
+  onDone: () => void;
+  t: T;
+}) {
   const copy = () => {
     navigator.clipboard.writeText(backupCodes.join("\n")).catch(() => {});
   };
   return (
     <div>
       <p className="m-0 mb-1 font-display text-base font-semibold text-text-primary">
-        2FA activée ✓
+        {t("backupTitle")}
       </p>
       <p className="m-0 mb-5 font-body text-xs text-text-tertiary">
-        Sauvegarde ces codes de récupération dans un endroit sûr. Ils te permettent de te connecter si tu perds ton téléphone. <span className="text-text-secondary">Ils ne seront plus jamais affichés.</span>
+        {t("backupSubtitle1")}{" "}
+        <span className="text-text-secondary">{t("backupSubtitle2")}</span>
       </p>
       <div className="mb-5 grid grid-cols-2 gap-2 rounded-md border border-border bg-bg-base p-4 font-mono text-sm">
         {backupCodes.map((c) => (
@@ -334,7 +350,7 @@ function BackupStep({ backupCodes, onDone }: { backupCodes: string[]; onDone: ()
           onClick={copy}
           className="inline-flex h-9 items-center rounded-md border border-border bg-bg-surface px-3 font-body text-sm text-text-secondary hover:text-text-primary"
         >
-          Copier
+          {t("copy")}
         </button>
         <button
           type="button"
@@ -342,7 +358,7 @@ function BackupStep({ backupCodes, onDone }: { backupCodes: string[]; onDone: ()
           className="inline-flex h-9 items-center rounded-md px-4 font-body text-sm font-semibold"
           style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
         >
-          J'ai sauvegardé
+          {t("done")}
         </button>
       </div>
     </div>

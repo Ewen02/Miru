@@ -6,34 +6,35 @@ import { BillingSection } from "./billing-section";
 import { fetchBillingStatus } from "@/lib/server-billing";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 
-export const metadata: Metadata = {
-  title: "Paramètres",
-  description: "Réglages de ton compte Miru.",
-};
-
-const TABS = [
-  { key: "account", label: "Compte" },
-  { key: "notifications", label: "Notifications" },
-  { key: "privacy", label: "Données & confidentialité" },
-  { key: "appearance", label: "Apparence" },
-  { key: "advanced", label: "Avancé" },
-];
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("settings");
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
 
 export default async function SettingsPage() {
   const [billing, t] = await Promise.all([fetchBillingStatus(), getTranslations("settings")]);
+
+  const TABS: Array<{ key: string; label: string }> = [
+    { key: "account", label: t("tabAccount") },
+    { key: "notifications", label: t("tabNotifications") },
+    { key: "privacy", label: t("tabPrivacy") },
+    { key: "appearance", label: t("tabAppearance") },
+    { key: "advanced", label: t("tabAdvanced") },
+  ];
+
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
       <header className="mb-10">
         <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-          Préférences
+          {t("eyebrowPreferences")}
         </p>
         <h1 className="m-0 font-display text-4xl font-semibold tracking-[-0.025em] text-text-primary sm:text-5xl">
-          Paramètres
+          {t("metaTitle")}
         </h1>
       </header>
 
       <div className="grid grid-cols-1 gap-10 md:grid-cols-[200px_1fr]">
-        <nav className="flex flex-col gap-1" aria-label="Sections paramètres">
+        <nav className="flex flex-col gap-1" aria-label={t("sectionsAria")}>
           {TABS.map((tab) => {
             const active = tab.key === "notifications";
             return (
@@ -73,48 +74,60 @@ export default async function SettingsPage() {
           <section>
             <header className="mb-5">
               <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">
-                Notifications par e-mail
+                {t("emailNotifsTitle")}
               </h2>
               <p className="m-0 mt-1 font-body text-sm text-text-tertiary">
-                Choisis ce qui mérite d'arriver dans ta boîte mail.
+                {t("emailNotifsSubtitle")}
               </p>
             </header>
             <div className="rounded-2xl border border-border-subtle bg-bg-surface divide-y divide-border-subtle">
-              <ToggleRow label="Nouveaux épisodes" description="Quand un épisode de ta watchlist sort." defaultOn />
-              <ToggleRow label="Récap hebdomadaire" description="Récap de ce que tu as regardé chaque dimanche." defaultOn />
-              <ToggleRow label="Commentaires sur mes avis" description="Quand quelqu'un répond à un de tes avis." />
-              <ToggleRow label="Nouveaux abonnés" description="Quand quelqu'un commence à te suivre." />
+              <ToggleRow
+                label={t("emailNewEpisodes")}
+                description={t("emailNewEpisodesDesc")}
+                defaultOn
+              />
+              <ToggleRow
+                label={t("emailWeeklyRecap")}
+                description={t("emailWeeklyRecapDesc")}
+                defaultOn
+              />
+              <ToggleRow label={t("emailComments")} description={t("emailCommentsDesc")} />
+              <ToggleRow label={t("emailFollowers")} description={t("emailFollowersDesc")} />
             </div>
           </section>
 
           <section>
             <header className="mb-5">
               <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">
-                Notifications dans l'app
+                {t("inAppTitle")}
               </h2>
             </header>
             <div className="rounded-2xl border border-border-subtle bg-bg-surface divide-y divide-border-subtle">
               <PushToggle />
-              <ToggleRow label="Épisodes diffusés" description="Pip rouge sur la cloche." defaultOn />
-              <ToggleRow label="Recommandations personnalisées" defaultOn />
-              <ToggleRow label="Mentions @" defaultOn />
+              <ToggleRow
+                label={t("inAppAired")}
+                description={t("inAppAiredDesc")}
+                defaultOn
+              />
+              <ToggleRow label={t("inAppRecos")} defaultOn />
+              <ToggleRow label={t("inAppMentions")} defaultOn />
             </div>
           </section>
 
           <section>
             <header className="mb-5">
               <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">
-                Heures calmes
+                {t("quietTitle")}
               </h2>
               <p className="m-0 mt-1 font-body text-sm text-text-tertiary">
-                Aucune notification entre ces deux heures.
+                {t("quietSubtitle")}
               </p>
             </header>
             <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-border-subtle bg-bg-surface p-5">
-              <TimeField label="De" defaultValue="22:00" />
-              <TimeField label="À" defaultValue="08:00" />
+              <TimeField label={t("quietFrom")} defaultValue="22:00" />
+              <TimeField label={t("quietTo")} defaultValue="08:00" />
               <span className="font-mono text-[10px] text-text-tertiary">
-                Fuseau : Europe/Paris
+                {t("quietTimezone")}
               </span>
             </div>
           </section>
@@ -122,18 +135,18 @@ export default async function SettingsPage() {
           <section>
             <header className="mb-5">
               <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-error">
-                Zone dangereuse
+                {t("dangerTitle")}
               </h2>
             </header>
             <div className="rounded-2xl border border-error/30 bg-error-muted p-5">
               <p className="m-0 mb-3 font-body text-sm text-text-secondary">
-                Supprimer ton compte efface watchlist, avis et historique. C'est irréversible.
+                {t("dangerDescription")}
               </p>
               <button
                 type="button"
                 className="inline-flex h-9 items-center rounded-md border border-error/40 bg-bg-base px-4 font-body text-sm font-medium text-error transition-colors duration-200 hover:bg-error-muted"
               >
-                Supprimer mon compte
+                {t("dangerCta")}
               </button>
             </div>
           </section>

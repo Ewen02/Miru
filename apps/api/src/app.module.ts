@@ -1,11 +1,13 @@
 import { Module } from "@nestjs/common";
-import { APP_FILTER } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ScheduleModule } from "@nestjs/schedule";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { AuthModule } from "@thallesp/nestjs-better-auth";
 import { LoggerModule } from "nestjs-pino";
 import { SentryModule, SentryGlobalFilter } from "@sentry/nestjs/setup";
 import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
+import { MailModule } from "@shared/mail/mail.module";
 import { HealthController } from "@shared/infrastructure/http/health.controller";
 import { AnimeModule } from "@modules/anime/anime.module";
 import { CharacterModule } from "@modules/character/character.module";
@@ -54,6 +56,10 @@ const isDev = process.env.NODE_ENV !== "production";
     }),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
+    // Global rate limit: 120 req/min per IP across the whole API.
+    // Better Auth's `/api/auth/*` routes have their own internal rate limit on
+    // top of this — so signup/login are double-gated.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
     AuthModule.forRoot({
       auth,
       // Anime catalog is mostly public — opt-in to auth via @Session() on
@@ -61,6 +67,7 @@ const isDev = process.env.NODE_ENV !== "production";
       disableGlobalAuthGuard: true,
     }),
     PrismaModule,
+    MailModule,
     AnimeModule,
     CharacterModule,
     GenreModule,
@@ -81,6 +88,7 @@ const isDev = process.env.NODE_ENV !== "production";
     // runs (registered globally in main.ts) and converts known domain errors
     // to HTTP responses — Sentry records them either way.
     { provide: APP_FILTER, useClass: SentryGlobalFilter },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}

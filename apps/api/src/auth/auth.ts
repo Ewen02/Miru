@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { twoFactor } from "better-auth/plugins";
 import { prisma } from "@miru/db";
+import { authMailer } from "./auth-mailer";
 
 const SECRET = process.env.BETTER_AUTH_SECRET;
 if (!SECRET) {
@@ -26,8 +27,29 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    // Force email verification before allowing login — keeps bots out and
+    // sends the welcome flow only to addresses the user actually owns.
+    requireEmailVerification: true,
+    async sendResetPassword({ user, url }) {
+      await authMailer.sendPasswordReset(user.email, url);
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    async sendVerificationEmail({ user, url }) {
+      await authMailer.sendVerify(user.email, url);
+    },
   },
   trustedOrigins: [WEB_ORIGIN],
+  // Built-in rate limit for /api/auth/* on top of the global Nest throttler.
+  // 30 req/min/IP is loose enough for normal use (a few signup attempts +
+  // session refreshes), tight enough to stop credential stuffing scripts.
+  rateLimit: {
+    enabled: true,
+    window: 60,
+    max: 30,
+  },
   // Map Better Auth's lowercase defaults to our PascalCase Prisma models.
   user: { modelName: "User" },
   session: {

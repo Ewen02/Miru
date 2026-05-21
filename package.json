@@ -12,12 +12,15 @@
     "type-check": "turbo type-check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install --with-deps chromium",
     "db:generate": "turbo db:generate",
     "db:push": "turbo db:push",
     "db:seed": "turbo db:seed",
     "clean": "turbo clean"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "prettier": "^3.4.2",
     "turbo": "^2"
   },

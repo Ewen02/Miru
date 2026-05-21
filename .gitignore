@@ -13,3 +13,9 @@ prompt-migration-design.md
 
 # Claude Design mockup output — reference material, not source code
 Miru/
+
+# Playwright artifacts
+/playwright-report
+/test-results
+/blob-report
+/playwright/.cache

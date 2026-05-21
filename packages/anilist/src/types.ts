@@ -113,3 +113,33 @@ export const AniListAnimeSchema = z.object({
 
 export type AniListAnime = z.infer<typeof AniListAnimeSchema>;
 export type AniListCharacterEdge = AniListAnime["characters"]["edges"][number];
+
+/** AniList native list statuses — we map these to Miru's WatchStatus. */
+export const AniListMediaListStatusSchema = z.enum([
+  "CURRENT",
+  "PLANNING",
+  "COMPLETED",
+  "DROPPED",
+  "PAUSED",
+  "REPEATING",
+]);
+export type AniListMediaListStatus = z.infer<typeof AniListMediaListStatusSchema>;
+
+const FuzzyDateSchema = z
+  .object({
+    year: z.number().int().nullable().optional(),
+    month: z.number().int().nullable().optional(),
+    day: z.number().int().nullable().optional(),
+  })
+  .nullable()
+  .optional();
+
+export const AniListMediaListEntrySchema = z.object({
+  mediaId: z.number().int().positive(),
+  status: AniListMediaListStatusSchema,
+  progress: z.number().int().nonnegative().default(0),
+  score: z.number().nullable().optional(),
+  startedAt: FuzzyDateSchema,
+  completedAt: FuzzyDateSchema,
+});
+export type AniListMediaListEntry = z.infer<typeof AniListMediaListEntrySchema>;

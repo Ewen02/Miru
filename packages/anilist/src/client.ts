@@ -4,8 +4,14 @@ import {
   ANIME_SEARCH_QUERY,
   SEASON_QUERY,
   TRENDING_QUERY,
+  USER_MEDIA_LIST_QUERY,
 } from "./queries.js";
-import { AniListAnimeSchema, type AniListAnime } from "./types.js";
+import {
+  AniListAnimeSchema,
+  AniListMediaListEntrySchema,
+  type AniListAnime,
+  type AniListMediaListEntry,
+} from "./types.js";
 
 const ANILIST_API = "https://graphql.anilist.co";
 // AniList rate-limit: 90 req/min = ~667ms min per req. 750ms garde une marge.
@@ -90,6 +96,28 @@ export class AniListClient extends ThrottledRetryClient {
       const data = await this.graphql<{ Media: unknown }>(ANIME_DETAIL_QUERY, { id });
       return AniListAnimeSchema.parse(data.Media);
     });
+  }
+
+  /**
+   * Fetch a user's public anime list. AniList returns multiple "lists"
+   * (Watching / Completed / etc.) which we flatten — the entry's `status`
+   * field is the source of truth, not the list it sits in.
+   */
+  async getUserMediaList(username: string): Promise<AniListMediaListEntry[]> {
+    const data = await this.graphql<{
+      MediaListCollection: { lists: Array<{ entries: unknown[] }> } | null;
+    }>(USER_MEDIA_LIST_QUERY, { username });
+
+    if (!data.MediaListCollection) return [];
+
+    const entries: AniListMediaListEntry[] = [];
+    for (const list of data.MediaListCollection.lists) {
+      for (const raw of list.entries) {
+        const parsed = AniListMediaListEntrySchema.safeParse(raw);
+        if (parsed.success) entries.push(parsed.data);
+      }
+    }
+    return entries;
   }
 
   private parseMany(list: unknown[]): AniListAnime[] {

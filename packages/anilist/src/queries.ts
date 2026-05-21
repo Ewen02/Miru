@@ -75,3 +75,25 @@ export const ANIME_DETAIL_QUERY = `
   }
   ${MEDIA_FRAGMENT}
 `;
+
+/**
+ * Lightweight query for importing a user's anime list. Only fields we need
+ * to build a WatchlistEntry: the media id (maps to externalAnilistId),
+ * status, progress, optional score and dates.
+ */
+export const USER_MEDIA_LIST_QUERY = `
+  query UserMediaList($username: String) {
+    MediaListCollection(userName: $username, type: ANIME) {
+      lists {
+        entries {
+          mediaId
+          status
+          progress
+          score(format: POINT_10)
+          startedAt { year month day }
+          completedAt { year month day }
+        }
+      }
+    }
+  }
+`;

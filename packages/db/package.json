@@ -5,11 +5,13 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch --preserveWatchOutput",
+    "dev": "concurrently --names 'tsc,studio' --prefix-colors 'cyan,magenta' --kill-others-on-fail 'pnpm tsc:watch' 'pnpm db:studio:silent'",
+    "tsc:watch": "tsc --watch --preserveWatchOutput",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
+    "db:studio:silent": "prisma studio --browser none",
     "clean": "rm -rf dist",
     "postinstall": "prisma generate"
   },
@@ -19,6 +21,7 @@
   "devDependencies": {
     "@miru/config": "workspace:*",
     "@types/node": "^20",
+    "concurrently": "^9.2.1",
     "prisma": "^6",
     "tsx": "^4",
     "typescript": "^5"

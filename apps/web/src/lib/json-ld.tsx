@@ -126,6 +126,29 @@ export function profilePageSchema(params: {
   };
 }
 
+/** schema.org Article node for editorial article pages. */
+export function articleSchema(params: {
+  title: string;
+  path: string;
+  authorName: string;
+  description?: string | null;
+  image?: string | null;
+  publishedAt?: string | null;
+}): Record<string, unknown> {
+  const node: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: params.title,
+    url: absoluteUrl(params.path),
+    author: { "@type": "Person", name: params.authorName },
+    publisher: { "@type": "Organization", name: "Miru" },
+  };
+  if (params.description) node.description = params.description;
+  if (params.image) node.image = params.image;
+  if (params.publishedAt) node.datePublished = params.publishedAt;
+  return node;
+}
+
 /**
  * BreadcrumbList from an ordered list of {name, path} crumbs. The last crumb
  * is the current page; pass its path too so the chain is fully resolvable.

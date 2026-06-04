@@ -626,3 +626,20 @@ export interface ClubDetailDto extends ClubSummaryDto {
   ownerName: string;
   posts: ClubPostDto[];
 }
+
+// ── Editorial (articles) ─────────────────────────────────────────────────────
+
+export interface ArticleSummaryDto {
+  slug: string;
+  title: string;
+  kicker: string | null;
+  excerpt: string | null;
+  coverUrl: string | null;
+  authorName: string;
+  /** ISO string or null when unpublished. */
+  publishedAt: string | null;
+}
+
+export interface ArticleDetailDto extends ArticleSummaryDto {
+  body: string;
+}

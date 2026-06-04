@@ -651,6 +651,16 @@
     "followers": "Abonnés",
     "followingCount": "Abonnements"
   },
+  "editorialPage": {
+    "metaTitle": "Éditorial",
+    "metaDescription": "Articles et analyses de la rédaction Miru.",
+    "eyebrow": "Éditorial",
+    "title": "Éditorial",
+    "empty": "Aucun article publié pour l'instant.",
+    "readMore": "Lire",
+    "backToEditorial": "← Tous les articles",
+    "by": "par {author}"
+  },
   "clubsPage": {
     "metaTitle": "Clubs",
     "metaDescription": "Rejoins des clubs de fans sur Miru.",

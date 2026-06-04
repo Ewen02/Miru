@@ -666,6 +666,26 @@
     "followers": "Followers",
     "followingCount": "Following"
   },
+  "watchPartyPage": {
+    "metaTitle": "Watch party",
+    "metaDescription": "Watch an anime in sync with your friends.",
+    "eyebrow": "Community",
+    "title": "Watch party",
+    "intro": "Create a session and share the code, or join a friend's.",
+    "loginToParty": "Sign in to start a watch party.",
+    "createParty": "Create a session",
+    "joinParty": "Join",
+    "codePlaceholder": "CODE",
+    "notFound": "Session not found.",
+    "members": "{count} online",
+    "host": "Host",
+    "guest": "Guest",
+    "play": "Play",
+    "pause": "Pause",
+    "chatEmpty": "Chat is empty. Start the conversation!",
+    "chatPlaceholder": "Message…",
+    "chatSend": "Send"
+  },
   "messagesPage": {
     "metaTitle": "Messages",
     "eyebrow": "Messaging",

@@ -9,13 +9,19 @@ import { auth } from "@auth/auth";
  * Lives in shared/ so every gateway (DM, watch party) authenticates uniformly.
  */
 export async function userIdFromSocket(client: Socket): Promise<string | null> {
+  return (await userFromSocket(client))?.id ?? null;
+}
+
+/** Resolves the authenticated user (id + display name) from a socket, or null. */
+export async function userFromSocket(client: Socket): Promise<{ id: string; name: string } | null> {
   const cookie = client.handshake.headers.cookie;
   if (!cookie) return null;
   try {
     const session = await auth.api.getSession({
       headers: new Headers({ cookie }),
     });
-    return session?.user?.id ?? null;
+    if (!session?.user?.id) return null;
+    return { id: session.user.id, name: session.user.name ?? "Anon" };
   } catch {
     return null;
   }

@@ -31,6 +31,7 @@ const STATIC_PAGES: Array<{
   { path: "/clubs", priority: 0.4, changeFrequency: "weekly" },
   { path: "/polls", priority: 0.4, changeFrequency: "weekly" },
   { path: "/editorial", priority: 0.5, changeFrequency: "weekly" },
+  { path: "/party", priority: 0.3, changeFrequency: "monthly" },
 ];
 
 /** Walk the paginated anime catalog up to ANIME_MAX_PAGES, collecting slugs. */

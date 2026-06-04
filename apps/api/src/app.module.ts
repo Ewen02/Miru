@@ -33,6 +33,7 @@ import { SyncModule } from "@modules/sync/sync.module";
 import { UserModule } from "@modules/user/user.module";
 import { VoiceActorModule } from "@modules/voice-actor/voice-actor.module";
 import { WatchlistModule } from "@modules/watchlist/watchlist.module";
+import { WatchPartyModule } from "@modules/watch-party/watch-party.module";
 import { auth } from "./auth/auth";
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -103,6 +104,7 @@ const isDev = process.env.NODE_ENV !== "production";
     UserModule,
     VoiceActorModule,
     WatchlistModule,
+    WatchPartyModule,
     ReviewModule,
   ],
   controllers: [HealthController],

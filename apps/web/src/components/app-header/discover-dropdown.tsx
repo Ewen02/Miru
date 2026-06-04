@@ -51,6 +51,11 @@ const ROUTES: Array<{ href: string; label: string; description: string }> = [
     label: "Éditorial",
     description: "Articles et analyses de la rédaction.",
   },
+  {
+    href: "/party",
+    label: "Watch party",
+    description: "Regarde en synchro avec tes amis.",
+  },
 ];
 
 export function DiscoverDropdown() {

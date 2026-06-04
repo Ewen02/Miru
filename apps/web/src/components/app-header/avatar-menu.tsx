@@ -87,6 +87,9 @@ export function AvatarMenu({ user }: AvatarMenuProps) {
             <AvatarMenuItem href="/lists" onClick={() => setOpen(false)}>
               Mes listes
             </AvatarMenuItem>
+            <AvatarMenuItem href="/messages" onClick={() => setOpen(false)}>
+              Messages
+            </AvatarMenuItem>
             <AvatarMenuItem href="/activity" onClick={() => setOpen(false)}>
               Activité
             </AvatarMenuItem>

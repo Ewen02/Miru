@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { EpisodeRow, cn } from "@miru/ui";
 import type { AnimeDetail } from "@miru/types";
 import { episodesApi } from "@/lib/episodes-api";
+import { EpisodeHeatmap } from "@/components/episode-heatmap";
 
 interface EpisodesTrackerProps {
   episodes: AnimeDetail["episodes"];
@@ -28,6 +29,7 @@ export function EpisodesTracker({
 }: EpisodesTrackerProps) {
   const [watched, setWatched] = useState<Set<string>>(() => new Set(initialWatchedIds));
   const [pending, startTransition] = useTransition();
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   function toggle(episodeId: string) {
     const wasWatched = watched.has(episodeId);
@@ -67,8 +69,10 @@ export function EpisodesTracker({
       <div className="flex max-h-[70vh] flex-col gap-px overflow-y-auto rounded-2xl border border-border bg-bg-surface px-1 py-2">
         {episodes.map((ep) => {
           const isWatched = watched.has(ep.id);
+          const isExpanded = expanded === ep.id;
           return (
-            <div key={ep.id} className="flex items-center gap-2">
+            <div key={ep.id} className="flex flex-col">
+            <div className="flex items-center gap-2">
               {isAuthenticated && (
                 <button
                   type="button"
@@ -116,6 +120,25 @@ export function EpisodesTracker({
                   searchQuery={`${animeTitle} episode ${ep.number}`}
                 />
               </div>
+              <button
+                type="button"
+                onClick={() => setExpanded(isExpanded ? null : ep.id)}
+                aria-expanded={isExpanded}
+                aria-label={`Réactions ép. ${ep.number}`}
+                className="mr-1.5 shrink-0 rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-text-tertiary transition-colors duration-150 hover:bg-bg-elevated hover:text-text-secondary"
+              >
+                {isExpanded ? "×" : "❤"}
+              </button>
+            </div>
+            {isExpanded && (
+              <div className="px-1.5 pb-3 pt-1">
+                <EpisodeHeatmap
+                  episodeId={ep.id}
+                  durationSeconds={ep.duration != null ? ep.duration * 60 : null}
+                  isAuthenticated={isAuthenticated}
+                />
+              </div>
+            )}
             </div>
           );
         })}

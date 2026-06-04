@@ -15,6 +15,7 @@ import { BillingModule } from "@modules/billing/billing.module";
 import { CharacterModule } from "@modules/character/character.module";
 import { ClubsModule } from "@modules/clubs/clubs.module";
 import { EditorialModule } from "@modules/editorial/editorial.module";
+import { EpisodeReactionModule } from "@modules/episode-reaction/episode-reaction.module";
 import { ForumModule } from "@modules/forum/forum.module";
 import { GenreModule } from "@modules/genre/genre.module";
 import { ListModule } from "@modules/list/list.module";
@@ -84,6 +85,7 @@ const isDev = process.env.NODE_ENV !== "production";
     CharacterModule,
     ClubsModule,
     EditorialModule,
+    EpisodeReactionModule,
     ForumModule,
     GenreModule,
     ListModule,

@@ -643,3 +643,23 @@ export interface ArticleSummaryDto {
 export interface ArticleDetailDto extends ArticleSummaryDto {
   body: string;
 }
+
+// ── Episode reactions (heatmap) ──────────────────────────────────────────────
+
+export type EpisodeReactionKind = "love" | "laugh" | "cry" | "shock" | "fire";
+
+/** One time bucket of the heatmap. `counts` keyed by reaction kind. */
+export interface EpisodeHeatmapBucketDto {
+  /** Bucket start in seconds. */
+  from: number;
+  total: number;
+  counts: Partial<Record<EpisodeReactionKind, number>>;
+}
+
+export interface EpisodeHeatmapDto {
+  episodeId: string;
+  /** Bucket width in seconds. */
+  bucketSeconds: number;
+  total: number;
+  buckets: EpisodeHeatmapBucketDto[];
+}

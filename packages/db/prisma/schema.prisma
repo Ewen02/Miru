@@ -88,6 +88,7 @@ model Episode {
 
   watchers      UserEpisode[]
   platformLinks EpisodePlatformLink[]
+  reactions     EpisodeReaction[]
 
   @@unique([animeId, number])
   @@index([animeId])
@@ -278,6 +279,7 @@ model User {
   reviewComments   ReviewComment[]
   forumThreads     ForumThread[]
   forumPosts       ForumPost[]
+  episodeReactions EpisodeReaction[]
 
   // Clubs — Phase 7
   clubsOwned      Club[]       @relation("ClubOwner")
@@ -778,6 +780,29 @@ model Article {
 
   @@index([published, publishedAt(sort: Desc)])
   @@index([authorId])
+}
+
+// ---------------------------------------------------------------------------
+// Episode reactions — Phase 7: timestamped emoji reactions for heatmaps.
+// ---------------------------------------------------------------------------
+
+// One reaction dropped by a user at a specific second in an episode.
+// No unique constraint — a user may react multiple times at different marks.
+model EpisodeReaction {
+  id         String   @id @default(cuid())
+  episodeId  String
+  userId     String
+  secondMark Int
+  kind       String   @db.VarChar(16)
+  createdAt  DateTime @default(now())
+
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Heatmap aggregation: bucket reactions by time across an episode.
+  @@index([episodeId, secondMark])
+  // Per-user reactions on an episode (load / rate-limit a single user's marks).
+  @@index([episodeId, userId])
 }
 
 // Web Push subscription. One row per (user × browser). Endpoint is unique

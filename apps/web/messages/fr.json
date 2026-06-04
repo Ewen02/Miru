@@ -651,6 +651,14 @@
     "followers": "Abonnés",
     "followingCount": "Abonnements"
   },
+  "episodeHeatmap": {
+    "title": "Réactions",
+    "reactionsCount": "{count} réactions",
+    "atMinute": "à la minute {min}",
+    "pickMoment": "Choisis un moment, puis une réaction :",
+    "loginToReact": "Connecte-toi pour réagir.",
+    "empty": "Aucune réaction. Sois le premier à réagir à un moment de l'épisode."
+  },
   "editorialPage": {
     "metaTitle": "Éditorial",
     "metaDescription": "Articles et analyses de la rédaction Miru.",

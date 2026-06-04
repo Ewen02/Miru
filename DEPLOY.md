@@ -46,7 +46,14 @@ Après le premier déploiement Railway, la DB est vide. Lancer le seed une fois 
 ```bash
 # Pointer vers la DB Railway temporairement
 DATABASE_URL="postgresql://...railway..." pnpm --filter api seed:seasons
+
+# Seed du catalogue de badges (idempotent — re-jouable à chaque release)
+DATABASE_URL="postgresql://...railway..." pnpm --filter @miru/db db:seed
 ```
+
+> Les **tables** sont créées automatiquement : le container lance
+> `prisma migrate deploy` au boot (applique les fichiers de `prisma/migrations/`).
+> Le **seed des badges** n'est PAS auto — lance `db:seed` une fois (idempotent).
 
 Puis activer `ENABLE_SCHEDULER=true` côté Railway pour que les crons prennent le relais.
 

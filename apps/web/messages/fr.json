@@ -651,6 +651,27 @@
     "followers": "Abonnés",
     "followingCount": "Abonnements"
   },
+  "clubsPage": {
+    "metaTitle": "Clubs",
+    "metaDescription": "Rejoins des clubs de fans sur Miru.",
+    "eyebrow": "Communauté",
+    "title": "Clubs",
+    "empty": "Aucun club pour l'instant. Crée le premier.",
+    "newClub": "Créer un club",
+    "name": "Nom",
+    "description": "Description",
+    "create": "Créer",
+    "join": "Rejoindre",
+    "leave": "Quitter",
+    "members": "{count} membres",
+    "wall": "Mur",
+    "postPlaceholder": "Partage quelque chose avec le club…",
+    "post": "Publier",
+    "noPosts": "Aucun message. Sois le premier.",
+    "membersOnly": "Rejoins le club pour publier.",
+    "loginToCreate": "Connecte-toi pour créer un club.",
+    "backToClubs": "← Retour aux clubs"
+  },
   "forumPage": {
     "metaTitle": "Forum",
     "metaDescription": "Les discussions de la communauté Miru.",

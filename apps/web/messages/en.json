@@ -666,6 +666,27 @@
     "followers": "Followers",
     "followingCount": "Following"
   },
+  "clubsPage": {
+    "metaTitle": "Clubs",
+    "metaDescription": "Join fan clubs on Miru.",
+    "eyebrow": "Community",
+    "title": "Clubs",
+    "empty": "No clubs yet. Create the first one.",
+    "newClub": "Create a club",
+    "name": "Name",
+    "description": "Description",
+    "create": "Create",
+    "join": "Join",
+    "leave": "Leave",
+    "members": "{count} members",
+    "wall": "Wall",
+    "postPlaceholder": "Share something with the club…",
+    "post": "Post",
+    "noPosts": "No posts yet. Be the first.",
+    "membersOnly": "Join the club to post.",
+    "loginToCreate": "Sign in to create a club.",
+    "backToClubs": "← Back to clubs"
+  },
   "forumPage": {
     "metaTitle": "Forum",
     "metaDescription": "The Miru community's discussions.",

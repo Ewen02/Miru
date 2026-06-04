@@ -278,6 +278,11 @@ model User {
   reviewComments   ReviewComment[]
   forumThreads     ForumThread[]
   forumPosts       ForumPost[]
+
+  // Clubs — Phase 7
+  clubsOwned      Club[]       @relation("ClubOwner")
+  clubMemberships ClubMember[]
+  clubPosts       ClubPost[]
 }
 
 /**
@@ -698,6 +703,54 @@ model ForumPost {
   author User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([threadId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Clubs — Phase 7: community groups with membership and a post wall.
+// ---------------------------------------------------------------------------
+
+model Club {
+  id          String  @id @default(cuid())
+  name        String  @db.VarChar(120)
+  slug        String  @unique @db.VarChar(140)
+  description String? @db.Text
+  ownerId     String
+
+  createdAt DateTime @default(now())
+
+  owner   User         @relation("ClubOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members ClubMember[]
+  posts   ClubPost[]
+
+  @@index([createdAt(sort: Desc)])
+}
+
+// One row per user × club membership.
+model ClubMember {
+  id       String   @id @default(cuid())
+  clubId   String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, userId])
+  @@index([userId])
+}
+
+// One row per post on a club's wall. Flat — no threading.
+model ClubPost {
+  id        String   @id @default(cuid())
+  clubId    String
+  authorId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  club   Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([clubId, createdAt])
 }
 
 // Web Push subscription. One row per (user × browser). Endpoint is unique

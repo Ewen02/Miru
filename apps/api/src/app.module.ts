@@ -13,6 +13,7 @@ import { AchievementModule } from "@modules/achievement/achievement.module";
 import { AnimeModule } from "@modules/anime/anime.module";
 import { BillingModule } from "@modules/billing/billing.module";
 import { CharacterModule } from "@modules/character/character.module";
+import { ClubsModule } from "@modules/clubs/clubs.module";
 import { ForumModule } from "@modules/forum/forum.module";
 import { GenreModule } from "@modules/genre/genre.module";
 import { ListModule } from "@modules/list/list.module";
@@ -80,6 +81,7 @@ const isDev = process.env.NODE_ENV !== "production";
     AnimeModule,
     BillingModule,
     CharacterModule,
+    ClubsModule,
     ForumModule,
     GenreModule,
     ListModule,

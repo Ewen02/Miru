@@ -601,3 +601,28 @@ export interface ForumThreadDetailDto {
   createdAt: string;
   posts: ForumPostDto[];
 }
+
+// ── Clubs ────────────────────────────────────────────────────────────────────
+
+export interface ClubSummaryDto {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  memberCount: number;
+  /** Whether the current viewer is a member. */
+  isMember: boolean;
+}
+
+export interface ClubPostDto {
+  id: string;
+  body: string;
+  /** ISO string. */
+  createdAt: string;
+  author: { id: string; name: string; image: string | null };
+}
+
+export interface ClubDetailDto extends ClubSummaryDto {
+  ownerName: string;
+  posts: ClubPostDto[];
+}

@@ -34,16 +34,17 @@ model Anime {
   syncedAt     DateTime?
   syncFailedAt DateTime?
 
-  studioId   String?
-  studio     Studio?           @relation(fields: [studioId], references: [id])
-  genres     Genre[]           @relation("AnimeGenres")
-  episodes   Episode[]
-  characters AnimeCharacter[]
-  relations  AnimeRelation[]
-  platforms  AnimeOnPlatform[]
-  watchlist  WatchlistEntry[]
-  reviews    Review[]
-  listItems  ListItem[]
+  studioId       String?
+  studio         Studio?           @relation(fields: [studioId], references: [id])
+  genres         Genre[]           @relation("AnimeGenres")
+  episodes       Episode[]
+  characters     AnimeCharacter[]
+  relations      AnimeRelation[]
+  platforms      AnimeOnPlatform[]
+  watchlist      WatchlistEntry[]
+  reviews        Review[]
+  listItems      ListItem[]
+  activityEvents ActivityEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -266,6 +267,12 @@ model User {
   reportsResolved Report[] @relation("ReportsResolved")
 
   preferences UserPreferences?
+
+  // Social — Phase 7
+  following        Follow[]          @relation("follower")
+  followers        Follow[]          @relation("following")
+  activityEvents   ActivityEvent[]
+  userAchievements UserAchievement[]
 }
 
 /**
@@ -419,9 +426,10 @@ model List {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items ListItem[]
-  likes ListLike[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items          ListItem[]
+  likes          ListLike[]
+  activityEvents ActivityEvent[]
 
   @@unique([userId, slug])
   @@index([userId])
@@ -497,6 +505,87 @@ model Report {
 
   @@index([resolved, createdAt])
   @@index([targetKind, targetId])
+}
+
+// ---------------------------------------------------------------------------
+// Social — Phase 7: follows, activity feed, achievements.
+// ---------------------------------------------------------------------------
+
+// Directed follow edge between two users.
+// Self-follow is prevented at the use-case layer, not the schema.
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+enum ActivityKind {
+  RATED_ANIME
+  COMPLETED_ANIME
+  ADDED_TO_WATCHLIST
+  CREATED_LIST
+  UNLOCKED_ACHIEVEMENT
+}
+
+// One row per observable action in a user's timeline.
+// Nullable target columns avoid a polymorphic join while staying flexible.
+model ActivityEvent {
+  id        String       @id @default(cuid())
+  userId    String
+  kind      ActivityKind
+  createdAt DateTime     @default(now())
+
+  // Nullable targets — at most one will be set per event kind.
+  animeId       String?
+  listId        String?
+  achievementId String?
+  meta          Json?
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime       Anime?       @relation(fields: [animeId], references: [id], onDelete: SetNull)
+  list        List?        @relation(fields: [listId], references: [id], onDelete: SetNull)
+  achievement Achievement? @relation(fields: [achievementId], references: [id], onDelete: SetNull)
+
+  // Primary access pattern: fetch a user's own timeline (userId + createdAt DESC).
+  // Feed queries use IN (followed_ids) which hits the same index per userId.
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+// Static-ish catalog of unlockable badges. Rows are seeded, rarely written.
+model Achievement {
+  id          String  @id @default(cuid())
+  code        String  @unique @db.VarChar(60)
+  name        String  @db.VarChar(100)
+  description String  @db.Text
+  icon        String?
+  // Numeric threshold that triggers unlock (e.g. 100 for "completed 100 anime").
+  // NULL means the achievement is event-based with no numeric threshold.
+  threshold   Int?
+
+  createdAt DateTime @default(now())
+
+  userAchievements UserAchievement[]
+  activityEvents   ActivityEvent[]
+}
+
+// Join: which user unlocked which achievement and when.
+model UserAchievement {
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
 }
 
 // Web Push subscription. One row per (user × browser). Endpoint is unique

@@ -473,3 +473,51 @@ export interface ReviewItem {
     image: string | null;
   };
 }
+
+// ── Social (follow + activity feed) ──────────────────────────────────────────
+
+export interface FollowStatsDto {
+  followers: number;
+  following: number;
+  /** False when there is no viewer or the viewer is the target user. */
+  isFollowing: boolean;
+}
+
+export type ActivityKind =
+  | "RATED_ANIME"
+  | "COMPLETED_ANIME"
+  | "ADDED_TO_WATCHLIST"
+  | "CREATED_LIST"
+  | "UNLOCKED_ACHIEVEMENT";
+
+export interface ActivityEventDto {
+  id: string;
+  userId: string;
+  actorName: string;
+  kind: ActivityKind;
+  /** ISO string. */
+  createdAt: string;
+  anime: { slug: string; title: string; coverUrl: string | null } | null;
+  list: { id: string; title: string } | null;
+  achievement: { code: string; name: string } | null;
+  meta: Record<string, unknown> | null;
+}
+
+// ── Achievements ─────────────────────────────────────────────────────────────
+
+export interface AchievementDto {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  icon: string | null;
+  threshold: number | null;
+}
+
+export interface UserAchievementsDto {
+  unlocked: (AchievementDto & {
+    /** ISO string. */
+    unlockedAt: string;
+  })[];
+  all: AchievementDto[];
+}

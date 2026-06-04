@@ -7,6 +7,9 @@ import { Link } from "@/i18n/navigation";
 import { buildAlternates } from "@/lib/alternates";
 import { fetchUserProfile } from "@/lib/api";
 import { JsonLd, profilePageSchema } from "@/lib/json-ld";
+import { getServerSession } from "@/lib/server-auth";
+import { fetchFollowStats } from "@/lib/server-social";
+import { FollowButton } from "@/components/follow-button";
 import type { UserProfileReview } from "@miru/types";
 import { ShareProfileButton } from "./share-profile-button";
 
@@ -34,6 +37,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   setRequestLocale(locale);
   const profile = await fetchUserProfile(handle).catch(() => null);
   if (!profile) notFound();
+
+  const [session, followStats] = await Promise.all([
+    getServerSession(),
+    fetchFollowStats(profile.id),
+  ]);
+  const isOwnProfile = session?.user?.id === profile.id;
 
   const joinedLabel = profile.joinedAt ? formatJoinedAt(profile.joinedAt) : null;
   const handleSlug = profile.handle.toLowerCase().replace(/\s+/g, "");
@@ -74,6 +83,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {!isOwnProfile && (
+            <FollowButton
+              userId={profile.id}
+              initialIsFollowing={followStats.isFollowing}
+              isAuthenticated={!!session}
+            />
+          )}
           <ShareProfileButton name={profile.name} />
         </div>
       </header>

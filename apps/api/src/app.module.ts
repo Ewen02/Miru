@@ -9,6 +9,7 @@ import { SentryModule, SentryGlobalFilter } from "@sentry/nestjs/setup";
 import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
 import { MailModule } from "@shared/mail/mail.module";
 import { HealthController } from "@shared/infrastructure/http/health.controller";
+import { AchievementModule } from "@modules/achievement/achievement.module";
 import { AnimeModule } from "@modules/anime/anime.module";
 import { BillingModule } from "@modules/billing/billing.module";
 import { CharacterModule } from "@modules/character/character.module";
@@ -20,6 +21,7 @@ import { PlatformModule } from "@modules/platform/platform.module";
 import { PushModule } from "@modules/push/push.module";
 import { ReviewModule } from "@modules/review/review.module";
 import { StreamingLinkModule } from "@modules/streaming-link/streaming-link.module";
+import { SocialModule } from "@modules/social/social.module";
 import { StudioModule } from "@modules/studio/studio.module";
 import { SyncModule } from "@modules/sync/sync.module";
 import { UserModule } from "@modules/user/user.module";
@@ -72,6 +74,7 @@ const isDev = process.env.NODE_ENV !== "production";
     }),
     PrismaModule,
     MailModule,
+    AchievementModule,
     AnimeModule,
     BillingModule,
     CharacterModule,
@@ -81,6 +84,7 @@ const isDev = process.env.NODE_ENV !== "production";
     NotificationModule,
     PlatformModule,
     PushModule,
+    SocialModule,
     StreamingLinkModule,
     StudioModule,
     SyncModule,

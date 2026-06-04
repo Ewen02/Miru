@@ -87,6 +87,12 @@ export function AvatarMenu({ user }: AvatarMenuProps) {
             <AvatarMenuItem href="/lists" onClick={() => setOpen(false)}>
               Mes listes
             </AvatarMenuItem>
+            <AvatarMenuItem href="/activity" onClick={() => setOpen(false)}>
+              Activité
+            </AvatarMenuItem>
+            <AvatarMenuItem href="/achievements" onClick={() => setOpen(false)}>
+              Badges
+            </AvatarMenuItem>
             <AvatarMenuItem href="/lifetime-stats" onClick={() => setOpen(false)}>
               Mes stats
             </AvatarMenuItem>

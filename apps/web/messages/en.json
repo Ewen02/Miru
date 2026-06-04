@@ -658,5 +658,34 @@
     "sports": "Tournaments, sweat, teams finding themselves. Volleyball, basketball, track — the mechanics of self-transcendence.",
     "supernatural": "Spirits, demons, powers hidden behind routine. The supernatural drops into far-too-normal high schools.",
     "thriller": "Constant tension, manhunts, races against the clock. More frantic than mystery, more grounded than horror."
+  },
+  "social": {
+    "follow": "Follow",
+    "following": "Following",
+    "followCta": "Follow",
+    "followers": "Followers",
+    "followingCount": "Following"
+  },
+  "activityPage": {
+    "metaTitle": "Activity",
+    "metaDescription": "What the accounts you follow are doing on Miru.",
+    "eyebrow": "Activity feed",
+    "title": "Activity",
+    "empty": "Nothing yet. Follow other members to see their activity here.",
+    "ratedAnime": "rated {title}",
+    "completedAnime": "completed {title}",
+    "addedToWatchlist": "added {title} to their watchlist",
+    "createdList": "created the list {title}",
+    "unlockedAchievement": "unlocked the {title} badge"
+  },
+  "achievementsPage": {
+    "metaTitle": "Badges",
+    "metaDescription": "Your accomplishments on Miru.",
+    "eyebrow": "Accomplishments",
+    "title": "Badges",
+    "unlockedOn": "Unlocked on {date}",
+    "locked": "Locked",
+    "progress": "{unlocked} / {total} unlocked",
+    "empty": "No badges yet — explore and organize to unlock some."
   }
 }

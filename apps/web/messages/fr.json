@@ -643,5 +643,34 @@
     "sports": "Tournois, sueur, équipes qui se découvrent. Volley, basket, athlétisme — la mécanique du dépassement.",
     "supernatural": "Esprits, démons, pouvoirs cachés derrière la routine. Le surnaturel s'invite dans des lycées trop normaux.",
     "thriller": "Tension constante, traque, course contre la montre. Plus nerveux que le mystery, plus terre-à-terre que l'horror."
+  },
+  "social": {
+    "follow": "Suivre",
+    "following": "Suivi",
+    "followCta": "Suivre",
+    "followers": "Abonnés",
+    "followingCount": "Abonnements"
+  },
+  "activityPage": {
+    "metaTitle": "Activité",
+    "metaDescription": "Ce que font les comptes que tu suis sur Miru.",
+    "eyebrow": "Fil d'activité",
+    "title": "Activité",
+    "empty": "Rien pour l'instant. Suis d'autres membres pour voir leur activité ici.",
+    "ratedAnime": "a noté {title}",
+    "completedAnime": "a terminé {title}",
+    "addedToWatchlist": "a ajouté {title} à sa watchlist",
+    "createdList": "a créé la liste {title}",
+    "unlockedAchievement": "a débloqué le badge {title}"
+  },
+  "achievementsPage": {
+    "metaTitle": "Badges",
+    "metaDescription": "Tes accomplissements sur Miru.",
+    "eyebrow": "Accomplissements",
+    "title": "Badges",
+    "unlockedOn": "Débloqué le {date}",
+    "locked": "À débloquer",
+    "progress": "{unlocked} / {total} débloqués",
+    "empty": "Aucun badge pour l'instant — explore et organise pour en débloquer."
   }
 }

@@ -4,6 +4,7 @@ import { FollowUserUseCase } from "./application/use-cases/follow-user.use-case"
 import { UnfollowUserUseCase } from "./application/use-cases/unfollow-user.use-case";
 import { GetFollowStatsUseCase } from "./application/use-cases/get-follow-stats.use-case";
 import { GetActivityFeedUseCase } from "./application/use-cases/get-activity-feed.use-case";
+import { GetTrendingFeedUseCase } from "./application/use-cases/get-trending-feed.use-case";
 import { ACTIVITY_REPOSITORY, FOLLOW_REPOSITORY } from "./application/tokens";
 import { PrismaFollowRepository } from "./infrastructure/persistence/prisma-follow.repository";
 import { PrismaActivityRepository } from "./infrastructure/persistence/prisma-activity.repository";
@@ -18,6 +19,7 @@ import { RecordActivityListener } from "./infrastructure/event-listeners/record-
     UnfollowUserUseCase,
     GetFollowStatsUseCase,
     GetActivityFeedUseCase,
+    GetTrendingFeedUseCase,
     RecordActivityListener,
     { provide: FOLLOW_REPOSITORY, useClass: PrismaFollowRepository },
     { provide: ACTIVITY_REPOSITORY, useClass: PrismaActivityRepository },

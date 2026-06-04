@@ -1,35 +1,31 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { EditorialHero } from "@miru/ui";
-import { redirect } from "@/i18n/navigation";
 import { buildAlternates } from "@/lib/alternates";
-import { fetchActivityFeed } from "@/lib/server-social";
+import { fetchTrendingFeed } from "@/lib/api";
 import { ActivityFeedList } from "@/components/activity-feed-list";
 
-interface ActivityPageProps {
+interface TrendingPageProps {
   params: Promise<{ locale: string }>;
 }
 
-export async function generateMetadata({ params }: ActivityPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: TrendingPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "activityPage" });
+  const t = await getTranslations({ locale, namespace: "trendingPage" });
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: buildAlternates("/activity", locale),
-    robots: { index: false },
+    alternates: buildAlternates("/trending", locale),
   };
 }
 
-export default async function ActivityPage({ params }: ActivityPageProps) {
+export default async function TrendingPage({ params }: TrendingPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [feed, t] = await Promise.all([fetchActivityFeed(40), getTranslations("activityPage")]);
-
-  if (feed === null) {
-    redirect({ href: "/login?next=/activity", locale });
-    return null;
-  }
+  const [feed, t] = await Promise.all([
+    fetchTrendingFeed(40).catch(() => []),
+    getTranslations("trendingPage"),
+  ]);
 
   return (
     <>

@@ -30,4 +30,6 @@ export interface ActivityRepositoryPort {
   record(input: RecordActivityInput): Promise<void>;
   /** Newest first, joined with actor name + target preview. */
   feedForUsers(userIds: string[], limit: number): Promise<ActivityEventView[]>;
+  /** Global feed across all users (trending), newest first. */
+  feedGlobal(limit: number): Promise<ActivityEventView[]>;
 }

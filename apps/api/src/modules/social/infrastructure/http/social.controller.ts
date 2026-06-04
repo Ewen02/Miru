@@ -8,6 +8,7 @@ import { FollowUserUseCase } from "../../application/use-cases/follow-user.use-c
 import { UnfollowUserUseCase } from "../../application/use-cases/unfollow-user.use-case";
 import { GetFollowStatsUseCase } from "../../application/use-cases/get-follow-stats.use-case";
 import { GetActivityFeedUseCase } from "../../application/use-cases/get-activity-feed.use-case";
+import { GetTrendingFeedUseCase } from "../../application/use-cases/get-trending-feed.use-case";
 import { ActivityMapper } from "../../application/mappers/activity.mapper";
 import { FeedQueryDto } from "../../application/dtos/social.dto";
 
@@ -18,6 +19,7 @@ export class SocialController {
     private readonly unfollowUser: UnfollowUserUseCase,
     private readonly getFollowStats: GetFollowStatsUseCase,
     private readonly getActivityFeed: GetActivityFeedUseCase,
+    private readonly getTrendingFeed: GetTrendingFeedUseCase,
   ) {}
 
   @Post("follow/:userId")
@@ -56,6 +58,12 @@ export class SocialController {
     @Query() query: FeedQueryDto,
   ): Promise<ActivityEventDto[]> {
     const events = await this.getActivityFeed.execute({ userId, limit: query.limit });
+    return events.map((event) => ActivityMapper.toDto(event));
+  }
+
+  @Get("trending")
+  async trending(@Query() query: FeedQueryDto): Promise<ActivityEventDto[]> {
+    const events = await this.getTrendingFeed.execute({ limit: query.limit });
     return events.map((event) => ActivityMapper.toDto(event));
   }
 }

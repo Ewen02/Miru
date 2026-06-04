@@ -1,11 +1,20 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@miru/db";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
-import { ActivityEventView } from "../../domain/ports/activity-repository.port";
 import {
+  ActivityEventView,
   ActivityRepositoryPort,
   RecordActivityInput,
 } from "../../domain/ports/activity-repository.port";
+
+const FEED_INCLUDE = {
+  user: { select: { name: true } },
+  anime: { select: { slug: true, title: true, coverUrl: true } },
+  list: { select: { id: true, title: true } },
+  achievement: { select: { code: true, name: true } },
+} satisfies Prisma.ActivityEventInclude;
+
+type FeedRow = Prisma.ActivityEventGetPayload<{ include: typeof FEED_INCLUDE }>;
 
 @Injectable()
 export class PrismaActivityRepository implements ActivityRepositoryPort {
@@ -26,20 +35,26 @@ export class PrismaActivityRepository implements ActivityRepositoryPort {
 
   async feedForUsers(userIds: string[], limit: number): Promise<ActivityEventView[]> {
     if (userIds.length === 0) return [];
-
     const rows = await this.prisma.activityEvent.findMany({
       where: { userId: { in: userIds } },
       orderBy: { createdAt: "desc" },
       take: limit,
-      include: {
-        user: { select: { name: true } },
-        anime: { select: { slug: true, title: true, coverUrl: true } },
-        list: { select: { id: true, title: true } },
-        achievement: { select: { code: true, name: true } },
-      },
+      include: FEED_INCLUDE,
     });
+    return rows.map((row) => this.toView(row));
+  }
 
-    return rows.map((row) => ({
+  async feedGlobal(limit: number): Promise<ActivityEventView[]> {
+    const rows = await this.prisma.activityEvent.findMany({
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      include: FEED_INCLUDE,
+    });
+    return rows.map((row) => this.toView(row));
+  }
+
+  private toView(row: FeedRow): ActivityEventView {
+    return {
       id: row.id,
       userId: row.userId,
       actorName: row.user.name,
@@ -56,6 +71,6 @@ export class PrismaActivityRepository implements ActivityRepositoryPort {
         row.meta != null && typeof row.meta === "object" && !Array.isArray(row.meta)
           ? (row.meta as Record<string, unknown>)
           : null,
-    }));
+    };
   }
 }

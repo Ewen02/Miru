@@ -666,6 +666,30 @@
     "followers": "Followers",
     "followingCount": "Following"
   },
+  "trendingPage": {
+    "metaTitle": "Trending",
+    "metaDescription": "The Miru community's activity in real time.",
+    "eyebrow": "Community",
+    "title": "Trending",
+    "empty": "No activity yet. Come back once the community gets moving."
+  },
+  "comparePage": {
+    "metaTitle": "Compare",
+    "metaDescription": "Compare two anime side by side on Miru.",
+    "eyebrow": "Comparison",
+    "title": "Compare",
+    "empty": "Pick two anime to compare (a and b URL params, or via the Compare button on a detail page).",
+    "notFound": "One of the two anime could not be found.",
+    "vs": "VS",
+    "rowStudio": "Studio",
+    "rowYear": "Year",
+    "rowFormat": "Format",
+    "rowEpisodes": "Episodes",
+    "rowRating": "Rating",
+    "rowStatus": "Status",
+    "commonGenres": "Common genres",
+    "noCommonGenres": "No common genres"
+  },
   "activityPage": {
     "metaTitle": "Activity",
     "metaDescription": "What the accounts you follow are doing on Miru.",

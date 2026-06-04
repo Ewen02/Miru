@@ -1,5 +1,6 @@
 import { API_URL } from "./env";
 import type {
+  ActivityEventDto,
   AnimeCard,
   AnimeDetail,
   CalendarWeek,
@@ -84,6 +85,17 @@ export async function fetchGenres(): Promise<GenreCard[]> {
     throw new Error(`Miru API ${res.status}: ${await res.text()}`);
   }
   return res.json() as Promise<GenreCard[]>;
+}
+
+/** Global activity feed (trending) — public, no auth. */
+export async function fetchTrendingFeed(limit = 30): Promise<ActivityEventDto[]> {
+  const url = new URL("/social/trending", API_URL);
+  url.searchParams.set("limit", String(limit));
+  const res = await fetch(url, { next: { revalidate: 60 } });
+  if (!res.ok) {
+    throw new Error(`Miru API ${res.status}: ${await res.text()}`);
+  }
+  return res.json() as Promise<ActivityEventDto[]>;
 }
 
 export async function fetchCalendarWeek(from: Date, to: Date): Promise<CalendarWeek> {

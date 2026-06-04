@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import type { ReviewItem } from "@miru/types";
 import { Button, cn } from "@miru/ui";
 import { reviewApi } from "@/lib/review-api";

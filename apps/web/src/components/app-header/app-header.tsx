@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Logo } from "@miru/ui";
 import { getServerSession } from "@/lib/server-auth";
 import { fetchNotifications } from "@/lib/server-notifications";

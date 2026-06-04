@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import type { WatchStatus, WatchlistEntry } from "@miru/types";
 import { Button, cn } from "@miru/ui";

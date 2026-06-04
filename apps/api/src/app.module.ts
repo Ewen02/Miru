@@ -18,6 +18,7 @@ import { ListModule } from "@modules/list/list.module";
 import { ModerationModule } from "@modules/moderation/moderation.module";
 import { NotificationModule } from "@modules/notification/notification.module";
 import { PlatformModule } from "@modules/platform/platform.module";
+import { PollsModule } from "@modules/polls/polls.module";
 import { PushModule } from "@modules/push/push.module";
 import { ReviewModule } from "@modules/review/review.module";
 import { StreamingLinkModule } from "@modules/streaming-link/streaming-link.module";
@@ -83,6 +84,7 @@ const isDev = process.env.NODE_ENV !== "production";
     ModerationModule,
     NotificationModule,
     PlatformModule,
+    PollsModule,
     PushModule,
     SocialModule,
     StreamingLinkModule,

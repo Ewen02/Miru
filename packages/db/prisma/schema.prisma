@@ -273,6 +273,8 @@ model User {
   followers        Follow[]          @relation("following")
   activityEvents   ActivityEvent[]
   userAchievements UserAchievement[]
+  polls            Poll[]            @relation("PollsCreated")
+  pollVotes        PollVote[]
 }
 
 /**
@@ -586,6 +588,53 @@ model UserAchievement {
 
   @@unique([userId, achievementId])
   @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Polls — Phase 7: community polls with per-user single-choice votes.
+// ---------------------------------------------------------------------------
+
+model Poll {
+  id          String    @id @default(cuid())
+  question    String    @db.VarChar(200)
+  createdById String
+  closesAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  createdBy User         @relation("PollsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  options   PollOption[]
+  votes     PollVote[]
+
+  @@index([createdAt(sort: Desc)])
+}
+
+// One selectable choice within a Poll.
+model PollOption {
+  id     String @id @default(cuid())
+  pollId String
+  label  String @db.VarChar(120)
+  order  Int
+
+  poll  Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes PollVote[]
+
+  @@index([pollId])
+}
+
+// One vote per user per poll — enforced by the composite unique constraint.
+model PollVote {
+  id        String   @id @default(cuid())
+  pollId    String
+  optionId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  option PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+  @@index([optionId])
 }
 
 // Web Push subscription. One row per (user × browser). Endpoint is unique

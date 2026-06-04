@@ -521,3 +521,24 @@ export interface UserAchievementsDto {
   })[];
   all: AchievementDto[];
 }
+
+// ── Polls (community polls) ──────────────────────────────────────────────────
+
+export interface PollOptionDto {
+  id: string;
+  label: string;
+  votes: number;
+}
+
+export interface PollDto {
+  id: string;
+  question: string;
+  authorName: string;
+  /** ISO string or null (null = open indefinitely). */
+  closesAt: string | null;
+  closed: boolean;
+  totalVotes: number;
+  options: PollOptionDto[];
+  /** The option id the viewer voted for, or null. */
+  votedOptionId: string | null;
+}

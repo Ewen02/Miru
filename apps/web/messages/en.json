@@ -666,6 +666,15 @@
     "followers": "Followers",
     "followingCount": "Following"
   },
+  "pollsPage": {
+    "metaTitle": "Polls",
+    "metaDescription": "Vote on the Miru community's polls.",
+    "eyebrow": "Community",
+    "title": "Polls",
+    "empty": "No polls yet.",
+    "closed": "Closed",
+    "totalVotes": "{count} votes"
+  },
   "trendingPage": {
     "metaTitle": "Trending",
     "metaDescription": "The Miru community's activity in real time.",

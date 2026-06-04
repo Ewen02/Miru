@@ -651,6 +651,15 @@
     "followers": "Abonnés",
     "followingCount": "Abonnements"
   },
+  "pollsPage": {
+    "metaTitle": "Sondages",
+    "metaDescription": "Vote sur les sondages de la communauté Miru.",
+    "eyebrow": "Communauté",
+    "title": "Sondages",
+    "empty": "Aucun sondage pour l'instant.",
+    "closed": "Clos",
+    "totalVotes": "{count} votes"
+  },
   "trendingPage": {
     "metaTitle": "Tendances",
     "metaDescription": "L'activité de la communauté Miru en temps réel.",

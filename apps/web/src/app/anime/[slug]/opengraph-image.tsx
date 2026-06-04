@@ -36,7 +36,6 @@ export default async function OpenGraphImage({ params }: OpenGraphImageProps) {
         }}
       >
         {cover ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={cover}
             alt=""

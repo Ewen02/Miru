@@ -113,7 +113,6 @@ export default async function SeasonPage({ params, searchParams }: SeasonPagePro
       {/* Format tabs */}
       <nav
         className="mb-8 flex flex-wrap gap-1 border-b border-border-subtle"
-        role="tablist"
         aria-label={t("formatAria")}
       >
         {FORMAT_KEYS.map((tab) => {
@@ -123,8 +122,7 @@ export default async function SeasonPage({ params, searchParams }: SeasonPagePro
             <Link
               key={tab.key}
               href={makeHref({ format: tab.key, page: 1 })}
-              role="tab"
-              aria-selected={isActive}
+              aria-current={isActive ? "page" : undefined}
               className="relative inline-flex h-10 items-center rounded-t-md px-4 font-body text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
               style={{
                 color: isActive

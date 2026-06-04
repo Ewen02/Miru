@@ -37,17 +37,17 @@ function PageLink({ href, label }: { href?: string; label: string }) {
   );
 
   if (!href) {
+    // No target page → render a non-interactive span, not a hrefless anchor.
     return (
-      <a
+      <span
         aria-disabled="true"
-        tabIndex={-1}
         className={cn(
           baseClass,
           "cursor-not-allowed border-border-subtle bg-bg-surface text-text-tertiary",
         )}
       >
         {label}
-      </a>
+      </span>
     );
   }
 

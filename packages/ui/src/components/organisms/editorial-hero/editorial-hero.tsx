@@ -47,7 +47,17 @@ export function EditorialHero({
         className,
       )}
     >
-      <div className="mx-auto max-w-300 px-7 pb-12 pt-14">
+      {decorative && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(80% 120% at 100% 0%, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent 60%)",
+          }}
+        />
+      )}
+      <div className="relative mx-auto max-w-300 px-7 pb-12 pt-14">
         <div className="flex flex-wrap items-end gap-x-14 gap-y-6">
           <div className="min-w-0 flex-1">
             {breadcrumbs && breadcrumbs.length > 0 && (

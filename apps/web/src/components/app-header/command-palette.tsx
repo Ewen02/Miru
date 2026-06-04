@@ -99,6 +99,9 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   if (!open) return null;
 
   return (
+    // Backdrop click-to-close; Escape-to-close is wired via the keydown
+    // listener above, so the keyboard equivalent is covered.
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       role="dialog"
       aria-modal="true"

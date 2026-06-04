@@ -569,3 +569,35 @@ export interface PollDto {
   /** The option id the viewer voted for, or null. */
   votedOptionId: string | null;
 }
+
+// ── Forum ────────────────────────────────────────────────────────────────────
+
+export type ForumCategory = "GENERAL" | "RECOMMENDATIONS" | "NEWS" | "HELP" | "OFFTOPIC";
+
+export interface ForumThreadSummaryDto {
+  id: string;
+  title: string;
+  category: ForumCategory;
+  authorName: string;
+  postCount: number;
+  /** ISO string — last activity (updatedAt). */
+  updatedAt: string;
+}
+
+export interface ForumPostDto {
+  id: string;
+  body: string;
+  /** ISO string. */
+  createdAt: string;
+  author: { id: string; name: string; image: string | null };
+}
+
+export interface ForumThreadDetailDto {
+  id: string;
+  title: string;
+  category: ForumCategory;
+  authorName: string;
+  /** ISO string. */
+  createdAt: string;
+  posts: ForumPostDto[];
+}

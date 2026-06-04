@@ -276,6 +276,8 @@ model User {
   polls            Poll[]            @relation("PollsCreated")
   pollVotes        PollVote[]
   reviewComments   ReviewComment[]
+  forumThreads     ForumThread[]
+  forumPosts       ForumPost[]
 }
 
 /**
@@ -654,6 +656,48 @@ model PollVote {
 
   @@unique([pollId, userId])
   @@index([optionId])
+}
+
+// ---------------------------------------------------------------------------
+// Forum — Phase 7: community discussion threads and replies.
+// ---------------------------------------------------------------------------
+
+enum ForumCategory {
+  GENERAL
+  RECOMMENDATIONS
+  NEWS
+  HELP
+  OFFTOPIC
+}
+
+model ForumThread {
+  id        String        @id @default(cuid())
+  title     String        @db.VarChar(200)
+  category  ForumCategory
+  authorId  String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  author User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  posts  ForumPost[]
+
+  @@index([category, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+}
+
+// One row per message in a thread. The first post (lowest createdAt) is the
+// thread body; all subsequent rows are replies. Flat — no nesting.
+model ForumPost {
+  id        String   @id @default(cuid())
+  threadId  String
+  authorId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  thread ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
 }
 
 // Web Push subscription. One row per (user × browser). Endpoint is unique

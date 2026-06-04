@@ -1,0 +1,1 @@
+export const FORUM_REPOSITORY = Symbol("FORUM_REPOSITORY");

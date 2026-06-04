@@ -18,9 +18,7 @@ const DEFAULT_LIMIT = 20;
  */
 @Injectable()
 export class GetRecommendationsUseCase implements UseCase<Input, AnimeEntity[]> {
-  constructor(
-    @Inject(ANIME_REPOSITORY) private readonly repo: AnimeRepositoryPort,
-  ) {}
+  constructor(@Inject(ANIME_REPOSITORY) private readonly repo: AnimeRepositoryPort) {}
 
   async execute({ userId, limit }: Input): Promise<AnimeEntity[]> {
     return this.repo.findRecommendedForUser(userId, limit ?? DEFAULT_LIMIT);

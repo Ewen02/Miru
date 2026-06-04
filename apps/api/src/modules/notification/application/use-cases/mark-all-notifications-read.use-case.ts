@@ -9,9 +9,7 @@ interface Input {
 
 @Injectable()
 export class MarkAllNotificationsReadUseCase implements UseCase<Input, { updated: number }> {
-  constructor(
-    @Inject(NOTIFICATION_REPOSITORY) private readonly repo: NotificationRepositoryPort,
-  ) {}
+  constructor(@Inject(NOTIFICATION_REPOSITORY) private readonly repo: NotificationRepositoryPort) {}
 
   async execute({ userId }: Input): Promise<{ updated: number }> {
     const updated = await this.repo.markAllRead(userId);

@@ -13,9 +13,7 @@ describe("GetUserLifetimeStatsUseCase", () => {
   });
 
   it("rejects an empty session userId", async () => {
-    await expect(useCase.execute({ userId: "" })).rejects.toBeInstanceOf(
-      UnauthorizedException,
-    );
+    await expect(useCase.execute({ userId: "" })).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
   it("loads stats and joinedAt for a valid session", async () => {

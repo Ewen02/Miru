@@ -1,8 +1,4 @@
-import {
-  createParamDecorator,
-  ExecutionContext,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { createParamDecorator, ExecutionContext, UnauthorizedException } from "@nestjs/common";
 import type { UserSession } from "@thallesp/nestjs-better-auth";
 import type { Auth } from "./auth";
 
@@ -13,13 +9,11 @@ import type { Auth } from "./auth";
  * decorator will throw 401 on its own if used on an unprotected route
  * and no session is attached.
  */
-export const CurrentUserId = createParamDecorator(
-  (_: unknown, ctx: ExecutionContext): string => {
-    const req = ctx.switchToHttp().getRequest<{ session?: UserSession<Auth> | null }>();
-    const userId = req.session?.user?.id;
-    if (!userId) {
-      throw new UnauthorizedException("Authentication required");
-    }
-    return userId;
-  },
-);
+export const CurrentUserId = createParamDecorator((_: unknown, ctx: ExecutionContext): string => {
+  const req = ctx.switchToHttp().getRequest<{ session?: UserSession<Auth> | null }>();
+  const userId = req.session?.user?.id;
+  if (!userId) {
+    throw new UnauthorizedException("Authentication required");
+  }
+  return userId;
+});

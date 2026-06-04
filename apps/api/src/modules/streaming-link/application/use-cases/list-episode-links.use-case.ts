@@ -14,9 +14,7 @@ interface Input {
  * here so the controller can stay unaware.
  */
 @Injectable()
-export class ListEpisodeLinksUseCase
-  implements UseCase<Input, EpisodePlatformLinkEntity[]>
-{
+export class ListEpisodeLinksUseCase implements UseCase<Input, EpisodePlatformLinkEntity[]> {
   constructor(
     @Inject(EPISODE_LINK_REPOSITORY)
     private readonly repo: EpisodeLinkRepositoryPort,

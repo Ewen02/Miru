@@ -1,9 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { UseCase } from "@shared/domain/use-case.base";
-import {
-  AnimeAccentPreview,
-  AnimeRepositoryPort,
-} from "../../domain/ports/anime-repository.port";
+import { AnimeAccentPreview, AnimeRepositoryPort } from "../../domain/ports/anime-repository.port";
 import { AnimeNotFoundException } from "../../domain/exceptions/anime.exceptions";
 import { ANIME_REPOSITORY } from "../tokens";
 

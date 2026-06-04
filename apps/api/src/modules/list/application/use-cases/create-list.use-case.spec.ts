@@ -14,21 +14,21 @@ describe("CreateListUseCase", () => {
   });
 
   it("rejects a title under 2 characters", async () => {
-    await expect(
-      useCase.execute({ userId: "u1", title: "a" }),
-    ).rejects.toBeInstanceOf(ValidationException);
+    await expect(useCase.execute({ userId: "u1", title: "a" })).rejects.toBeInstanceOf(
+      ValidationException,
+    );
   });
 
   it("rejects a title over 80 characters", async () => {
-    await expect(
-      useCase.execute({ userId: "u1", title: "x".repeat(81) }),
-    ).rejects.toBeInstanceOf(ValidationException);
+    await expect(useCase.execute({ userId: "u1", title: "x".repeat(81) })).rejects.toBeInstanceOf(
+      ValidationException,
+    );
   });
 
   it("rejects a title that slugifies to empty", async () => {
-    await expect(
-      useCase.execute({ userId: "u1", title: "!!" }),
-    ).rejects.toBeInstanceOf(ValidationException);
+    await expect(useCase.execute({ userId: "u1", title: "!!" })).rejects.toBeInstanceOf(
+      ValidationException,
+    );
   });
 
   it("trims whitespace and delegates to the repository with a valid slug", async () => {

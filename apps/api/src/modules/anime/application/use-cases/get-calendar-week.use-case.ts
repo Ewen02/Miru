@@ -1,9 +1,6 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { UseCase } from "@shared/domain/use-case.base";
-import {
-  AnimeRepositoryPort,
-  EpisodeAiringRow,
-} from "../../domain/ports/anime-repository.port";
+import { AnimeRepositoryPort, EpisodeAiringRow } from "../../domain/ports/anime-repository.port";
 import { ANIME_REPOSITORY } from "../tokens";
 
 interface GetCalendarWeekInput {
@@ -20,12 +17,11 @@ interface GetCalendarWeekOutput {
 }
 
 @Injectable()
-export class GetCalendarWeekUseCase
-  implements UseCase<GetCalendarWeekInput, GetCalendarWeekOutput>
-{
-  constructor(
-    @Inject(ANIME_REPOSITORY) private readonly repo: AnimeRepositoryPort,
-  ) {}
+export class GetCalendarWeekUseCase implements UseCase<
+  GetCalendarWeekInput,
+  GetCalendarWeekOutput
+> {
+  constructor(@Inject(ANIME_REPOSITORY) private readonly repo: AnimeRepositoryPort) {}
 
   async execute({ from, to }: GetCalendarWeekInput): Promise<GetCalendarWeekOutput> {
     const episodes = await this.repo.findAiringEpisodesBetween(from, to);

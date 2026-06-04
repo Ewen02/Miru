@@ -27,9 +27,7 @@ const FAVORITES_LIMIT = 5;
 const REVIEWS_LIMIT = 3;
 
 @Injectable()
-export class GetUserProfileUseCase
-  implements UseCase<GetUserProfileInput, GetUserProfileOutput>
-{
+export class GetUserProfileUseCase implements UseCase<GetUserProfileInput, GetUserProfileOutput> {
   constructor(@Inject(USER_REPOSITORY) private readonly users: UserRepositoryPort) {}
 
   async execute({ handle }: GetUserProfileInput): Promise<GetUserProfileOutput> {

@@ -67,10 +67,7 @@ export class WatchlistController {
 
   @Delete("watchlist/:animeId")
   @HttpCode(204)
-  async remove(
-    @CurrentUserId() userId: string,
-    @Param("animeId") animeId: string,
-  ): Promise<void> {
+  async remove(@CurrentUserId() userId: string, @Param("animeId") animeId: string): Promise<void> {
     await this.removeEntry.execute({ userId, animeId });
   }
 

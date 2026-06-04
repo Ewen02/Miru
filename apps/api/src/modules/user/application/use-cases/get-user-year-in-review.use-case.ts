@@ -1,10 +1,7 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { ValidationException, UnauthorizedException } from "@shared/domain/domain-exception";
 import { UseCase } from "@shared/domain/use-case.base";
-import {
-  UserRepositoryPort,
-  YearInReview,
-} from "../../domain/ports/user-repository.port";
+import { UserRepositoryPort, YearInReview } from "../../domain/ports/user-repository.port";
 import { USER_REPOSITORY } from "../tokens";
 
 interface Input {

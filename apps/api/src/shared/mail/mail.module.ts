@@ -9,10 +9,7 @@ import { MailService } from "./mail.service";
  */
 @Global()
 @Module({
-  providers: [
-    { provide: MAIL_PORT, useClass: ResendMailAdapter },
-    MailService,
-  ],
+  providers: [{ provide: MAIL_PORT, useClass: ResendMailAdapter }, MailService],
   exports: [MailService],
 })
 export class MailModule {}

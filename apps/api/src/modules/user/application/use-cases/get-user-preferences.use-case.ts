@@ -1,9 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { UseCase } from "@shared/domain/use-case.base";
-import {
-  UserPreferences,
-  UserRepositoryPort,
-} from "../../domain/ports/user-repository.port";
+import { UserPreferences, UserRepositoryPort } from "../../domain/ports/user-repository.port";
 import { USER_REPOSITORY } from "../tokens";
 
 interface Input {

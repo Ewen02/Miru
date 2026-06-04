@@ -18,9 +18,7 @@ interface Output {
 
 @Injectable()
 export class ListNotificationsUseCase implements UseCase<Input, Output> {
-  constructor(
-    @Inject(NOTIFICATION_REPOSITORY) private readonly repo: NotificationRepositoryPort,
-  ) {}
+  constructor(@Inject(NOTIFICATION_REPOSITORY) private readonly repo: NotificationRepositoryPort) {}
 
   async execute({ userId, limit }: Input): Promise<Output> {
     const [items, unreadCount] = await Promise.all([

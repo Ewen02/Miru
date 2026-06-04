@@ -45,9 +45,9 @@ describe("GetStudioDetailUseCase", () => {
 
   it("throws 404 for an unknown slug", async () => {
     studios.findBySlug.mockResolvedValue(null);
-    await expect(
-      useCase.execute({ slug: "ghost", page: 1, pageSize: 20 }),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(useCase.execute({ slug: "ghost", page: 1, pageSize: 20 })).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it("returns studio + stats + paginated filmography", async () => {

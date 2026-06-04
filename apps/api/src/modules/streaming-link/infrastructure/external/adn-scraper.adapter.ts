@@ -3,8 +3,7 @@ import { ScraperClient, ScraperHttpError, type ScrapedEpisodeLink } from "@miru/
 import { EpisodeLinkPort } from "../../domain/ports/episode-link.port";
 
 const ADN_BASE = "https://animationdigitalnetwork.com";
-const USER_AGENT =
-  "MiruBot/0.5 (+https://miru.app; contact@miru.app) — anime metadata cache";
+const USER_AGENT = "MiruBot/0.5 (+https://miru.app; contact@miru.app) — anime metadata cache";
 
 /**
  * ADN (Animation Digital Network) adapter. ADN exposes a clearer URL

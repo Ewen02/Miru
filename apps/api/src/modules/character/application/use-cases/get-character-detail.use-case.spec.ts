@@ -22,9 +22,7 @@ describe("GetCharacterDetailUseCase", () => {
 
   it("throws 404 when the character does not exist", async () => {
     repo.findById.mockResolvedValue(null);
-    await expect(useCase.execute({ id: "missing" })).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(useCase.execute({ id: "missing" })).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it("aggregates appearances and voice credits in parallel", async () => {

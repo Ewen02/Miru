@@ -1,9 +1,6 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { UseCase } from "@shared/domain/use-case.base";
-import {
-  ReviewRepositoryPort,
-  ReviewWithAuthor,
-} from "../../domain/ports/review-repository.port";
+import { ReviewRepositoryPort, ReviewWithAuthor } from "../../domain/ports/review-repository.port";
 import { REVIEW_REPOSITORY } from "../tokens";
 
 @Injectable()

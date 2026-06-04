@@ -20,12 +20,11 @@ interface GetCharacterDetailOutput {
 }
 
 @Injectable()
-export class GetCharacterDetailUseCase
-  implements UseCase<GetCharacterDetailInput, GetCharacterDetailOutput>
-{
-  constructor(
-    @Inject(CHARACTER_REPOSITORY) private readonly repo: CharacterRepositoryPort,
-  ) {}
+export class GetCharacterDetailUseCase implements UseCase<
+  GetCharacterDetailInput,
+  GetCharacterDetailOutput
+> {
+  constructor(@Inject(CHARACTER_REPOSITORY) private readonly repo: CharacterRepositoryPort) {}
 
   async execute({ id }: GetCharacterDetailInput): Promise<GetCharacterDetailOutput> {
     const character = await this.repo.findById(id);

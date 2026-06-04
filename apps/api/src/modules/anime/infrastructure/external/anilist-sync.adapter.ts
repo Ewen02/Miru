@@ -5,7 +5,11 @@ import { AnimeStatus, AnimeFormat, CharacterRole } from "@miru/types";
 import { slugify } from "@shared/utils/slugify";
 import { cleanSynopsis } from "@shared/utils/clean-synopsis";
 import { extractAccentHex } from "@shared/utils/extract-accent-hex";
-import { AnimeSyncPort, MediaSeason, StreamingEpisodeInput } from "../../domain/ports/anime-sync.port";
+import {
+  AnimeSyncPort,
+  MediaSeason,
+  StreamingEpisodeInput,
+} from "../../domain/ports/anime-sync.port";
 import {
   AnimeEntity,
   AnimePlatformSummary,

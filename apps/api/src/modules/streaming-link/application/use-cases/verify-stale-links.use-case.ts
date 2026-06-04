@@ -56,9 +56,7 @@ export class VerifyStaleLinksUseCase implements UseCase<Input, Output> {
           refreshed += 1;
         }
       } catch (err) {
-        this.logger.debug(
-          `Verify probe inconclusive for ${link.url}: ${(err as Error).message}`,
-        );
+        this.logger.debug(`Verify probe inconclusive for ${link.url}: ${(err as Error).message}`);
       }
     }
 

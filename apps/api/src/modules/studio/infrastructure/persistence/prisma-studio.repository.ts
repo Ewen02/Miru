@@ -1,10 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { StudioEntity } from "../../domain/entities/studio.entity";
-import {
-  StudioRepositoryPort,
-  StudioStats,
-} from "../../domain/ports/studio-repository.port";
+import { StudioRepositoryPort, StudioStats } from "../../domain/ports/studio-repository.port";
 
 const NSFW_HENTAI = "hentai";
 

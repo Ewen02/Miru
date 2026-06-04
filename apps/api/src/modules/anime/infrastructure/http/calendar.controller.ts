@@ -11,10 +11,7 @@ export class CalendarController {
   constructor(private readonly getCalendarWeek: GetCalendarWeekUseCase) {}
 
   @Get()
-  async week(
-    @Query("from") fromStr?: string,
-    @Query("to") toStr?: string,
-  ): Promise<CalendarWeek> {
+  async week(@Query("from") fromStr?: string, @Query("to") toStr?: string): Promise<CalendarWeek> {
     if (!fromStr || !toStr) {
       throw new BadRequestException("from and to query params are required (YYYY-MM-DD)");
     }

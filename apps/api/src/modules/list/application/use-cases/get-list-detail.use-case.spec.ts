@@ -15,9 +15,9 @@ describe("GetListDetailUseCase", () => {
 
   it("throws 404 when the list does not exist", async () => {
     repo.findWithItems.mockResolvedValue(null);
-    await expect(
-      useCase.execute({ listId: "missing", viewerUserId: null }),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(useCase.execute({ listId: "missing", viewerUserId: null })).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it("hides a private list from anonymous viewers", async () => {
@@ -29,9 +29,9 @@ describe("GetListDetailUseCase", () => {
       items: [],
     });
 
-    await expect(
-      useCase.execute({ listId: "list-1", viewerUserId: null }),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(useCase.execute({ listId: "list-1", viewerUserId: null })).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
   });
 
   it("hides a private list from non-owners", async () => {

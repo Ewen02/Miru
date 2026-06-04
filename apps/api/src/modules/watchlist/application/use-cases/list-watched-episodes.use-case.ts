@@ -13,9 +13,7 @@ interface Input {
 
 @Injectable()
 export class ListWatchedEpisodesUseCase implements UseCase<Input, WatchedEpisodeSummary[]> {
-  constructor(
-    @Inject(WATCHLIST_REPOSITORY) private readonly repo: WatchlistRepositoryPort,
-  ) {}
+  constructor(@Inject(WATCHLIST_REPOSITORY) private readonly repo: WatchlistRepositoryPort) {}
 
   async execute({ userId, animeId }: Input): Promise<WatchedEpisodeSummary[]> {
     return this.repo.listWatchedEpisodes(userId, animeId);

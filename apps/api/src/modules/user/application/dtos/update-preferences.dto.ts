@@ -1,11 +1,4 @@
-import {
-  IsBoolean,
-  IsInt,
-  IsOptional,
-  Max,
-  Min,
-  ValidateIf,
-} from "class-validator";
+import { IsBoolean, IsInt, IsOptional, Max, Min, ValidateIf } from "class-validator";
 
 /**
  * PATCH /users/me/preferences. Every field optional — client sends only

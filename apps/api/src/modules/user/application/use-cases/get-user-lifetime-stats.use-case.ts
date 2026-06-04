@@ -1,10 +1,7 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { UnauthorizedException } from "@shared/domain/domain-exception";
 import { UseCase } from "@shared/domain/use-case.base";
-import {
-  UserLifetimeStats,
-  UserRepositoryPort,
-} from "../../domain/ports/user-repository.port";
+import { UserLifetimeStats, UserRepositoryPort } from "../../domain/ports/user-repository.port";
 import { USER_REPOSITORY } from "../tokens";
 
 interface GetUserLifetimeStatsInput {
@@ -18,9 +15,10 @@ interface GetUserLifetimeStatsOutput {
 }
 
 @Injectable()
-export class GetUserLifetimeStatsUseCase
-  implements UseCase<GetUserLifetimeStatsInput, GetUserLifetimeStatsOutput>
-{
+export class GetUserLifetimeStatsUseCase implements UseCase<
+  GetUserLifetimeStatsInput,
+  GetUserLifetimeStatsOutput
+> {
   constructor(@Inject(USER_REPOSITORY) private readonly users: UserRepositoryPort) {}
 
   async execute({ userId }: GetUserLifetimeStatsInput): Promise<GetUserLifetimeStatsOutput> {

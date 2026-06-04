@@ -22,9 +22,7 @@ describe("GetVoiceActorDetailUseCase", () => {
 
   it("throws 404 when the voice actor does not exist", async () => {
     repo.findById.mockResolvedValue(null);
-    await expect(useCase.execute({ id: "missing" })).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(useCase.execute({ id: "missing" })).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it("returns voice actor + stats + roles for a known id", async () => {

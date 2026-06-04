@@ -13,9 +13,10 @@ export interface GetUserWatchlistInput {
 }
 
 @Injectable()
-export class GetUserWatchlistUseCase
-  implements UseCase<GetUserWatchlistInput, WatchlistEntryWithAnime[]>
-{
+export class GetUserWatchlistUseCase implements UseCase<
+  GetUserWatchlistInput,
+  WatchlistEntryWithAnime[]
+> {
   constructor(
     @Inject(WATCHLIST_REPOSITORY)
     private readonly repo: WatchlistRepositoryPort,

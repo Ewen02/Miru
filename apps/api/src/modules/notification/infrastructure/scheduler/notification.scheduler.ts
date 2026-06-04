@@ -107,7 +107,9 @@ export class NotificationScheduler {
     }
 
     if (pushed > 0) {
-      this.logger.log(`Episode aired: pushed ${pushed} notification(s) across ${episodes.length} episode(s)`);
+      this.logger.log(
+        `Episode aired: pushed ${pushed} notification(s) across ${episodes.length} episode(s)`,
+      );
     }
   }
 

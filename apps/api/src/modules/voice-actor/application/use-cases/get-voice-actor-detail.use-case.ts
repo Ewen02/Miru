@@ -20,12 +20,11 @@ interface GetVoiceActorDetailOutput {
 }
 
 @Injectable()
-export class GetVoiceActorDetailUseCase
-  implements UseCase<GetVoiceActorDetailInput, GetVoiceActorDetailOutput>
-{
-  constructor(
-    @Inject(VOICE_ACTOR_REPOSITORY) private readonly repo: VoiceActorRepositoryPort,
-  ) {}
+export class GetVoiceActorDetailUseCase implements UseCase<
+  GetVoiceActorDetailInput,
+  GetVoiceActorDetailOutput
+> {
+  constructor(@Inject(VOICE_ACTOR_REPOSITORY) private readonly repo: VoiceActorRepositoryPort) {}
 
   async execute({ id }: GetVoiceActorDetailInput): Promise<GetVoiceActorDetailOutput> {
     const voiceActor = await this.repo.findById(id);

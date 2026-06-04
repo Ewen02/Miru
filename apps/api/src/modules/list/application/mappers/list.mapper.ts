@@ -1,8 +1,5 @@
 import type { ListDetailDto, ListSummaryDto } from "@miru/types";
-import {
-  ListSummary,
-  ListWithItems,
-} from "../../domain/ports/list-repository.port";
+import { ListSummary, ListWithItems } from "../../domain/ports/list-repository.port";
 
 export class ListMapper {
   static toSummaryDto(summary: ListSummary): ListSummaryDto {

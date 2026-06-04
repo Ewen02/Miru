@@ -12,9 +12,9 @@ import { auth, type Auth } from "./auth";
 @Injectable()
 export class OptionalAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<
-      Request & { session?: UserSession<Auth> | null }
-    >();
+    const req = context
+      .switchToHttp()
+      .getRequest<Request & { session?: UserSession<Auth> | null }>();
     if (!req.session) {
       const session = await auth.api.getSession({
         headers: fromNodeHeaders(req.headers),

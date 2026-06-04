@@ -12,9 +12,7 @@ const DEFAULT_LIMIT = 50;
 
 @Injectable()
 export class ListPendingReportsUseCase implements UseCase<Input, ReportWithPreview[]> {
-  constructor(
-    @Inject(REPORT_REPOSITORY) private readonly repo: ReportRepositoryPort,
-  ) {}
+  constructor(@Inject(REPORT_REPOSITORY) private readonly repo: ReportRepositoryPort) {}
 
   execute({ limit }: Input): Promise<ReportWithPreview[]> {
     return this.repo.listPending(limit ?? DEFAULT_LIMIT);

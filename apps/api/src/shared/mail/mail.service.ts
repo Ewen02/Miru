@@ -1,10 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { MAIL_PORT, type MailPort } from "./mail.port";
-import {
-  passwordResetTemplate,
-  verifyEmailTemplate,
-  welcomeTemplate,
-} from "./templates";
+import { passwordResetTemplate, verifyEmailTemplate, welcomeTemplate } from "./templates";
 
 const WEB_ORIGIN = process.env.WEB_ORIGIN ?? "http://localhost:3000";
 

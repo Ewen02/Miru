@@ -34,10 +34,7 @@ export class NotificationController {
   }
 
   @Post(":id/read")
-  async readOne(
-    @Param("id") id: string,
-    @CurrentUserId() userId: string,
-  ): Promise<{ ok: true }> {
+  async readOne(@Param("id") id: string, @CurrentUserId() userId: string): Promise<{ ok: true }> {
     await this.markRead.execute({ userId, notificationId: id });
     return { ok: true };
   }

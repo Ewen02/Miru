@@ -20,10 +20,7 @@ export class WebPushAdapter implements WebPushSenderPort, OnModuleInit {
     this.enabled = true;
   }
 
-  async send(
-    sub: PushSubscriptionRecord,
-    payload: PushPayload,
-  ): Promise<"ok" | "gone" | "error"> {
+  async send(sub: PushSubscriptionRecord, payload: PushPayload): Promise<"ok" | "gone" | "error"> {
     if (!this.enabled) return "error";
     try {
       await webpush.sendNotification(

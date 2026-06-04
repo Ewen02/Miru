@@ -34,10 +34,11 @@ export class UpdateUserPreferencesUseCase implements UseCase<Input, UserPreferen
     // (or both null = disabled). Mixed nulls would be ambiguous.
     const fromSet = patch.quietFromHour != null;
     const toSet = patch.quietToHour != null;
-    if (fromSet !== toSet && (patch.quietFromHour !== undefined || patch.quietToHour !== undefined)) {
-      throw new ValidationException(
-        "quietFromHour and quietToHour must both be set or both null",
-      );
+    if (
+      fromSet !== toSet &&
+      (patch.quietFromHour !== undefined || patch.quietToHour !== undefined)
+    ) {
+      throw new ValidationException("quietFromHour and quietToHour must both be set or both null");
     }
   }
 }

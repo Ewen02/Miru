@@ -18,13 +18,11 @@ const client = apiKey ? new Resend(apiKey) : null;
 
 async function send(to: string, subject: string, html: string): Promise<void> {
   if (!client) {
-    // eslint-disable-next-line no-console
     console.warn(`[auth-mailer:dry-run] to=${to} subject=${subject}`);
     return;
   }
   const { error } = await client.emails.send({ from, to, subject, html });
   if (error) {
-    // eslint-disable-next-line no-console
     console.error(`[auth-mailer] send failed (${to}): ${error.message}`);
   }
 }

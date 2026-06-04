@@ -9,11 +9,7 @@ export interface PushSubscriptionRecord {
 }
 
 export interface PushSubscriptionRepositoryPort {
-  upsert(
-    userId: string,
-    sub: PushSubscriptionRecord,
-    userAgent: string | null,
-  ): Promise<void>;
+  upsert(userId: string, sub: PushSubscriptionRecord, userAgent: string | null): Promise<void>;
   deleteByEndpoint(endpoint: string): Promise<void>;
   findByUserId(userId: string): Promise<PushSubscriptionRecord[]>;
 }

@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Param,
-  Post,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, UseGuards } from "@nestjs/common";
 import { AuthRequiredGuard } from "@auth/auth-required.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
 import { ReviewEntity } from "../../domain/entities/review.entity";
@@ -50,10 +41,7 @@ export class ReviewController {
   @Delete("reviews/:id")
   @UseGuards(AuthRequiredGuard)
   @HttpCode(204)
-  async delete(
-    @CurrentUserId() userId: string,
-    @Param("id") reviewId: string,
-  ): Promise<void> {
+  async delete(@CurrentUserId() userId: string, @Param("id") reviewId: string): Promise<void> {
     await this.deleteReview.execute({ reviewId, userId });
   }
 }

@@ -1,10 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@miru/db";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
-import {
-  NotificationEntity,
-  NotificationKind,
-} from "../../domain/entities/notification.entity";
+import { NotificationEntity, NotificationKind } from "../../domain/entities/notification.entity";
 import {
   CreateNotificationInput,
   NotificationRepositoryPort,

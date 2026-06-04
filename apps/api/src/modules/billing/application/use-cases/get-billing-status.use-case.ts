@@ -15,9 +15,7 @@ export interface BillingStatusOutput {
 
 @Injectable()
 export class GetBillingStatusUseCase implements UseCase<Input, BillingStatusOutput> {
-  constructor(
-    @Inject(BILLING_REPOSITORY) private readonly repo: BillingRepositoryPort,
-  ) {}
+  constructor(@Inject(BILLING_REPOSITORY) private readonly repo: BillingRepositoryPort) {}
 
   async execute({ userId }: Input): Promise<BillingStatusOutput> {
     const state = await this.repo.findByUserId(userId);

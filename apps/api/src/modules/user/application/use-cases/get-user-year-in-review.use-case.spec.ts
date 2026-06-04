@@ -19,9 +19,9 @@ describe("GetUserYearInReviewUseCase", () => {
   });
 
   it("rejects a non-integer year", async () => {
-    await expect(
-      useCase.execute({ userId: "u1", year: Number.NaN }),
-    ).rejects.toBeInstanceOf(ValidationException);
+    await expect(useCase.execute({ userId: "u1", year: Number.NaN })).rejects.toBeInstanceOf(
+      ValidationException,
+    );
   });
 
   it("rejects a year before 2000", async () => {
@@ -32,9 +32,9 @@ describe("GetUserYearInReviewUseCase", () => {
 
   it("rejects a year in the future", async () => {
     const future = new Date().getFullYear() + 1;
-    await expect(
-      useCase.execute({ userId: "u1", year: future }),
-    ).rejects.toBeInstanceOf(ValidationException);
+    await expect(useCase.execute({ userId: "u1", year: future })).rejects.toBeInstanceOf(
+      ValidationException,
+    );
   });
 
   it("delegates to the repository for a valid year", async () => {

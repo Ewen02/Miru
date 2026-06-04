@@ -1,4 +1,12 @@
-import { Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Query, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  DefaultValuePipe,
+  Get,
+  Param,
+  ParseIntPipe,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthRequiredGuard } from "@auth/auth-required.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
 import { GetAnimeCatalogUseCase } from "../../application/use-cases/get-anime-catalog.use-case";

@@ -22,9 +22,7 @@ interface GetGenreDetailOutput {
 }
 
 @Injectable()
-export class GetGenreDetailUseCase
-  implements UseCase<GetGenreDetailInput, GetGenreDetailOutput>
-{
+export class GetGenreDetailUseCase implements UseCase<GetGenreDetailInput, GetGenreDetailOutput> {
   constructor(
     @Inject(GENRE_REPOSITORY) private readonly genres: GenreRepositoryPort,
     @Inject(ANIME_REPOSITORY) private readonly animes: AnimeRepositoryPort,

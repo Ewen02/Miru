@@ -13,9 +13,7 @@ interface Input {
 
 @Injectable()
 export class ResolveReportUseCase implements UseCase<Input, void> {
-  constructor(
-    @Inject(REPORT_REPOSITORY) private readonly repo: ReportRepositoryPort,
-  ) {}
+  constructor(@Inject(REPORT_REPOSITORY) private readonly repo: ReportRepositoryPort) {}
 
   async execute({ reportId, adminId, deleteTarget }: Input): Promise<void> {
     if (deleteTarget) {

@@ -1,9 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
-import {
-  ReportCreateInput,
-  ReportRepositoryPort,
-} from "../../domain/ports/report-repository.port";
+import { ReportCreateInput, ReportRepositoryPort } from "../../domain/ports/report-repository.port";
 import {
   ReportEntity,
   ReportReason,

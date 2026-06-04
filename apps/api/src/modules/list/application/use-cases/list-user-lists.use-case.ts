@@ -1,9 +1,6 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { UseCase } from "@shared/domain/use-case.base";
-import {
-  ListRepositoryPort,
-  ListSummary,
-} from "../../domain/ports/list-repository.port";
+import { ListRepositoryPort, ListSummary } from "../../domain/ports/list-repository.port";
 import { LIST_REPOSITORY } from "../tokens";
 
 interface Input {

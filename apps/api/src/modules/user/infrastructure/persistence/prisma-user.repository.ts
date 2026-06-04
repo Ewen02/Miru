@@ -327,9 +327,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
     };
   }
 
-  async activeSessionsByUserId(
-    userId: string,
-  ): Promise<Omit<UserActiveSession, "current">[]> {
+  async activeSessionsByUserId(userId: string): Promise<Omit<UserActiveSession, "current">[]> {
     const records = await this.prisma.session.findMany({
       where: { userId, expiresAt: { gt: new Date() } },
       orderBy: { updatedAt: "desc" },
@@ -369,10 +367,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
     };
   }
 
-  async updatePreferences(
-    userId: string,
-    patch: UserPreferencesPatch,
-  ): Promise<UserPreferences> {
+  async updatePreferences(userId: string, patch: UserPreferencesPatch): Promise<UserPreferences> {
     const row = await this.prisma.userPreferences.upsert({
       where: { userId },
       create: { userId, ...DEFAULT_USER_PREFERENCES, ...patch },

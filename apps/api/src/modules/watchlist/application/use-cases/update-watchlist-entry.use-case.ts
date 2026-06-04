@@ -21,9 +21,10 @@ export interface UpdateWatchlistEntryInput {
 const VALID_STATUSES = new Set<string>(Object.values(WatchStatus));
 
 @Injectable()
-export class UpdateWatchlistEntryUseCase
-  implements UseCase<UpdateWatchlistEntryInput, WatchlistEntryEntity>
-{
+export class UpdateWatchlistEntryUseCase implements UseCase<
+  UpdateWatchlistEntryInput,
+  WatchlistEntryEntity
+> {
   constructor(
     @Inject(WATCHLIST_REPOSITORY)
     private readonly repo: WatchlistRepositoryPort,

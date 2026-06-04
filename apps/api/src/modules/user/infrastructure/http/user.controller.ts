@@ -172,8 +172,9 @@ export class UserController {
 
   @Get(":handle")
   async profile(@Param("handle") handle: string): Promise<UserProfile> {
-    const { user, joinedAt, isPro, stats, favorites, reviews } =
-      await this.getUserProfile.execute({ handle });
+    const { user, joinedAt, isPro, stats, favorites, reviews } = await this.getUserProfile.execute({
+      handle,
+    });
 
     return {
       id: user.id,

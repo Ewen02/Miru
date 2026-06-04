@@ -1,7 +1,5 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import {
-  PushSubscriptionRepositoryPort,
-} from "../domain/ports/push-subscription.port";
+import { PushSubscriptionRepositoryPort } from "../domain/ports/push-subscription.port";
 import { PushPayload, WebPushSenderPort } from "../domain/ports/web-push.port";
 import { PUSH_SUBSCRIPTION_REPOSITORY, WEB_PUSH_SENDER } from "./tokens";
 

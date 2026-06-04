@@ -199,21 +199,19 @@ export class PrismaListRepository implements ListRepositoryPort {
     };
   }
 
-  private toSummary(
-    record: {
-      id: string;
-      userId: string;
-      title: string;
-      description: string | null;
-      slug: string;
-      isPublic: boolean;
-      coverArtSeed: number | null;
-      updatedAt: Date;
-      user: { name: string };
-      items: Array<{ anime: { coverUrl: string | null } }>;
-      _count: { items: number; likes: number };
-    },
-  ): ListSummary {
+  private toSummary(record: {
+    id: string;
+    userId: string;
+    title: string;
+    description: string | null;
+    slug: string;
+    isPublic: boolean;
+    coverArtSeed: number | null;
+    updatedAt: Date;
+    user: { name: string };
+    items: Array<{ anime: { coverUrl: string | null } }>;
+    _count: { items: number; likes: number };
+  }): ListSummary {
     return {
       id: record.id,
       userId: record.userId,

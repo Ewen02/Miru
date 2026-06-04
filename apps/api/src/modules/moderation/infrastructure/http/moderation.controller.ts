@@ -63,10 +63,7 @@ export class ModerationController {
   /** Resolve without deleting the target. */
   @Post("admin/reports/:id/dismiss")
   @UseGuards(AuthRequiredGuard, AdminRequiredGuard)
-  async dismiss(
-    @Param("id") id: string,
-    @CurrentUserId() adminId: string,
-  ): Promise<{ ok: true }> {
+  async dismiss(@Param("id") id: string, @CurrentUserId() adminId: string): Promise<{ ok: true }> {
     await this.resolveReport.execute({ reportId: id, adminId });
     return { ok: true };
   }

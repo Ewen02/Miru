@@ -15,9 +15,7 @@ describe("GetUserProfileUseCase", () => {
 
   it("throws 404 when the handle resolves to no user", async () => {
     repo.findByHandle.mockResolvedValue(null);
-    await expect(useCase.execute({ handle: "ghost" })).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(useCase.execute({ handle: "ghost" })).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it("loads profile stats, favorites and reviews in parallel for a known handle", async () => {

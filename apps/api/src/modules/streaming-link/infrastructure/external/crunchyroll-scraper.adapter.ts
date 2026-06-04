@@ -3,8 +3,7 @@ import { ScraperClient, ScraperHttpError, type ScrapedEpisodeLink } from "@miru/
 import { EpisodeLinkPort } from "../../domain/ports/episode-link.port";
 
 const CRUNCHYROLL_BASE = "https://www.crunchyroll.com";
-const USER_AGENT =
-  "MiruBot/0.5 (+https://miru.app; contact@miru.app) — anime metadata cache";
+const USER_AGENT = "MiruBot/0.5 (+https://miru.app; contact@miru.app) — anime metadata cache";
 
 /**
  * Crunchyroll adapter — scrapes the public series page to extract episode
@@ -66,8 +65,7 @@ export class CrunchyrollScraperAdapter implements EpisodeLinkPort {
       const href = $(el).attr("href");
       if (!href) return;
       const title =
-        $(el).attr("title") ??
-        ($(el).find("[data-testid='episode-title']").text().trim() || null);
+        $(el).attr("title") ?? ($(el).find("[data-testid='episode-title']").text().trim() || null);
       // Episode number is usually in a sibling [data-testid='episode-number-label']
       const numberText = $(el).find("[data-testid='episode-number']").text();
       const match = numberText.match(/\d+/);

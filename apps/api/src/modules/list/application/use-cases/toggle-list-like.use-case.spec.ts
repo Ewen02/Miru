@@ -21,9 +21,7 @@ describe("ToggleListLikeUseCase", () => {
   });
 
   it("refuses to like a private list belonging to someone else", async () => {
-    repo.findById.mockResolvedValue(
-      makeListEntity({ userId: "owner", isPublic: false }),
-    );
+    repo.findById.mockResolvedValue(makeListEntity({ userId: "owner", isPublic: false }));
     await expect(
       useCase.execute({ userId: "other", listId: "list-1", action: "like" }),
     ).rejects.toBeInstanceOf(ForbiddenException);
@@ -31,9 +29,7 @@ describe("ToggleListLikeUseCase", () => {
   });
 
   it("lets the owner like their own private list", async () => {
-    repo.findById.mockResolvedValue(
-      makeListEntity({ userId: "owner", isPublic: false }),
-    );
+    repo.findById.mockResolvedValue(makeListEntity({ userId: "owner", isPublic: false }));
     await useCase.execute({ userId: "owner", listId: "list-1", action: "like" });
     expect(repo.like).toHaveBeenCalledWith("owner", "list-1");
   });

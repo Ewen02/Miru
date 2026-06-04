@@ -15,16 +15,16 @@ describe("DeleteListUseCase", () => {
 
   it("throws 404 when the list does not exist", async () => {
     repo.findById.mockResolvedValue(null);
-    await expect(
-      useCase.execute({ userId: "u1", listId: "missing" }),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(useCase.execute({ userId: "u1", listId: "missing" })).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it("refuses deletion when the user is not the owner", async () => {
     repo.findById.mockResolvedValue(makeListEntity({ userId: "owner" }));
-    await expect(
-      useCase.execute({ userId: "other", listId: "list-1" }),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(useCase.execute({ userId: "other", listId: "list-1" })).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
     expect(repo.delete).not.toHaveBeenCalled();
   });
 

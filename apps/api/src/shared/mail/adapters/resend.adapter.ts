@@ -20,9 +20,7 @@ export class ResendMailAdapter implements MailPort {
     this.from = process.env.MAIL_FROM ?? "Miru <onboarding@resend.dev>";
     this.client = apiKey ? new Resend(apiKey) : null;
     if (!this.client) {
-      this.logger.warn(
-        "RESEND_API_KEY not set — emails will be logged instead of sent.",
-      );
+      this.logger.warn("RESEND_API_KEY not set — emails will be logged instead of sent.");
     }
   }
 

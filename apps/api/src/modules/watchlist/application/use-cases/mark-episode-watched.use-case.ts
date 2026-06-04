@@ -10,9 +10,7 @@ interface Input {
 
 @Injectable()
 export class MarkEpisodeWatchedUseCase implements UseCase<Input, void> {
-  constructor(
-    @Inject(WATCHLIST_REPOSITORY) private readonly repo: WatchlistRepositoryPort,
-  ) {}
+  constructor(@Inject(WATCHLIST_REPOSITORY) private readonly repo: WatchlistRepositoryPort) {}
 
   async execute({ userId, episodeId }: Input): Promise<void> {
     await this.repo.markEpisodeWatched(userId, episodeId);

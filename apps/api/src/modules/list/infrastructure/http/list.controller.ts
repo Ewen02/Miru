@@ -55,7 +55,7 @@ export class ListController {
       userId: userId ?? "",
       filter,
     });
-    return summaries.map(ListMapper.toSummaryDto);
+    return summaries.map((summary) => ListMapper.toSummaryDto(summary));
   }
 
   @Get(":id")

@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Headers,
-  HttpCode,
-  Post,
-  Req,
-  UseGuards,
-} from "@nestjs/common";
+import { Controller, Get, Headers, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
 import { AuthRequiredGuard } from "@auth/auth-required.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
@@ -64,7 +55,7 @@ export class BillingController {
   @Post("webhook")
   @HttpCode(200)
   async webhook(
-    @Req() req: Request & { rawBody?: Buffer; body: Buffer | unknown },
+    @Req() req: Request & { rawBody?: Buffer; body: unknown },
     @Headers("stripe-signature") signature: string,
   ): Promise<{ received: true }> {
     const raw = (req.rawBody ?? req.body) as Buffer;

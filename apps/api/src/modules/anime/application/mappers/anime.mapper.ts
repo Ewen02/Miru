@@ -36,7 +36,7 @@ export class AnimeMapper {
   }
 
   static toCardList(entities: AnimeEntity[]): AnimeCard[] {
-    return entities.map(AnimeMapper.toCard);
+    return entities.map((entity) => AnimeMapper.toCard(entity));
   }
 
   static toCharacterCards(characters: CharacterSummary[]): CharacterCard[] {

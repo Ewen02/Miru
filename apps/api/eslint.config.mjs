@@ -29,7 +29,19 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-floating-promises": "warn",
       "@typescript-eslint/no-unsafe-argument": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
       "prettier/prettier": ["error", { endOfLine: "auto" }],
+    },
+  },
+  {
+    // Jest mocks reference repository/port methods unbound (e.g. `repo.findById`
+    // as a jest.fn()); `unbound-method` is a false positive in that context.
+    files: ["**/*.spec.ts"],
+    rules: {
+      "@typescript-eslint/unbound-method": "off",
     },
   },
 );

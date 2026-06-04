@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchCharacterDetail } from "@/lib/api";
+import { JsonLd, personSchema } from "@/lib/json-ld";
 
 interface CharacterPageProps {
   params: Promise<{ id: string }>;
@@ -25,6 +26,14 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
 
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
+      <JsonLd
+        data={personSchema({
+          name: character.name,
+          path: `/characters/${id}`,
+          image: character.imageUrl,
+          description: `${character.name} — apparitions dans ${character.appearances.length} anime sur Miru.`,
+        })}
+      />
       <header className="mb-14 flex flex-col gap-10 md:flex-row md:items-start">
         {character.imageUrl ? (
           <div className="relative h-85 w-60 shrink-0 overflow-hidden rounded-xl border border-border-subtle">

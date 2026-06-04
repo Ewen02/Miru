@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AnimeCard, EditorialHero, Pagination } from "@miru/ui";
 import { fetchGenreDetail } from "@/lib/api";
+import { JsonLd, breadcrumbSchema } from "@/lib/json-ld";
 
 interface GenrePageProps {
   params: Promise<{ slug: string }>;
@@ -68,6 +69,12 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Miru", path: "/" },
+          { name: detail.name, path: `/genre/${slug}` },
+        ])}
+      />
       <EditorialHero
         decorative
         breadcrumbs={[{ href: "/", label: t("breadcrumbCatalog") }]}

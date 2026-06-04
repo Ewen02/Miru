@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchVoiceActorDetail } from "@/lib/api";
+import { JsonLd, personSchema } from "@/lib/json-ld";
 
 interface PersonPageProps {
   params: Promise<{ id: string }>;
@@ -25,6 +26,13 @@ export default async function PersonPage({ params }: PersonPageProps) {
 
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
+      <JsonLd
+        data={personSchema({
+          name: person.name,
+          path: `/people/${id}`,
+          description: `${person.name} — ${person.stats.roleCount} rôles indexés sur Miru.`,
+        })}
+      />
       <header className="mb-14 flex flex-col gap-10 md:flex-row md:items-start">
         <div
           aria-hidden

@@ -15,6 +15,7 @@ import {
   type SeasonItem,
 } from "@miru/ui";
 import { fetchAnimeAccent, fetchAnimeDetail } from "@/lib/api";
+import { JsonLd, animeSchema, breadcrumbSchema } from "@/lib/json-ld";
 import { fetchUserWatchlist } from "@/lib/server-watchlist";
 import { fetchAnimeReviews } from "@/lib/server-reviews";
 import { fetchWatchedEpisodes } from "@/lib/server-watched-episodes";
@@ -111,8 +112,18 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
   const showEpisodes =
     !isMovie && (anime.episodes.length > 0 || anime.status === "AIRING");
 
+  const canonicalPath = `/anime/${anime.slug}`;
+
   return (
     <>
+      <JsonLd data={animeSchema(anime, canonicalPath)} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Miru", path: "/" },
+          { name: t("breadcrumb"), path: "/search" },
+          { name: anime.title, path: canonicalPath },
+        ])}
+      />
       <HeaderDetailBridge
         title={anime.title}
         rating={anime.averageRating}

@@ -200,6 +200,7 @@
     "quietDisable": "Disable",
     "privacyHint": "Data export and other controls ship in the next release. In the meantime, write to contact@miru.app."
   },
+  "lifetimePage": {
     "metaTitle": "Lifetime stats",
     "metaDescription": "Your stats since day one on Miru.",
     "eyebrow": "All-time",
@@ -320,6 +321,7 @@
   },
   "animeDetail": {
     "notFound": "Anime not found",
+    "breadcrumb": "Catalog",
     "backCatalog": "← Catalog",
     "synopsisEmpty": "No synopsis available.",
     "infoFormat": "Format",

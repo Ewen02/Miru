@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/app-header";
 import { HeaderProvider } from "@/components/app-header/header-context";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { SiteFooter } from "@/components/site-footer";
+import { JsonLd, organizationSchema, websiteSchema } from "@/lib/json-ld";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://miru.app";
 const DESCRIPTION =
@@ -88,6 +89,8 @@ export default async function RootLayout({
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
         />
+        <JsonLd data={websiteSchema()} />
+        <JsonLd data={organizationSchema()} />
       </head>
       <body className="flex min-h-full flex-col bg-bg-base font-body text-text-primary pb-16 md:pb-0">
         <NextIntlClientProvider locale={locale} messages={messages}>

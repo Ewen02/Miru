@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { AnimeCard, EditorialHero, Pagination } from "@miru/ui";
 import { fetchStudioDetail } from "@/lib/api";
+import { JsonLd, breadcrumbSchema } from "@/lib/json-ld";
 
 interface StudioPageProps {
   params: Promise<{ slug: string }>;
@@ -32,6 +33,12 @@ export default async function StudioPage({ params, searchParams }: StudioPagePro
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Miru", path: "/" },
+          { name: studio.name, path: `/studios/${slug}` },
+        ])}
+      />
       <EditorialHero
         decorative
         breadcrumbs={[{ href: "/", label: "Catalogue" }]}

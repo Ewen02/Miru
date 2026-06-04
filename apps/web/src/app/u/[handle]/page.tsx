@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { AnimeCard, EditorialSectionHeader, RatingHistogram, StatCard } from "@miru/ui";
 import { fetchUserProfile } from "@/lib/api";
+import { JsonLd, profilePageSchema } from "@/lib/json-ld";
 import type { UserProfileReview } from "@miru/types";
 import { ShareProfileButton } from "./share-profile-button";
 
@@ -32,6 +33,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
+      <JsonLd
+        data={profilePageSchema({
+          handle: handleSlug,
+          displayName: profile.name,
+          image: profile.image,
+        })}
+      />
       {/* Identity header. Avatar (image or initial) + handle eyebrow + name + share. */}
       <header className="mb-14 flex flex-col gap-7 sm:flex-row sm:items-end">
         <Avatar image={profile.image} initial={initial} />

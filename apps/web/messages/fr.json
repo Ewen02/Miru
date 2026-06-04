@@ -321,6 +321,7 @@
   },
   "animeDetail": {
     "notFound": "Anime introuvable",
+    "breadcrumb": "Catalogue",
     "backCatalog": "← Catalogue",
     "synopsisEmpty": "Pas de synopsis disponible.",
     "infoFormat": "Format",

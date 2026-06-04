@@ -666,6 +666,17 @@
     "followers": "Followers",
     "followingCount": "Following"
   },
+  "messagesPage": {
+    "metaTitle": "Messages",
+    "eyebrow": "Messaging",
+    "title": "Messages",
+    "empty": "No conversations yet. Open someone's profile to message them.",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "backToInbox": "← Messages",
+    "noMessages": "No messages yet. Say hi!",
+    "unread": "{count} unread"
+  },
   "episodeHeatmap": {
     "title": "Reactions",
     "reactionsCount": "{count} reactions",

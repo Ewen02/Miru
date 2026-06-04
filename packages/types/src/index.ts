@@ -663,3 +663,29 @@ export interface EpisodeHeatmapDto {
   total: number;
   buckets: EpisodeHeatmapBucketDto[];
 }
+
+// ── Direct messages ──────────────────────────────────────────────────────────
+
+export interface ConversationSummaryDto {
+  id: string;
+  /** The other participant (not the viewer). */
+  peer: { id: string; name: string; image: string | null };
+  lastMessageAt: string | null;
+  /** Unread messages from the peer for the viewer. */
+  unreadCount: number;
+}
+
+export interface DirectMessageDto {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  body: string;
+  /** ISO string. */
+  createdAt: string;
+}
+
+export interface ConversationDetailDto {
+  id: string;
+  peer: { id: string; name: string; image: string | null };
+  messages: DirectMessageDto[];
+}

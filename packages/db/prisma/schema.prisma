@@ -288,6 +288,11 @@ model User {
 
   // Editorial — Phase 7
   articles Article[]
+
+  // Direct messages — Phase 7
+  conversationsA Conversation[]  @relation("ConvUserA")
+  conversationsB Conversation[]  @relation("ConvUserB")
+  sentMessages   DirectMessage[]
 }
 
 /**
@@ -803,6 +808,47 @@ model EpisodeReaction {
   @@index([episodeId, secondMark])
   // Per-user reactions on an episode (load / rate-limit a single user's marks).
   @@index([episodeId, userId])
+}
+
+// ---------------------------------------------------------------------------
+// Direct messages — Phase 7: 1-to-1 private conversations.
+// ---------------------------------------------------------------------------
+
+// One row per unique user pair. userAId < userBId lexicographically so the
+// pair always maps to exactly one Conversation row regardless of who initiates.
+model Conversation {
+  id            String    @id @default(cuid())
+  userAId       String
+  userBId       String
+  createdAt     DateTime  @default(now())
+  // NULL until the first message is sent; used to sort the inbox by recency.
+  lastMessageAt DateTime?
+
+  userA    User            @relation("ConvUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB    User            @relation("ConvUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  messages DirectMessage[]
+
+  // One row per ordered pair — canonical order enforced at the application layer.
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+}
+
+// One row per message in a conversation.
+model DirectMessage {
+  id             String    @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String    @db.Text
+  createdAt      DateTime  @default(now())
+  // NULL = unread; set when the recipient first loads the message.
+  readAt         DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  // Primary access pattern: paginate a conversation's messages in order.
+  @@index([conversationId, createdAt])
 }
 
 // Web Push subscription. One row per (user × browser). Endpoint is unique

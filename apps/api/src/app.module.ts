@@ -19,6 +19,7 @@ import { EpisodeReactionModule } from "@modules/episode-reaction/episode-reactio
 import { ForumModule } from "@modules/forum/forum.module";
 import { GenreModule } from "@modules/genre/genre.module";
 import { ListModule } from "@modules/list/list.module";
+import { MessagingModule } from "@modules/messaging/messaging.module";
 import { ModerationModule } from "@modules/moderation/moderation.module";
 import { NotificationModule } from "@modules/notification/notification.module";
 import { PlatformModule } from "@modules/platform/platform.module";
@@ -89,6 +90,7 @@ const isDev = process.env.NODE_ENV !== "production";
     ForumModule,
     GenreModule,
     ListModule,
+    MessagingModule,
     ModerationModule,
     NotificationModule,
     PlatformModule,

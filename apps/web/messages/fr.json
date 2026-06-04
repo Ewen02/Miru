@@ -651,6 +651,17 @@
     "followers": "Abonnés",
     "followingCount": "Abonnements"
   },
+  "messagesPage": {
+    "metaTitle": "Messages",
+    "eyebrow": "Messagerie",
+    "title": "Messages",
+    "empty": "Aucune conversation. Ouvre le profil de quelqu'un pour lui écrire.",
+    "placeholder": "Écris un message…",
+    "send": "Envoyer",
+    "backToInbox": "← Messages",
+    "noMessages": "Aucun message. Dis bonjour !",
+    "unread": "{count} non lus"
+  },
   "episodeHeatmap": {
     "title": "Réactions",
     "reactionsCount": "{count} réactions",

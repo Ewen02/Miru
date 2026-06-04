@@ -16,9 +16,13 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
   const { handle } = await params;
   const profile = await fetchUserProfile(handle).catch(() => null);
   if (!profile) return { title: "Profil introuvable" };
+  const title = profile.name;
+  const description = `Profil Miru de ${profile.name} — ${profile.stats.completedCount} anime terminés, ${profile.stats.reviewCount} avis.`;
   return {
-    title: `${profile.name}`,
-    description: `Profil Miru de ${profile.name} — ${profile.stats.completedCount} anime terminés, ${profile.stats.reviewCount} avis.`,
+    title,
+    description,
+    openGraph: { title: `${title} — Miru`, description, type: "profile" },
+    twitter: { card: "summary_large_image", title: `${title} — Miru`, description },
   };
 }
 

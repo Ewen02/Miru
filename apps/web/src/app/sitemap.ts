@@ -5,6 +5,13 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://miru.app";
 
 export const revalidate = 3600;
 
+// Pagination budget for the anime catalog. The catalog holds ~4,500 titles;
+// we walk it in pages of 250 up to this many pages (5,000 URLs) so the
+// sitemap stays close to complete without unbounded API load. If the catalog
+// ever exceeds this, the overflow is logged rather than silently dropped.
+const ANIME_PAGE_SIZE = 250;
+const ANIME_MAX_PAGES = 20;
+
 const STATIC_PAGES: Array<{
   path: string;
   priority: number;
@@ -21,28 +28,48 @@ const STATIC_PAGES: Array<{
   { path: "/changelog", priority: 0.3, changeFrequency: "monthly" },
 ];
 
+/** Walk the paginated anime catalog up to ANIME_MAX_PAGES, collecting slugs. */
+async function fetchAllAnimeSlugs(): Promise<string[]> {
+  const slugs: string[] = [];
+  for (let page = 1; page <= ANIME_MAX_PAGES; page++) {
+    const result = await fetchAnimeCatalog({ page, pageSize: ANIME_PAGE_SIZE }).catch(() => null);
+    if (!result) break;
+    for (const anime of result.data) slugs.push(anime.slug);
+    if (!result.hasNext) return slugs;
+    if (page === ANIME_MAX_PAGES && result.hasNext) {
+      console.warn(
+        `sitemap: anime catalog exceeds ${ANIME_MAX_PAGES * ANIME_PAGE_SIZE} URLs; remaining pages omitted.`,
+      );
+    }
+  }
+  return slugs;
+}
+
 /**
- * Dynamic sitemap. Pulls the top 250 anime, all genres, the current year's
- * season page, plus a handful of static landing routes. Auth-gated pages
- * (watchlist, profile, security…) are never listed.
+ * Dynamic sitemap. Walks the full anime catalog (paginated), all genres, the
+ * current season, plus static landing routes. Auth-gated and personalized
+ * pages (watchlist, profile, security, for-you…) are never listed.
+ *
+ * Entity routes without a bulk-listing API endpoint (studios, characters,
+ * people, public lists, public profiles) are not enumerable here yet — adding
+ * them requires listing endpoints on the API.
  *
  * Cached for 1h (`revalidate`) to keep the API load low.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
-  const [catalog, genres] = await Promise.all([
-    fetchAnimeCatalog({ pageSize: 250 }).catch(() => null),
+  const [animeSlugs, genres] = await Promise.all([
+    fetchAllAnimeSlugs(),
     fetchGenres().catch(() => []),
   ]);
 
-  const animeEntries: MetadataRoute.Sitemap =
-    catalog?.data.map((a) => ({
-      url: `${SITE_URL}/anime/${a.slug}`,
-      lastModified: now,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    })) ?? [];
+  const animeEntries: MetadataRoute.Sitemap = animeSlugs.map((slug) => ({
+    url: `${SITE_URL}/anime/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
 
   const genreEntries: MetadataRoute.Sitemap = genres.map((g) => ({
     url: `${SITE_URL}/genre/${g.slug}`,

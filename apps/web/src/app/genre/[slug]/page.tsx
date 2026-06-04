@@ -41,12 +41,15 @@ export async function generateMetadata({ params }: GenrePageProps): Promise<Meta
     getTranslations("genrePage"),
   ]);
   if (!detail) return { title: t("notFound") };
+  const description = t("metaDescription", {
+    name: detail.name,
+    total: detail.stats.totalAnimes,
+  });
   return {
     title: detail.name,
-    description: t("metaDescription", {
-      name: detail.name,
-      total: detail.stats.totalAnimes,
-    }),
+    description,
+    openGraph: { title: `${detail.name} — Miru`, description, type: "website" },
+    twitter: { card: "summary_large_image", title: `${detail.name} — Miru`, description },
   };
 }
 

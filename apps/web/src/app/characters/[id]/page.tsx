@@ -13,9 +13,13 @@ export async function generateMetadata({ params }: CharacterPageProps): Promise<
   const { id } = await params;
   const character = await fetchCharacterDetail(id).catch(() => null);
   if (!character) return { title: "Personnage introuvable" };
+  const description = `${character.name} — apparitions dans ${character.appearances.length} anime sur Miru.`;
+  const images = character.imageUrl ? [character.imageUrl] : undefined;
   return {
     title: character.name,
-    description: `${character.name} — apparitions dans ${character.appearances.length} anime sur Miru.`,
+    description,
+    openGraph: { title: `${character.name} — Miru`, description, images, type: "profile" },
+    twitter: { card: "summary_large_image", title: `${character.name} — Miru`, description, images },
   };
 }
 

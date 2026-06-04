@@ -13,9 +13,12 @@ export async function generateMetadata({ params }: PersonPageProps): Promise<Met
   const { id } = await params;
   const person = await fetchVoiceActorDetail(id).catch(() => null);
   if (!person) return { title: "Personne introuvable" };
+  const description = `${person.name} — ${person.stats.roleCount} rôles indexés sur Miru.`;
   return {
     title: person.name,
-    description: `${person.name} — ${person.stats.roleCount} rôles indexés sur Miru.`,
+    description,
+    openGraph: { title: `${person.name} — Miru`, description, type: "profile" },
+    twitter: { card: "summary_large_image", title: `${person.name} — Miru`, description },
   };
 }
 

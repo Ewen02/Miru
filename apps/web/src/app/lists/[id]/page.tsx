@@ -14,9 +14,14 @@ export async function generateMetadata({ params }: ListDetailPageProps): Promise
   const { id } = await params;
   const list = await fetchListDetail(id).catch(() => null);
   if (!list) return { title: "Liste introuvable" };
+  const description = list.description ?? `Liste ${list.title} sur Miru par ${list.ownerName}.`;
+  const cover = list.items.find((item) => item.animeCoverUrl)?.animeCoverUrl;
+  const images = cover ? [cover] : undefined;
   return {
     title: list.title,
-    description: list.description ?? `Liste ${list.title} sur Miru par ${list.ownerName}.`,
+    description,
+    openGraph: { title: `${list.title} — Miru`, description, images, type: "website" },
+    twitter: { card: "summary_large_image", title: `${list.title} — Miru`, description, images },
   };
 }
 

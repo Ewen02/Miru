@@ -16,9 +16,12 @@ export async function generateMetadata({ params }: StudioPageProps): Promise<Met
   const { slug } = await params;
   const studio = await fetchStudioDetail(slug).catch(() => null);
   if (!studio) return { title: "Studio introuvable" };
+  const description = `${studio.name} — ${studio.stats.totalAnimes} titres au catalogue Miru.`;
   return {
     title: studio.name,
-    description: `${studio.name} — ${studio.stats.totalAnimes} titres au catalogue Miru.`,
+    description,
+    openGraph: { title: `${studio.name} — Miru`, description, type: "website" },
+    twitter: { card: "summary_large_image", title: `${studio.name} — Miru`, description },
   };
 }
 

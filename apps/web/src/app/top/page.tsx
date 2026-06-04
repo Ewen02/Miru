@@ -14,7 +14,14 @@ const TOP_LIMIT = 100;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("topPage");
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  const title = t("metaTitle");
+  const description = t("metaDescription");
+  return {
+    title,
+    description,
+    openGraph: { title: `${title} — Miru`, description, type: "website" },
+    twitter: { card: "summary_large_image", title: `${title} — Miru`, description },
+  };
 }
 
 export default async function TopPage({ searchParams }: TopPageProps) {

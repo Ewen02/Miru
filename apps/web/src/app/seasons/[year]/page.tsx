@@ -24,9 +24,13 @@ const FORMAT_KEYS = [
 export async function generateMetadata({ params }: SeasonPageProps): Promise<Metadata> {
   const { year } = await params;
   const t = await getTranslations("seasonsPage");
+  const title = t("metaTitle", { year });
+  const description = t("metaDescription", { year });
   return {
-    title: t("metaTitle", { year }),
-    description: t("metaDescription", { year }),
+    title,
+    description,
+    openGraph: { title: `${title} — Miru`, description, type: "website" },
+    twitter: { card: "summary_large_image", title: `${title} — Miru`, description },
   };
 }
 

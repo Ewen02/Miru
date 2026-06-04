@@ -26,6 +26,11 @@ const STATIC_PAGES: Array<{
   { path: "/terms", priority: 0.2, changeFrequency: "yearly" },
   { path: "/help", priority: 0.3, changeFrequency: "monthly" },
   { path: "/changelog", priority: 0.3, changeFrequency: "monthly" },
+  { path: "/trending", priority: 0.5, changeFrequency: "daily" },
+  { path: "/forum", priority: 0.5, changeFrequency: "daily" },
+  { path: "/clubs", priority: 0.4, changeFrequency: "weekly" },
+  { path: "/polls", priority: 0.4, changeFrequency: "weekly" },
+  { path: "/editorial", priority: 0.5, changeFrequency: "weekly" },
 ];
 
 /** Walk the paginated anime catalog up to ANIME_MAX_PAGES, collecting slugs. */

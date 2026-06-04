@@ -26,6 +26,31 @@ const ROUTES: Array<{ href: string; label: string; description: string }> = [
     label: "Saisons",
     description: "Tous les titres de l'année, filtrables par format.",
   },
+  {
+    href: "/trending",
+    label: "Tendances",
+    description: "L'activité de la communauté en direct.",
+  },
+  {
+    href: "/forum",
+    label: "Forum",
+    description: "Discussions de la communauté par catégorie.",
+  },
+  {
+    href: "/clubs",
+    label: "Clubs",
+    description: "Rejoins des clubs de fans.",
+  },
+  {
+    href: "/polls",
+    label: "Sondages",
+    description: "Vote sur les sondages de la communauté.",
+  },
+  {
+    href: "/editorial",
+    label: "Éditorial",
+    description: "Articles et analyses de la rédaction.",
+  },
 ];
 
 export function DiscoverDropdown() {

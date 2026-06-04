@@ -275,6 +275,7 @@ model User {
   userAchievements UserAchievement[]
   polls            Poll[]            @relation("PollsCreated")
   pollVotes        PollVote[]
+  reviewComments   ReviewComment[]
 }
 
 /**
@@ -404,12 +405,30 @@ model Review {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime    Anime           @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  comments ReviewComment[]
 
   @@unique([userId, animeId])
   @@index([animeId])
   @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Review comments — Phase 7: flat (non-threaded) comments on a review.
+// ---------------------------------------------------------------------------
+
+model ReviewComment {
+  id        String   @id @default(cuid())
+  reviewId  String
+  userId    String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId, createdAt])
 }
 
 // ---------------------------------------------------------------------------

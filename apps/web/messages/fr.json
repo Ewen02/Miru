@@ -651,6 +651,19 @@
     "followers": "Abonnés",
     "followingCount": "Abonnements"
   },
+  "reviewPage": {
+    "metaTitle": "Avis",
+    "notFound": "Avis introuvable",
+    "reviewOf": "Avis sur {title}",
+    "ratingLabel": "Note",
+    "commentsHeading": "Commentaires",
+    "commentsCount": "{count} commentaires",
+    "noComments": "Aucun commentaire. Sois le premier à réagir.",
+    "placeholder": "Ajoute un commentaire…",
+    "submit": "Publier",
+    "loginToComment": "Connecte-toi pour commenter.",
+    "backToAnime": "← Retour à la fiche"
+  },
   "pollsPage": {
     "metaTitle": "Sondages",
     "metaDescription": "Vote sur les sondages de la communauté Miru.",

@@ -3,6 +3,7 @@ import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { ReviewEntity } from "../../domain/entities/review.entity";
 import {
   AnimeReviewStats,
+  ReviewDetailView,
   ReviewRepositoryPort,
   ReviewWithAuthor,
 } from "../../domain/ports/review-repository.port";
@@ -69,6 +70,51 @@ export class PrismaReviewRepository implements ReviewRepositoryPort {
       averageRating: result._avg.rating,
       count: result._count._all,
     };
+  }
+
+  async findDetailById(reviewId: string): Promise<ReviewDetailView | null> {
+    const record = await this.prisma.review.findUnique({
+      where: { id: reviewId },
+      include: {
+        anime: { select: { slug: true, title: true } },
+        user: { select: { id: true, name: true, image: true } },
+        comments: {
+          orderBy: { createdAt: "asc" },
+          include: {
+            user: { select: { id: true, name: true, image: true } },
+          },
+        },
+      },
+    });
+    if (!record) return null;
+
+    return {
+      id: record.id,
+      animeId: record.animeId,
+      animeSlug: record.anime.slug,
+      animeTitle: record.anime.title,
+      rating: record.rating,
+      body: record.body,
+      createdAt: record.createdAt,
+      author: record.user,
+      comments: record.comments.map((c) => ({
+        id: c.id,
+        body: c.body,
+        createdAt: c.createdAt,
+        author: c.user,
+      })),
+    };
+  }
+
+  async addComment(reviewId: string, userId: string, body: string): Promise<void> {
+    await this.prisma.reviewComment.create({
+      data: { reviewId, userId, body },
+    });
+  }
+
+  async reviewExists(reviewId: string): Promise<boolean> {
+    const count = await this.prisma.review.count({ where: { id: reviewId } });
+    return count > 0;
   }
 }
 

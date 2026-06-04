@@ -666,6 +666,19 @@
     "followers": "Followers",
     "followingCount": "Following"
   },
+  "reviewPage": {
+    "metaTitle": "Review",
+    "notFound": "Review not found",
+    "reviewOf": "Review of {title}",
+    "ratingLabel": "Rating",
+    "commentsHeading": "Comments",
+    "commentsCount": "{count} comments",
+    "noComments": "No comments yet. Be the first to reply.",
+    "placeholder": "Add a comment…",
+    "submit": "Post",
+    "loginToComment": "Sign in to comment.",
+    "backToAnime": "← Back to the page"
+  },
   "pollsPage": {
     "metaTitle": "Polls",
     "metaDescription": "Vote on the Miru community's polls.",

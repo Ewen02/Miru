@@ -474,6 +474,33 @@ export interface ReviewItem {
   };
 }
 
+export interface ReviewCommentDto {
+  id: string;
+  body: string;
+  createdAt: string;
+  author: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+}
+
+export interface ReviewDetailDto {
+  id: string;
+  animeId: string;
+  animeSlug: string;
+  animeTitle: string;
+  rating: number;
+  body: string | null;
+  createdAt: string;
+  author: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+  comments: ReviewCommentDto[];
+}
+
 // ── Social (follow + activity feed) ──────────────────────────────────────────
 
 export interface FollowStatsDto {

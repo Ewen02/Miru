@@ -1,3 +1,4 @@
+import type { EventEmitter2 } from "@nestjs/event-emitter";
 import { ValidationException } from "@shared/domain/domain-exception";
 import { ListRepositoryPort } from "../../domain/ports/list-repository.port";
 import { makeListRepoMock } from "../../domain/__fixtures__/list-repo.mock";
@@ -6,11 +7,13 @@ import { CreateListUseCase } from "./create-list.use-case";
 
 describe("CreateListUseCase", () => {
   let repo: jest.Mocked<ListRepositoryPort>;
+  let events: { emit: jest.Mock };
   let useCase: CreateListUseCase;
 
   beforeEach(() => {
     repo = makeListRepoMock();
-    useCase = new CreateListUseCase(repo);
+    events = { emit: jest.fn() };
+    useCase = new CreateListUseCase(repo, events as unknown as EventEmitter2);
   });
 
   it("rejects a title under 2 characters", async () => {

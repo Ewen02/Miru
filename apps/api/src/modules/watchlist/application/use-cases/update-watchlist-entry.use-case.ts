@@ -1,6 +1,11 @@
 import { Injectable, Inject } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { WatchStatus } from "@miru/types";
 import { UseCase } from "@shared/domain/use-case.base";
+import {
+  WATCHLIST_COMPLETED_EVENT,
+  type WatchlistCompletedPayload,
+} from "@shared/events/activity.events";
 import { WatchlistEntryEntity } from "../../domain/entities/watchlist-entry.entity";
 import {
   InvalidWatchStatusException,
@@ -28,6 +33,7 @@ export class UpdateWatchlistEntryUseCase implements UseCase<
   constructor(
     @Inject(WATCHLIST_REPOSITORY)
     private readonly repo: WatchlistRepositoryPort,
+    private readonly events: EventEmitter2,
   ) {}
 
   async execute(input: UpdateWatchlistEntryInput): Promise<WatchlistEntryEntity> {
@@ -35,6 +41,8 @@ export class UpdateWatchlistEntryUseCase implements UseCase<
     if (!entry) {
       throw new WatchlistEntryNotFoundException(input.userId, input.animeId);
     }
+
+    const wasCompleted = entry.status === WatchStatus.COMPLETED;
 
     if (input.status !== undefined) {
       if (!VALID_STATUSES.has(input.status)) {
@@ -53,6 +61,15 @@ export class UpdateWatchlistEntryUseCase implements UseCase<
     }
 
     await this.repo.save(entry);
+
+    const nowCompleted = input.status === WatchStatus.COMPLETED;
+    if (!wasCompleted && nowCompleted) {
+      this.events.emit(WATCHLIST_COMPLETED_EVENT, {
+        userId: input.userId,
+        animeId: input.animeId,
+      } satisfies WatchlistCompletedPayload);
+    }
+
     return entry;
   }
 }

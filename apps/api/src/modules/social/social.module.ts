@@ -8,6 +8,7 @@ import { ACTIVITY_REPOSITORY, FOLLOW_REPOSITORY } from "./application/tokens";
 import { PrismaFollowRepository } from "./infrastructure/persistence/prisma-follow.repository";
 import { PrismaActivityRepository } from "./infrastructure/persistence/prisma-activity.repository";
 import { SocialController } from "./infrastructure/http/social.controller";
+import { RecordActivityListener } from "./infrastructure/event-listeners/record-activity.listener";
 
 @Module({
   imports: [PrismaModule],
@@ -17,6 +18,7 @@ import { SocialController } from "./infrastructure/http/social.controller";
     UnfollowUserUseCase,
     GetFollowStatsUseCase,
     GetActivityFeedUseCase,
+    RecordActivityListener,
     { provide: FOLLOW_REPOSITORY, useClass: PrismaFollowRepository },
     { provide: ACTIVITY_REPOSITORY, useClass: PrismaActivityRepository },
   ],

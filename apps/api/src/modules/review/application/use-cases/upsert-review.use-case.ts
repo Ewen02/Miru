@@ -6,6 +6,7 @@ import { ReviewEntity } from "../../domain/entities/review.entity";
 import { ReviewRepositoryPort } from "../../domain/ports/review-repository.port";
 import { REVIEW_REPOSITORY } from "../tokens";
 import { REVIEW_CHANGED_EVENT, type ReviewChangedPayload } from "../events";
+import { REVIEW_UPSERTED_EVENT, type ReviewUpsertedPayload } from "@shared/events/activity.events";
 
 export interface UpsertReviewInput {
   userId: string;
@@ -45,6 +46,11 @@ export class UpsertReviewUseCase implements UseCase<UpsertReviewInput, ReviewEnt
 
     const payload: ReviewChangedPayload = { animeId: input.animeId };
     this.events.emit(REVIEW_CHANGED_EVENT, payload);
+    this.events.emit(REVIEW_UPSERTED_EVENT, {
+      userId: input.userId,
+      animeId: input.animeId,
+      rating: input.rating,
+    } satisfies ReviewUpsertedPayload);
 
     return review;
   }

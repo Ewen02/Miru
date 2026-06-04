@@ -64,8 +64,8 @@ Le domaine **ne connaît rien** de l'extérieur. Pas de decorators NestJS, pas d
 
 ### 2. Application (orchestration)
 
-**Imports autorisés :** `domain/`, `@miru/types`, `class-validator`, `class-transformer`.
-**Imports interdits :** `@prisma/*`, controllers, tout adapter concret.
+**Imports autorisés :** `domain/`, `@miru/types`, `class-validator`, `class-transformer`, `@nestjs/common` (`@Injectable`/`@Inject`), `@nestjs/event-emitter` (`EventEmitter2` pour émettre des événements cross-modules), constantes d'événements de `@shared/events/*`.
+**Imports interdits :** `@prisma/*`, controllers, tout adapter concret, le use-case/repository d'un autre module (passer par un événement).
 
 ### 3. Infrastructure (adapters)
 

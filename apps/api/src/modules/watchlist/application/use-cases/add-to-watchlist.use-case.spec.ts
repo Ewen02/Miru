@@ -1,3 +1,4 @@
+import type { EventEmitter2 } from "@nestjs/event-emitter";
 import { WatchStatus } from "@miru/types";
 import { WatchlistEntryEntity } from "../../domain/entities/watchlist-entry.entity";
 import { WatchlistRepositoryPort } from "../../domain/ports/watchlist-repository.port";
@@ -17,11 +18,13 @@ function makeRepoMock(): jest.Mocked<WatchlistRepositoryPort> {
 
 describe("AddToWatchlistUseCase", () => {
   let repo: jest.Mocked<WatchlistRepositoryPort>;
+  let events: { emit: jest.Mock };
   let useCase: AddToWatchlistUseCase;
 
   beforeEach(() => {
     repo = makeRepoMock();
-    useCase = new AddToWatchlistUseCase(repo);
+    events = { emit: jest.fn() };
+    useCase = new AddToWatchlistUseCase(repo, events as unknown as EventEmitter2);
   });
 
   it("creates a PLANNED entry by default when none exists", async () => {

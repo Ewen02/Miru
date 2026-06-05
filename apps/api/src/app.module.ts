@@ -8,6 +8,7 @@ import { LoggerModule } from "nestjs-pino";
 import { SentryModule, SentryGlobalFilter } from "@sentry/nestjs/setup";
 import { ContextModule } from "@shared/infrastructure/context/context.module";
 import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
+import { SchedulerModule } from "@shared/infrastructure/scheduler/scheduler.module";
 import { MailModule } from "@shared/mail/mail.module";
 import { HealthController } from "@shared/infrastructure/http/health.controller";
 import { AchievementModule } from "@modules/achievement/achievement.module";
@@ -82,6 +83,7 @@ const isDev = process.env.NODE_ENV !== "production";
     }),
     ContextModule,
     PrismaModule,
+    SchedulerModule,
     MailModule,
     AchievementModule,
     AnimeModule,

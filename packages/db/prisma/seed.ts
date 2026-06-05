@@ -1,10 +1,20 @@
 import { prisma } from "../src";
+import { seedGenres } from "./seed/genres";
+import { seedPlatforms } from "./seed/platforms";
 
 /**
- * Seeds the static achievement catalog. Idempotent — re-running upserts by
- * `code`, so it's safe to run on every deploy. Unlocking is handled at
- * runtime by the application; this only defines the badges that exist.
+ * Idempotent seed for static data. Designed to be runnable on every deploy:
+ *  - Achievements: badge catalog (only this was seeded before).
+ *  - Genres: AniList genre list (so NSFW filtering + browse pages work
+ *    even before the first import).
+ *  - Platforms: streaming platforms shown on anime cards.
+ *
+ * The anime catalog itself stays out — it's populated by the sync crons
+ * (or `pnpm sync:trending` for a fresh DB).
+ *
+ * All upserts key on natural keys (code/slug). Safe to re-run.
  */
+
 const ACHIEVEMENTS: Array<{
   code: string;
   name: string;
@@ -56,7 +66,7 @@ const ACHIEVEMENTS: Array<{
   },
 ];
 
-async function main() {
+async function seedAchievements(): Promise<number> {
   for (const a of ACHIEVEMENTS) {
     await prisma.achievement.upsert({
       where: { code: a.code },
@@ -64,7 +74,18 @@ async function main() {
       update: { name: a.name, description: a.description, icon: a.icon, threshold: a.threshold },
     });
   }
-  console.log(`Seeded ${ACHIEVEMENTS.length} achievements.`);
+  return ACHIEVEMENTS.length;
+}
+
+async function main() {
+  const [achievements, genres, platforms] = await Promise.all([
+    seedAchievements(),
+    seedGenres(prisma),
+    seedPlatforms(prisma),
+  ]);
+  console.log(
+    `Seeded: ${achievements} achievements, ${genres} genres, ${platforms} platforms.`,
+  );
 }
 
 main()

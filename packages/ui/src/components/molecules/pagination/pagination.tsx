@@ -21,18 +21,37 @@ export function Pagination({ currentPage, totalPages, makeHref, className }: Pag
         className,
       )}
     >
-      <PageLink href={prev != null ? makeHref(prev) : undefined} label="← Précédent" />
+      <PageLink
+        href={prev != null ? makeHref(prev) : undefined}
+        label="← Précédent"
+        ariaLabel="Page précédente"
+      />
       <span className="uppercase tracking-wide text-text-tertiary">
         Page {currentPage} / {totalPages}
       </span>
-      <PageLink href={next != null ? makeHref(next) : undefined} label="Suivant →" />
+      <PageLink
+        href={next != null ? makeHref(next) : undefined}
+        label="Suivant →"
+        ariaLabel="Page suivante"
+      />
     </nav>
   );
 }
 
-function PageLink({ href, label }: { href?: string; label: string }) {
+function PageLink({
+  href,
+  label,
+  ariaLabel,
+}: {
+  href?: string;
+  label: string;
+  ariaLabel: string;
+}) {
+  // QW-08: mobile-first tap target ≥44×44 (WCAG 2.5.5). Desktop collapses to
+  // the design system's denser pill via the md:h-9 md:min-h-0 override.
   const baseClass = cn(
-    "inline-flex items-center rounded-md border px-3 py-1.5 uppercase tracking-wide",
+    "inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border px-3 py-1.5",
+    "uppercase tracking-wide md:min-h-0 md:h-9",
     "transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
   );
 
@@ -41,6 +60,7 @@ function PageLink({ href, label }: { href?: string; label: string }) {
     return (
       <span
         aria-disabled="true"
+        aria-label={ariaLabel}
         className={cn(
           baseClass,
           "cursor-not-allowed border-border-subtle bg-bg-surface text-text-tertiary",
@@ -54,6 +74,7 @@ function PageLink({ href, label }: { href?: string; label: string }) {
   return (
     <a
       href={href}
+      aria-label={ariaLabel}
       className={cn(
         baseClass,
         "border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated hover:text-text-primary",

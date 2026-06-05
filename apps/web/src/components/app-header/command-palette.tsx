@@ -93,6 +93,11 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           router.push(`/anime/${pick.slug}`);
           onClose();
         }
+      } else if (e.key === "Tab") {
+        // Keep focus inside the palette so AT users don't fall through to the
+        // page behind. Re-focus the search input on every Tab cycle.
+        e.preventDefault();
+        inputRef.current?.focus();
       }
     };
     document.addEventListener("keydown", onKey);

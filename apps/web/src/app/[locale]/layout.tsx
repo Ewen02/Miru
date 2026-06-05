@@ -120,10 +120,16 @@ export default async function LocaleLayout({
         <JsonLd data={organizationSchema()} />
       </head>
       <body className="flex min-h-full flex-col bg-bg-base font-body text-text-primary pb-16 md:pb-0">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-bg-elevated focus:px-4 focus:py-2 focus:text-text-primary focus:outline-none focus:ring-2 focus:ring-accent"
+        >
+          {locale === "fr" ? "Aller au contenu" : "Skip to content"}
+        </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <HeaderProvider>
             <AppHeader />
-            <div className="flex-1">{children}</div>
+            <main id="main-content" className="flex-1">{children}</main>
           </HeaderProvider>
           <MobileBottomNav />
           <SiteFooter />

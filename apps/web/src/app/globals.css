@@ -23,8 +23,9 @@
   /* Text — opacités */
   --color-text-primary: rgba(255, 255, 255, 0.95);
   --color-text-secondary: rgba(255, 255, 255, 0.55);
-  --color-text-tertiary: rgba(255, 255, 255, 0.32);
-  --color-text-quaternary: rgba(255, 255, 255, 0.18);
+  /* Bumped from 0.32/0.18 — WCAG AA needs ~4.5:1 ratio on the #08080c base. */
+  --color-text-tertiary: rgba(255, 255, 255, 0.48);
+  --color-text-quaternary: rgba(255, 255, 255, 0.28);
 
   /* Status */
   --color-success: #3ecf8e;

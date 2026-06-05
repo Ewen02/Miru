@@ -113,6 +113,8 @@
     "watchlist": {
       "add": "Ajouter à ma liste",
       "addLong": "+ Ajouter à ma watchlist",
+      "addShort": "Watchlist",
+      "adding": "Ajout…",
       "markAsWatched": "Marquer comme vu",
       "watching": "En cours",
       "completed": "Terminé",
@@ -507,6 +509,7 @@
     "eyebrow": "Watchlist",
     "filterAria": "Filtrer par statut",
     "discoverCatalog": "Découvrir le catalogue",
+    "resumeEpisode": "Reprendre ép. {n}",
     "statusWatching": "En cours",
     "statusPlanned": "À voir",
     "statusOnHold": "En pause",

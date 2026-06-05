@@ -146,6 +146,12 @@ export default async function WatchlistPage({ params, searchParams }: WatchlistP
               : badgeKey
                 ? t(badgeKey)
                 : "";
+            // S1-07: surface "Reprendre ép N" only when we know the user
+            // hasn't finished — episodeCount unknown or strictly ahead.
+            const nextEpisode = item.currentEpisode + 1;
+            const hasNext =
+              watching &&
+              (!item.anime.episodeCount || item.currentEpisode < item.anime.episodeCount);
             return (
               <WatchlistCard
                 key={item.animeId}
@@ -156,6 +162,7 @@ export default async function WatchlistPage({ params, searchParams }: WatchlistP
                 episodesTotal={item.anime.episodeCount}
                 rating={item.rating}
                 badge={badge}
+                nextLabel={hasNext ? t("resumeEpisode", { n: nextEpisode }) : null}
               />
             );
           })}

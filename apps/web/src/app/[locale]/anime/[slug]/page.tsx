@@ -22,6 +22,7 @@ import { fetchAnimeReviews } from "@/lib/server-reviews";
 import { fetchWatchedEpisodes } from "@/lib/server-watched-episodes";
 import { getServerSession } from "@/lib/server-auth";
 import { WatchlistButton } from "@/components/watchlist-button";
+import { MobileWatchlistFab } from "@/components/mobile-watchlist-fab";
 import { AddToListButton } from "@/components/add-to-list-button";
 import { EpisodesTracker } from "@/components/episodes-tracker";
 import { ReviewSection } from "@/components/review-section";
@@ -202,6 +203,13 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
         />
       }
       reviewsCount={reviews.length > 0 ? reviews.length : null}
+    />
+    {/* S1-05: persistent thumb-reach add-to-watchlist on mobile only.
+        Hides itself once the user already has an entry. */}
+    <MobileWatchlistFab
+      animeId={anime.id}
+      initialEntry={existingEntry}
+      isAuthenticated={session !== null}
     />
     </>
   );

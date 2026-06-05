@@ -12,6 +12,12 @@ interface WatchlistCardProps {
   rating?: number | null;
   /** Top-right status badge — defaults to episode count when status=WATCHING. */
   badge?: string | null;
+  /**
+   * Optional "Reprendre ép N" call-to-action shown under the title for
+   * WATCHING items (S1-07). Overrides the rating block to keep the card
+   * height stable.
+   */
+  nextLabel?: string | null;
   className?: string;
 }
 
@@ -29,6 +35,7 @@ export function WatchlistCard({
   episodesTotal,
   rating,
   badge,
+  nextLabel,
   className,
 }: WatchlistCardProps) {
   const pct =
@@ -83,7 +90,14 @@ export function WatchlistCard({
       <h3 className="mb-1 line-clamp-2 font-display text-sm font-semibold leading-snug text-text-primary">
         {title}
       </h3>
-      {rating != null ? (
+      {nextLabel ? (
+        <p
+          className="inline-flex items-center gap-1 font-mono text-[11px] font-medium"
+          style={{ color: "var(--color-accent)" }}
+        >
+          ▸ {nextLabel}
+        </p>
+      ) : rating != null ? (
         <p className="font-mono text-[11px] text-text-secondary">
           <span style={{ color: "var(--color-accent)" }}>★</span> {rating.toFixed(1)}
         </p>

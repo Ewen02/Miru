@@ -361,20 +361,34 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
   }
 
   async findRecommendedForUser(userId: string, limit: number): Promise<AnimeEntity[]> {
-    // Two-CTE scoring:
-    //   user_genre  → genres seen in the user's WATCHING/COMPLETED entries, with weight = count
-    //   user_studio → same for studios
-    // Then sum a per-anime score = SUM(matching genre weights) * 2 + studio weight,
-    // exclude anything in the watchlist (any status) and NSFW.
+    // Three-CTE scoring with cold-start support:
+    //   user_genre   → genres seen in WATCHING (weight 2) + COMPLETED (weight 2)
+    //                  + PLANNED (weight 1, picks from onboarding count)
+    //                  + UserPreferences.favoriteGenres (weight 1, explicit taste)
+    //   user_studio  → same source set without prefs (no studio signal there)
+    //   candidate    → per-anime score = sum(genre weights)*2 + max(studio weight)
+    //
+    // Excludes anything already in the watchlist (any status) and NSFW.
+    //
+    // The PLANNED + prefs branches solve the cold-start case: a brand-new
+    // user who just finished /onboard has 3 PLANNED picks and a genre list
+    // — enough signal to seed meaningful recos before they watch anything.
     const rows = await this.prisma.$queryRaw<Array<{ id: string }>>`
       WITH user_genre AS (
-        SELECT g.id, COUNT(*)::int AS weight
+        -- Genres from the user's own watchlist (weighted by status).
+        SELECT g.id, SUM(CASE WHEN w.status = 'PLANNED' THEN 1 ELSE 2 END)::int AS weight
         FROM "WatchlistEntry" w
         JOIN "_AnimeGenres" ag ON ag."A" = w."animeId"
         JOIN "Genre" g ON g.id = ag."B"
         WHERE w."userId" = ${userId}
-          AND w.status IN ('WATCHING', 'COMPLETED')
+          AND w.status IN ('WATCHING', 'COMPLETED', 'PLANNED')
         GROUP BY g.id
+        UNION ALL
+        -- Explicit favourites picked at /onboard step 3.
+        SELECT g.id, 1 AS weight
+        FROM "UserPreferences" up
+        JOIN "Genre" g ON g.slug = ANY(up."favoriteGenres")
+        WHERE up."userId" = ${userId}
       ),
       user_studio AS (
         SELECT a."studioId" AS id, COUNT(*)::int AS weight
@@ -392,7 +406,8 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
           a."averageRating"
         FROM "Anime" a
         LEFT JOIN "_AnimeGenres" ag ON ag."A" = a.id
-        LEFT JOIN user_genre ug ON ug.id = ag."B"
+        LEFT JOIN (SELECT id, SUM(weight)::int AS weight FROM user_genre GROUP BY id) ug
+          ON ug.id = ag."B"
         LEFT JOIN user_studio us ON us.id = a."studioId"
         WHERE a.id NOT IN (SELECT "animeId" FROM "WatchlistEntry" WHERE "userId" = ${userId})
           AND a.id NOT IN (

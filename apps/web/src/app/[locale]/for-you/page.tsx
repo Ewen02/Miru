@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { AnimeCard, EditorialHero } from "@miru/ui";
 import { Link, redirect } from "@/i18n/navigation";
+import { fetchAnimeCatalog } from "@/lib/api";
 import { fetchRecommendations } from "@/lib/server-recommendations";
 import { fetchUserLifetimeStats } from "@/lib/server-lifetime-stats";
 
@@ -31,25 +32,35 @@ export default async function ForYouPage({ params }: ForYouPageProps) {
   const topGenre = lifetime?.stats.topGenre ?? null;
   const topStudio = lifetime?.stats.topStudio ?? null;
 
+  // S1-06: cold-start fallback. When the user has no recommendable signal
+  // (empty/tiny watchlist + no genres → empty recos), show airing trending
+  // instead of a sad empty state. Mode flag drives the eyebrow + headline.
+  const isFallback = recommendations.length === 0;
+  let displayed = recommendations;
+  if (isFallback) {
+    const trending = await fetchAnimeCatalog({ status: "AIRING", pageSize: 24 }).catch(
+      () => null,
+    );
+    displayed = trending?.data ?? [];
+  }
+
   return (
     <>
       <EditorialHero
         decorative
         breadcrumbs={[{ href: "/", label: "Accueil" }]}
-        eyebrow="Recommandations"
-        title="Pour toi"
-        description={buildDescription(topGenre?.name ?? null, topStudio?.name ?? null)}
+        eyebrow={isFallback ? "Découverte" : "Recommandations"}
+        title={isFallback ? "À voir cette saison" : "Pour toi"}
+        description={
+          isFallback
+            ? "On apprend encore tes goûts — en attendant, voici ce qui passe en ce moment. Marque quelques anime comme « En cours » ou « Regardé » et les suggestions deviendront perso."
+            : buildDescription(topGenre?.name ?? null, topStudio?.name ?? null)
+        }
         aside={
           <>
-            <StatBlock
-              label="Genre dominant"
-              value={topGenre ? topGenre.name : "—"}
-            />
-            <StatBlock
-              label="Studio favori"
-              value={topStudio ? topStudio.name : "—"}
-            />
-            <StatBlock label="Suggestions" value={String(recommendations.length)} />
+            <StatBlock label="Genre dominant" value={topGenre ? topGenre.name : "—"} />
+            <StatBlock label="Studio favori" value={topStudio ? topStudio.name : "—"} />
+            <StatBlock label="Suggestions" value={String(displayed.length)} />
           </>
         }
       />
@@ -62,27 +73,26 @@ export default async function ForYouPage({ params }: ForYouPageProps) {
               className="inline-block h-0.5 w-6 rounded-sm"
               style={{ backgroundColor: "var(--color-accent)" }}
             />
-            Sélection personnalisée
+            {isFallback ? "Tendance de la saison" : "Sélection personnalisée"}
           </h2>
           <span className="font-mono text-[11px] text-text-tertiary">
-            {recommendations.length.toLocaleString("fr-FR")} titres
+            {displayed.length.toLocaleString("fr-FR")} titres
           </span>
         </header>
 
-        {recommendations.length === 0 ? (
+        {displayed.length === 0 ? (
           <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
             <p className="font-body text-text-secondary">
-              Marque quelques anime comme “Regardé” ou “En cours” pour qu'on apprenne
-              tes goûts. Tu peux commencer par le{" "}
+              On n'a pas réussi à charger les suggestions. Reviens dans un instant ou{" "}
               <Link href="/" className="underline hover:text-text-primary">
-                catalogue
+                explore le catalogue
               </Link>
               .
             </p>
           </div>
         ) : (
           <section className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {recommendations.map((anime) => (
+            {displayed.map((anime) => (
               <Link
                 key={anime.id}
                 href={`/anime/${anime.slug}`}

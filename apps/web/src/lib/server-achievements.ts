@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import type { UserAchievementsDto } from "@miru/types";
 import { API_URL } from "./env";
@@ -6,8 +7,11 @@ import { API_URL } from "./env";
 /**
  * The authenticated user's achievements (unlocked + the full catalog so the
  * page can show locked ones too). Returns null when unauthenticated.
+ *
+ * Wrapped in React.cache() per RSC-A10 so per-render dedup happens when
+ * the badge ribbon and the achievement page both call it.
  */
-export async function fetchUserAchievements(): Promise<UserAchievementsDto | null> {
+export const fetchUserAchievements = cache(async (): Promise<UserAchievementsDto | null> => {
   const store = await cookies();
   const header = store
     .getAll()
@@ -22,4 +26,4 @@ export async function fetchUserAchievements(): Promise<UserAchievementsDto | nul
   if (res.status === 401) return null;
   if (!res.ok) throw new Error(`Miru API ${res.status}: ${await res.text()}`);
   return res.json() as Promise<UserAchievementsDto>;
-}
+});

@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { API_URL } from "./env";
 
@@ -10,8 +11,11 @@ export interface BillingStatus {
 /**
  * Server-side check whether the current user is a sympathisant. Returns the
  * inactive default for anonymous visitors instead of throwing.
+ *
+ * Wrapped in React.cache() so AppHeader + page-level callers share the
+ * same fetch per render (RSC-A10).
  */
-export async function fetchBillingStatus(): Promise<BillingStatus> {
+export const fetchBillingStatus = cache(async (): Promise<BillingStatus> => {
   const cookieStore = await cookies();
   const cookieHeader = cookieStore
     .getAll()
@@ -25,4 +29,4 @@ export async function fetchBillingStatus(): Promise<BillingStatus> {
   });
   if (!res.ok) return { isPro: false, proSince: null };
   return res.json() as Promise<BillingStatus>;
-}
+});

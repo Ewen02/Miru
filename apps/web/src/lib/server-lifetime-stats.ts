@@ -1,14 +1,18 @@
-import { API_URL } from "./env";
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import type { UserLifetime } from "@miru/types";
-
+import { API_URL } from "./env";
 
 /**
  * Server-side fetch of the current user's lifetime stats. Returns null for
  * anonymous visitors (the page redirects to /login when this is null).
+ *
+ * Wrapped in React.cache() — lifetime stats are referenced by the homepage
+ * "Pour toi" eyebrow and the dedicated stats page; same-render dedup
+ * collapses repeated calls into one.
  */
-export async function fetchUserLifetimeStats(): Promise<UserLifetime | null> {
+export const fetchUserLifetimeStats = cache(async (): Promise<UserLifetime | null> => {
   const cookieStore = await cookies();
   const cookieHeader = cookieStore
     .getAll()
@@ -26,4 +30,4 @@ export async function fetchUserLifetimeStats(): Promise<UserLifetime | null> {
     throw new Error(`Miru API ${res.status}: ${await res.text()}`);
   }
   return res.json() as Promise<UserLifetime>;
-}
+});

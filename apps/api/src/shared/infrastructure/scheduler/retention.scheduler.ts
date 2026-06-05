@@ -79,7 +79,8 @@ export class RetentionScheduler {
   }
 
   private buildWhere(rule: RetentionRule, cutoff: Date): string {
-    const base = `"createdAt" < '${cutoff.toISOString()}'`;
+    const column = rule.dateColumn ?? "createdAt";
+    const base = `"${column}" < '${cutoff.toISOString()}'`;
     return rule.extraWhere ? `${base} AND ${rule.extraWhere}` : base;
   }
 

@@ -4,6 +4,10 @@
  *
  * Rules are interpreted by RetentionScheduler:
  *  - `keepDays`: rows older than this are deletion candidates.
+ *  - `dateColumn`: the date column compared to (cutoff = now - keepDays).
+ *    Default `"createdAt"`. Use `"expiresAt"` for tables that have an
+ *    explicit lifetime (sessions, tokens), so we never delete a still-
+ *    valid row just because it was minted long ago.
  *  - `extraWhere`: additional predicate (e.g. only purge read notifs).
  *  - `description`: shown in logs.
  *
@@ -14,6 +18,7 @@ export interface RetentionRule {
   table: string;
   keepDays: number;
   description: string;
+  dateColumn?: string;
   /** Raw SQL appended to the WHERE clause (Prisma raw query). Optional. */
   extraWhere?: string;
 }
@@ -34,6 +39,16 @@ export const RETENTION_RULES: RetentionRule[] = [
     table: "EpisodeReaction",
     keepDays: 365,
     description: "Episode reactions older than 1 year",
+  },
+  {
+    // CONFIG-D3: Better Auth refreshes session.updatedAt rather than minting
+    // new rows, but expired sessions never get cleaned up. Delete only rows
+    // whose `expiresAt` is at least 60 days in the past — generous grace
+    // window so a long-paused user keeps their session.
+    table: "Session",
+    keepDays: 60,
+    description: "Expired sessions older than 60 days",
+    dateColumn: "expiresAt",
   },
 ];
 

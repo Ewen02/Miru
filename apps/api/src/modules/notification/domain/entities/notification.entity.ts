@@ -1,6 +1,12 @@
 import { Entity } from "@shared/domain/entity.base";
 
-export type NotificationKind = "EPISODE_AIRED" | "REVIEW_REPLY" | "WEEKLY_RECAP" | "SYSTEM";
+export type NotificationKind =
+  | "EPISODE_AIRED"
+  | "REVIEW_REPLY"
+  | "WEEKLY_RECAP"
+  | "SYSTEM"
+  | "ACHIEVEMENT_UNLOCKED"
+  | "NEW_FOLLOWER";
 
 interface NotificationProps {
   userId: string;

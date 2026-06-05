@@ -350,7 +350,18 @@
     "previous": "← Previous",
     "next": "Next →",
     "finish": "Finish →",
-    "finishing": "Getting you in…"
+    "finishing": "Getting you in…",
+    "stepNotifications": "Notifications",
+    "notifTitle": "Get a ping when an episode airs.",
+    "notifSubtitle": "No ads, no spam. Just a quiet ping when an anime in your watchlist drops its next episode.",
+    "notifEnable": "Enable notifications",
+    "notifEnabling": "Asking the browser…",
+    "notifEnabled": "Notifications on ✓",
+    "notifDenied": "Permission denied",
+    "notifUnavailable": "Browser not supported",
+    "notifHint": "You can turn them off any time from your settings.",
+    "notifEnabledHint": "All set. Move on to the next step.",
+    "notifDeniedHint": "Re-enable them from your browser settings if you change your mind."
   },
   "calendarPage": {
     "metaTitle": "Calendar",

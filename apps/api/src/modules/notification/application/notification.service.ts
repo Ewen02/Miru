@@ -78,14 +78,16 @@ export class NotificationService {
       case "EPISODE_AIRED":
         return prefs.inAppEpisodeAired;
       case "REVIEW_REPLY":
+      case "NEW_FOLLOWER":
         // Mention-style — uses the @mentions toggle since we don't have
-        // a dedicated review-reply in-app toggle.
+        // dedicated in-app toggles per kind.
         return prefs.inAppMention;
+      case "ACHIEVEMENT_UNLOCKED":
       case "WEEKLY_RECAP":
       case "SYSTEM":
         // Always allowed in-app — these are low-frequency and important
-        // (welcome, recap). Email side is gated separately by the cron
-        // when it queries prefs for who to email.
+        // (welcome, recap, badges). Email side is gated separately by the
+        // listener when it queries prefs for who to email.
         return true;
       default:
         return true;

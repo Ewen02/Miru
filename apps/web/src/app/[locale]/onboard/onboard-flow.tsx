@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Logo, cn } from "@miru/ui";
 import { API_URL } from "@/lib/env";
+import { enablePush, isPushSupported } from "@/lib/push-api";
 
 interface StarterPick {
   id: string;
@@ -24,7 +25,7 @@ interface OnboardFlowProps {
   genres: GenreOption[];
 }
 
-const STEP_KEYS = ["stepImport", "stepFavorites", "stepGenres"] as const;
+const STEP_KEYS = ["stepImport", "stepFavorites", "stepGenres", "stepNotifications"] as const;
 const TOTAL_STEPS = STEP_KEYS.length;
 const PICKS_REQUIRED = 3;
 
@@ -54,6 +55,13 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
   const [importError, setImportError] = useState<string | null>(null);
   const [importing, startImport] = useTransition();
   const [finishing, startFinish] = useTransition();
+  // S2-01: track push enrollment progress so the button shows the right
+  // state without polling Notification.permission. "unavailable" lets us
+  // hide the step content entirely when the browser can't support push.
+  const [pushState, setPushState] = useState<
+    "idle" | "enabling" | "enabled" | "denied" | "error" | "unavailable"
+  >("idle");
+  const [pushError, setPushError] = useState<string | null>(null);
   const [selectedGenres, setSelectedGenres] = useState<Set<string>>(() => {
     // Preselect the curated default set, intersected with what the API
     // actually returned — avoids ticking a genre that no longer exists.
@@ -83,8 +91,34 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
   };
 
   const canAdvance =
-    step === 0 || (step === 1 && picks.size >= PICKS_REQUIRED) || step === 2;
+    step === 0 ||
+    (step === 1 && picks.size >= PICKS_REQUIRED) ||
+    step === 2 ||
+    step === 3;
   const isFinal = step === TOTAL_STEPS - 1;
+
+  async function handleEnablePush() {
+    if (!isPushSupported()) {
+      setPushState("unavailable");
+      return;
+    }
+    setPushState("enabling");
+    setPushError(null);
+    try {
+      const res = await enablePush();
+      if (res.ok) {
+        setPushState("enabled");
+      } else if (res.reason === "Permission refusée.") {
+        setPushState("denied");
+      } else {
+        setPushState("error");
+        setPushError(res.reason);
+      }
+    } catch (err) {
+      setPushState("error");
+      setPushError((err as Error).message);
+    }
+  }
 
   function handleFinish() {
     // Best-effort: even if /onboarding/complete fails (network, 401), we
@@ -345,6 +379,62 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
               })}
             </div>
           )}
+        </section>
+      )}
+
+      {step === 3 && (
+        <section className="mb-12">
+          <h1 className="m-0 mb-3 font-display text-3xl font-semibold tracking-[-0.025em] text-text-primary sm:text-4xl">
+            {t("notifTitle")}
+          </h1>
+          <p className="m-0 mb-8 font-body text-base text-text-secondary">
+            {t("notifSubtitle")}
+          </p>
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-bg-surface p-5">
+            <button
+              type="button"
+              onClick={handleEnablePush}
+              disabled={
+                pushState === "enabling" ||
+                pushState === "enabled" ||
+                pushState === "denied" ||
+                pushState === "unavailable"
+              }
+              className="inline-flex h-11 items-center justify-center rounded-md font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+              style={{
+                backgroundColor:
+                  pushState === "enabled"
+                    ? "var(--color-success)"
+                    : "var(--color-accent)",
+                color: "var(--color-on-accent)",
+              }}
+            >
+              {pushState === "enabling"
+                ? t("notifEnabling")
+                : pushState === "enabled"
+                  ? t("notifEnabled")
+                  : pushState === "denied"
+                    ? t("notifDenied")
+                    : pushState === "unavailable"
+                      ? t("notifUnavailable")
+                      : t("notifEnable")}
+            </button>
+            <p className="m-0 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
+              {pushState === "denied"
+                ? t("notifDeniedHint")
+                : pushState === "enabled"
+                  ? t("notifEnabledHint")
+                  : t("notifHint")}
+            </p>
+            {pushError && (
+              <p
+                className="m-0 rounded-md border border-error/30 bg-error-muted px-3 py-2 font-body text-xs text-error"
+                role="alert"
+              >
+                {pushError}
+              </p>
+            )}
+          </div>
         </section>
       )}
 

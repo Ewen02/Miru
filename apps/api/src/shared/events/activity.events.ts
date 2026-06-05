@@ -44,3 +44,20 @@ export interface AchievementUnlockedPayload {
   userId: string;
   code: string;
 }
+
+/**
+ * A comment was posted on a Review. The notification module turns this
+ * into a REVIEW_REPLY in-app notification + (opt-in) email.
+ * `recipientId` is the original review author; `commenterId` triggered
+ * the event — the listener silently skips when they're the same person
+ * (no "you replied to yourself" notifications).
+ */
+export const REVIEW_COMMENTED_EVENT = "review.commented";
+export interface ReviewCommentedPayload {
+  reviewId: string;
+  /** Who wrote the comment. */
+  commenterId: string;
+  /** The original review's author. May equal commenterId on self-reply. */
+  recipientId: string;
+  body: string;
+}

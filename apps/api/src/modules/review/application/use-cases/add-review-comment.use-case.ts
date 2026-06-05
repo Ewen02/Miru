@@ -1,6 +1,11 @@
 import { Injectable, Inject } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { NotFoundException, ValidationException } from "@shared/domain/domain-exception";
 import { UseCase } from "@shared/domain/use-case.base";
+import {
+  REVIEW_COMMENTED_EVENT,
+  type ReviewCommentedPayload,
+} from "@shared/events/activity.events";
 import { ReviewDetailView, ReviewRepositoryPort } from "../../domain/ports/review-repository.port";
 import { REVIEW_REPOSITORY } from "../tokens";
 
@@ -15,6 +20,7 @@ export class AddReviewCommentUseCase implements UseCase<AddReviewCommentInput, R
   constructor(
     @Inject(REVIEW_REPOSITORY)
     private readonly repo: ReviewRepositoryPort,
+    private readonly events: EventEmitter2,
   ) {}
 
   async execute({ reviewId, userId, body }: AddReviewCommentInput): Promise<ReviewDetailView> {
@@ -33,6 +39,17 @@ export class AddReviewCommentUseCase implements UseCase<AddReviewCommentInput, R
 
     const detail = await this.repo.findDetailById(reviewId);
     if (!detail) throw new NotFoundException("Review", reviewId);
+
+    // S2-04: emit so the notification listener can push a REVIEW_REPLY
+    // in-app notif + an email when emailReviewReply is enabled. The
+    // notifier handles the self-reply skip — keep the producer simple.
+    this.events.emit(REVIEW_COMMENTED_EVENT, {
+      reviewId,
+      commenterId: userId,
+      recipientId: detail.author.id,
+      body: trimmed,
+    } satisfies ReviewCommentedPayload);
+
     return detail;
   }
 }

@@ -350,7 +350,18 @@
     "previous": "← Précédent",
     "next": "Suivant →",
     "finish": "Terminer →",
-    "finishing": "On y va…"
+    "finishing": "On y va…",
+    "stepNotifications": "Notifications",
+    "notifTitle": "Reçois une notif quand un épisode sort.",
+    "notifSubtitle": "Pas de pub, pas de spam. Juste un ping discret quand un anime de ta watchlist publie son prochain épisode.",
+    "notifEnable": "Activer les notifications",
+    "notifEnabling": "Demande au navigateur…",
+    "notifEnabled": "Notifications activées ✓",
+    "notifDenied": "Permission refusée",
+    "notifUnavailable": "Navigateur non supporté",
+    "notifHint": "Tu pourras les désactiver à tout moment depuis tes paramètres.",
+    "notifEnabledHint": "Tout est en place. Tu peux passer à la suite.",
+    "notifDeniedHint": "Réactive-les depuis les paramètres de ton navigateur si tu changes d'avis."
   },
   "calendarPage": {
     "metaTitle": "Calendrier",

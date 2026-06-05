@@ -188,7 +188,13 @@ export interface ListDetailDto {
   items: ListItemDto[];
 }
 
-export type NotificationKind = "EPISODE_AIRED" | "REVIEW_REPLY" | "WEEKLY_RECAP" | "SYSTEM";
+export type NotificationKind =
+  | "EPISODE_AIRED"
+  | "REVIEW_REPLY"
+  | "WEEKLY_RECAP"
+  | "SYSTEM"
+  | "ACHIEVEMENT_UNLOCKED"
+  | "NEW_FOLLOWER";
 
 export interface NotificationItemDto {
   id: string;

@@ -1,18 +1,20 @@
 import { Module } from "@nestjs/common";
 import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
+import { MailModule } from "@shared/mail/mail.module";
 import { PushModule } from "@modules/push/push.module";
 import { UserModule } from "@modules/user/user.module";
 import { ListNotificationsUseCase } from "./application/use-cases/list-notifications.use-case";
 import { MarkNotificationReadUseCase } from "./application/use-cases/mark-notification-read.use-case";
 import { MarkAllNotificationsReadUseCase } from "./application/use-cases/mark-all-notifications-read.use-case";
 import { NotificationService } from "./application/notification.service";
+import { SocialEventListener } from "./application/listeners/social-event.listener";
 import { NOTIFICATION_REPOSITORY } from "./application/tokens";
 import { PrismaNotificationRepository } from "./infrastructure/persistence/prisma-notification.repository";
 import { NotificationController } from "./infrastructure/http/notification.controller";
 import { NotificationScheduler } from "./infrastructure/scheduler/notification.scheduler";
 
 @Module({
-  imports: [PrismaModule, PushModule, UserModule],
+  imports: [PrismaModule, MailModule, PushModule, UserModule],
   controllers: [NotificationController],
   providers: [
     ListNotificationsUseCase,
@@ -20,6 +22,7 @@ import { NotificationScheduler } from "./infrastructure/scheduler/notification.s
     MarkAllNotificationsReadUseCase,
     NotificationService,
     NotificationScheduler,
+    SocialEventListener,
     { provide: NOTIFICATION_REPOSITORY, useClass: PrismaNotificationRepository },
   ],
   // NotificationService is exported so other modules can push notifications

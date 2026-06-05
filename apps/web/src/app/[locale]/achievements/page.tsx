@@ -4,6 +4,7 @@ import { EditorialHero, EmptyState } from "@miru/ui";
 import { redirect } from "@/i18n/navigation";
 import { buildAlternates } from "@/lib/alternates";
 import { fetchUserAchievements } from "@/lib/server-achievements";
+import { ShareAchievementButton } from "@/components/share-achievement-button";
 
 interface AchievementsPageProps {
   params: Promise<{ locale: string }>;
@@ -73,9 +74,18 @@ export default async function AchievementsPage({ params }: AchievementsPageProps
                     {badge.icon ?? "★"}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="m-0 font-body text-sm font-semibold text-text-primary">
-                      {badge.name}
-                    </h2>
+                    <div className="flex items-start justify-between gap-2">
+                      <h2 className="m-0 font-body text-sm font-semibold text-text-primary">
+                        {badge.name}
+                      </h2>
+                      {unlocked && (
+                        <ShareAchievementButton
+                          badgeName={badge.name}
+                          badgeDescription={badge.description}
+                          href="/achievements"
+                        />
+                      )}
+                    </div>
                     <p className="m-0 mt-1 font-body text-xs leading-relaxed text-text-secondary">
                       {badge.description}
                     </p>

@@ -80,6 +80,15 @@
     "paletteClose": "Fermer"
   },
   "components": {
+    "shareAchievement": {
+      "share": "Partager",
+      "close": "Fermer",
+      "twitter": "Partager sur Twitter",
+      "discord": "Copier pour Discord",
+      "copyLink": "Copier le lien",
+      "copied": "Copié ✓",
+      "tweetText": "J'ai débloqué « {badge} » sur Miru."
+    },
     "review": {
       "title": "Avis communauté",
       "writeReview": "Écrire un avis",

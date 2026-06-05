@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { EmptyState } from "@miru/ui";
 import { Link } from "@/i18n/navigation";
 import { buildAlternates } from "@/lib/alternates";
 import type { ListSummaryDto } from "@miru/types";
@@ -91,7 +92,7 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
       </nav>
 
       {lists.length === 0 ? (
-        <EmptyState tab={activeTab} authenticated={session !== null} t={t} />
+        <ListsEmptyState tab={activeTab} authenticated={session !== null} t={t} />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {lists.map((list) => (
@@ -105,7 +106,7 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
 
 type T = (key: string, values?: Record<string, string | number>) => string;
 
-function EmptyState({
+function ListsEmptyState({
   tab,
   authenticated,
   t,
@@ -116,18 +117,10 @@ function EmptyState({
 }) {
   if (!authenticated && tab !== "public") {
     return (
-      <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
-        <p className="m-0 mb-4 font-body text-sm text-text-tertiary">
-          {t("emptyAnonymous")}
-        </p>
-        <Link
-          href="/login?next=/lists"
-          className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
-          style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
-        >
-          {t("emptyAnonymousCta")}
-        </Link>
-      </div>
+      <EmptyState
+        title={t("emptyAnonymous")}
+        primaryAction={{ label: t("emptyAnonymousCta"), href: "/login?next=/lists" }}
+      />
     );
   }
   const messageKey: Record<Tab, string> = {
@@ -135,11 +128,13 @@ function EmptyState({
     liked: "emptyLiked",
     public: "emptyPublic",
   };
-  return (
-    <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
-      <p className="m-0 font-body text-sm text-text-tertiary">{t(messageKey[tab])}</p>
-    </div>
-  );
+  // "mine" and "liked" both benefit from a route into the catalogue to start
+  // building a list; "public" is a community surface so we point there instead.
+  const action =
+    tab === "public"
+      ? { label: t("emptyPublicCta"), href: "/trending" }
+      : { label: t("emptyMineCta"), href: "/" };
+  return <EmptyState title={t(messageKey[tab])} primaryAction={action} />;
 }
 
 function ListCard({ list, t }: { list: ListSummaryDto; t: T }) {

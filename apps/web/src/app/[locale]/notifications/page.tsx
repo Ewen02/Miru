@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { EmptyState } from "@miru/ui";
 import type { NotificationItemDto } from "@miru/types";
 import { Link, redirect } from "@/i18n/navigation";
 import { buildAlternates } from "@/lib/alternates";
@@ -65,12 +66,11 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
       </header>
 
       {data.items.length === 0 ? (
-        <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
-          <p className="m-0 mb-2 font-display text-base font-semibold text-text-primary">
-            {t("emptyTitle")}
-          </p>
-          <p className="m-0 font-body text-sm text-text-tertiary">{t("emptyBody")}</p>
-        </div>
+        <EmptyState
+          title={t("emptyTitle")}
+          description={t("emptyBody")}
+          primaryAction={{ label: t("emptyCta"), href: "/" }}
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {data.items.map((n) => (

@@ -56,7 +56,7 @@ export function EmptyState({
                 "transition-opacity duration-200 hover:opacity-90",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
               )}
-              style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
             >
               {primaryAction.label}
             </Link>

@@ -155,7 +155,7 @@ export function HomeHero({
           {current.pitch}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <Button asChild size="lg" style={{ backgroundColor: accent, color: "#08080c" }}>
+          <Button asChild size="lg" style={{ backgroundColor: accent, color: "var(--color-on-accent)" }}>
             <Link href={`/anime/${current.slug}`}>Voir la fiche</Link>
           </Button>
           {showWatchlistCta && (

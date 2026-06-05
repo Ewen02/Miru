@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { EditorialHero } from "@miru/ui";
+import { EditorialHero, EmptyState } from "@miru/ui";
 import { redirect } from "@/i18n/navigation";
 import { buildAlternates } from "@/lib/alternates";
 import { fetchUserAchievements } from "@/lib/server-achievements";
@@ -45,9 +45,11 @@ export default async function AchievementsPage({ params }: AchievementsPageProps
       />
       <main className="mx-auto max-w-300 px-7 pb-20 pt-10">
         {data.all.length === 0 ? (
-          <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
-            <p className="m-0 font-body text-sm text-text-secondary">{t("empty")}</p>
-          </div>
+          <EmptyState
+            title={t("empty")}
+            description={t("emptyDesc")}
+            primaryAction={{ label: t("emptyCta"), href: "/" }}
+          />
         ) : (
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {data.all.map((badge) => {

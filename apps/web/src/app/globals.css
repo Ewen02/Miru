@@ -69,6 +69,9 @@
   --color-accent-muted: color-mix(in srgb, var(--color-accent) 14%, transparent);
   --color-accent-subtle: color-mix(in srgb, var(--color-accent) 6%, transparent);
   --color-accent-strong: color-mix(in srgb, var(--color-accent) 35%, transparent);
+  /* Texte/icône posé sur un fond accent (boutons primaires). Near-black,
+     lisible quelle que soit la teinte accent (toujours claire). */
+  --color-on-accent: #08080c;
 
   /* Shadcn tokens — mappés sur la palette Miru dark-only */
   --color-background: var(--color-bg-base);

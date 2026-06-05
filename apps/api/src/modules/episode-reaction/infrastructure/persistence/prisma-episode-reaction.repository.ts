@@ -21,26 +21,47 @@ export class PrismaEpisodeReactionRepository implements EpisodeReactionRepositor
   }
 
   async episodeExists(episodeId: string): Promise<boolean> {
-    const count = await this.prisma.episode.count({ where: { id: episodeId } });
-    return count > 0;
+    // PERF-10: PK lookup is direct-seek; count() forces a planner check.
+    const row = await this.prisma.episode.findUnique({
+      where: { id: episodeId },
+      select: { id: true },
+    });
+    return row !== null;
   }
 
   async heatmap(episodeId: string, bucketSeconds: number): Promise<ReactionTally> {
-    const rows = await this.prisma.episodeReaction.findMany({
-      where: { episodeId },
-      select: { secondMark: true, kind: true },
-    });
+    // PERF-07: aggregation pushed to Postgres. The old JS path loaded every
+    // single reaction (potentially 10k+ rows for a popular scene) and
+    // bucketed them in a Map — drastic when episodes go viral.
+    //
+    // bucketSeconds is an integer chosen by the caller (no user input
+    // ever reaches it), so the integer interpolation is safe here.
+    const bucket = Math.max(1, Math.floor(bucketSeconds));
+    const rows = await this.prisma.$queryRaw<
+      Array<{ from: number; kind: string; count: bigint }>
+    >`
+      SELECT
+        (("secondMark" / ${bucket}) * ${bucket})::int AS from,
+        kind,
+        count(*)::bigint                              AS count
+      FROM "EpisodeReaction"
+      WHERE "episodeId" = ${episodeId}
+      GROUP BY 1, 2
+      ORDER BY 1 ASC
+    `;
 
     const byBucket = new Map<number, { total: number; counts: Record<string, number> }>();
+    let total = 0;
     for (const row of rows) {
-      const from = Math.floor(row.secondMark / bucketSeconds) * bucketSeconds;
-      let bucket = byBucket.get(from);
-      if (!bucket) {
-        bucket = { total: 0, counts: {} };
-        byBucket.set(from, bucket);
+      const n = Number(row.count);
+      total += n;
+      let entry = byBucket.get(row.from);
+      if (!entry) {
+        entry = { total: 0, counts: {} };
+        byBucket.set(row.from, entry);
       }
-      bucket.total += 1;
-      bucket.counts[row.kind] = (bucket.counts[row.kind] ?? 0) + 1;
+      entry.total += n;
+      entry.counts[row.kind] = (entry.counts[row.kind] ?? 0) + n;
     }
 
     const buckets = [...byBucket.entries()]
@@ -49,8 +70,8 @@ export class PrismaEpisodeReactionRepository implements EpisodeReactionRepositor
 
     return {
       episodeId,
-      bucketSeconds,
-      total: rows.length,
+      bucketSeconds: bucket,
+      total,
       buckets,
     };
   }

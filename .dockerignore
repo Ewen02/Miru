@@ -11,3 +11,18 @@
 .github
 migration-design-system.md
 prompt-migration-design.md
+
+# Test/E2E artifacts — never needed in the runtime image.
+e2e
+playwright-report
+test-results
+blob-report
+playwright/.cache
+**/*.spec.ts
+**/*.test.ts
+
+# Local DB snapshots and dumps (kept locally in snapshots/, see scripts/backup).
+snapshots
+*.dump
+*.dump.age
+*.sql.gz

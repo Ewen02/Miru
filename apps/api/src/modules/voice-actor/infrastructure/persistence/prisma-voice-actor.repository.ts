@@ -47,22 +47,22 @@ export class PrismaVoiceActorRepository implements VoiceActorRepositoryPort {
   }
 
   async statsByVoiceActorId(voiceActorId: string): Promise<VoiceActorStats> {
-    const [animeIds, characterIds] = await Promise.all([
-      this.prisma.animeCharacter.findMany({
-        where: { voiceActorId },
-        select: { animeId: true },
-        distinct: ["animeId"],
-      }),
-      this.prisma.animeCharacter.findMany({
-        where: { voiceActorId },
-        select: { characterId: true },
-        distinct: ["characterId"],
-      }),
-    ]);
-
+    // PERF-04: was 2 full DISTINCT fetches (loaded every id into Node
+    // just to take its length). One COUNT DISTINCT per dimension, one
+    // round-trip total.
+    const rows = await this.prisma.$queryRaw<
+      Array<{ anime_count: bigint; role_count: bigint }>
+    >`
+      SELECT
+        count(DISTINCT "animeId")::bigint     AS anime_count,
+        count(DISTINCT "characterId")::bigint AS role_count
+      FROM "AnimeCharacter"
+      WHERE "voiceActorId" = ${voiceActorId}
+    `;
+    const row = rows[0];
     return {
-      animeCount: animeIds.length,
-      roleCount: characterIds.length,
+      animeCount: Number(row?.anime_count ?? 0n),
+      roleCount: Number(row?.role_count ?? 0n),
     };
   }
 }

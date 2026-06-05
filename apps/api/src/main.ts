@@ -8,11 +8,15 @@ import { Logger } from "nestjs-pino";
 import { raw } from "express";
 import { AppModule } from "./app.module";
 import { DomainExceptionFilter } from "@shared/infrastructure/filters/domain-exception.filter";
+import { assertValidEnv } from "@shared/infrastructure/config/env.validation";
 
 const WEB_ORIGIN = process.env.WEB_ORIGIN ?? "http://localhost:3000";
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 async function bootstrap() {
+  // Fail-fast on misconfigured env (SSL missing in prod, default creds, weak secret…).
+  assertValidEnv();
+
   // Better Auth needs to read the raw request body on /api/auth/*, so we
   // disable the global Nest body parser; @thallesp/nestjs-better-auth wires
   // a scoped JSON parser for the rest of the app.

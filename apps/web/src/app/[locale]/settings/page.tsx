@@ -7,6 +7,7 @@ import { BillingSection } from "./billing-section";
 import { NotificationsSection } from "./notifications-section";
 import { QuietHoursSection } from "./quiet-hours-section";
 import { DeleteAccountSection } from "./delete-account-section";
+import { DataExportSection } from "./data-export-section";
 import { SignOutButton } from "./sign-out-button";
 import { BioSection } from "./bio-section";
 import { fetchBillingStatus } from "@/lib/server-billing";
@@ -115,7 +116,6 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           </section>
 
           <section id="privacy" className="scroll-mt-20">
-            {/* Placeholder — data export endpoint shipping next release. */}
             <header className="mb-5">
               <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">
                 {t("tabPrivacy")}
@@ -124,6 +124,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
                 {t("privacyHint")}
               </p>
             </header>
+            <DataExportSection />
           </section>
 
           <section id="advanced" className="scroll-mt-20">

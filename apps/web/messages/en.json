@@ -257,7 +257,11 @@
     "dangerPending": "Deleting…",
     "quietEnable": "Enable quiet hours",
     "quietDisable": "Disable",
-    "privacyHint": "Data export and other controls ship in the next release. In the meantime, write to contact@miru.app."
+    "privacyHint": "Get a full copy of your data, or request account deletion.",
+    "exportTitle": "Download my data",
+    "exportHint": "A single JSON file with your watchlist, reviews, lists, achievements and preferences. GDPR article 20 — your copy stays on your device, we don't keep it.",
+    "exportCta": "Download (.json)",
+    "exportPending": "Preparing…"
   },
   "lifetimePage": {
     "metaTitle": "Lifetime stats",

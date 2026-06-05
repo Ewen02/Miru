@@ -257,7 +257,11 @@
     "dangerPending": "Suppression…",
     "quietEnable": "Activer les heures calmes",
     "quietDisable": "Désactiver",
-    "privacyHint": "Export de tes données et autres contrôles arrivent dans la prochaine release. En attendant, écris-nous à contact@miru.app."
+    "privacyHint": "Récupère une copie complète de tes données ou demande la suppression de ton compte.",
+    "exportTitle": "Télécharger mes données",
+    "exportHint": "Un JSON unique avec ta watchlist, tes reviews, tes listes, tes achievements et tes préférences. RGPD article 20 — ta copie reste sur ton appareil, on ne la garde pas.",
+    "exportCta": "Télécharger (.json)",
+    "exportPending": "Préparation…"
   },
   "lifetimePage": {
     "metaTitle": "Stats lifetime",

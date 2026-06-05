@@ -32,6 +32,7 @@ import { DeleteUserAccountUseCase } from "../../application/use-cases/delete-use
 import { UpdateMyBioUseCase } from "../../application/use-cases/update-my-bio.use-case";
 import { CompleteOnboardingUseCase } from "../../application/use-cases/complete-onboarding.use-case";
 import { GetOnboardingSnapshotUseCase } from "../../application/use-cases/get-onboarding-snapshot.use-case";
+import { ExportUserDataUseCase, type UserDataExport } from "../../application/use-cases/export-user-data.use-case";
 import { UpdateUserPreferencesDto } from "../../application/dtos/update-preferences.dto";
 import { CompleteOnboardingDto } from "../../application/dtos/complete-onboarding.dto";
 import { DeleteAccountDto } from "../../application/dtos/delete-account.dto";
@@ -62,6 +63,7 @@ export class UserController {
     private readonly updateMyBio: UpdateMyBioUseCase,
     private readonly completeOnboarding: CompleteOnboardingUseCase,
     private readonly getOnboardingSnapshot: GetOnboardingSnapshotUseCase,
+    private readonly exportUserData: ExportUserDataUseCase,
   ) {}
 
   @Get("me")
@@ -174,6 +176,20 @@ export class UserController {
     @Body() body: UpdateBioDto,
   ): Promise<{ bio: string | null }> {
     return this.updateMyBio.execute({ userId, bio: body.bio });
+  }
+
+  /**
+   * GDPR Article 20 — data portability. Returns every row the user owns
+   * as a JSON blob; client downloads it directly. We don't store the file
+   * anywhere — keep the user in control of where their copy lives.
+   *
+   * Content-Disposition forces a download with a date-stamped filename so
+   * the browser doesn't try to render the JSON in a tab.
+   */
+  @Get("me/export")
+  @UseGuards(AuthRequiredGuard)
+  async exportMyData(@CurrentUserId() userId: string): Promise<UserDataExport> {
+    return this.exportUserData.execute({ userId });
   }
 
   /**

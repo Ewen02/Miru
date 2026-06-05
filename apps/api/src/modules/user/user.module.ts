@@ -13,6 +13,7 @@ import { DeleteUserAccountUseCase } from "./application/use-cases/delete-user-ac
 import { UpdateMyBioUseCase } from "./application/use-cases/update-my-bio.use-case";
 import { CompleteOnboardingUseCase } from "./application/use-cases/complete-onboarding.use-case";
 import { GetOnboardingSnapshotUseCase } from "./application/use-cases/get-onboarding-snapshot.use-case";
+import { ExportUserDataUseCase } from "./application/use-cases/export-user-data.use-case";
 import { USER_REPOSITORY } from "./application/tokens";
 import { PrismaUserRepository } from "./infrastructure/persistence/prisma-user.repository";
 import { UserController } from "./infrastructure/http/user.controller";
@@ -35,6 +36,7 @@ import { UserController } from "./infrastructure/http/user.controller";
     UpdateMyBioUseCase,
     CompleteOnboardingUseCase,
     GetOnboardingSnapshotUseCase,
+    ExportUserDataUseCase,
     { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
   ],
   exports: [USER_REPOSITORY, GetCurrentUserUseCase, GetUserPreferencesUseCase],

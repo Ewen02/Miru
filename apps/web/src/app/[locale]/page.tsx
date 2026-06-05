@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import {
@@ -84,6 +85,7 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
   const filters = parseFilters(sp);
   const isFiltered = hasActiveFilters(sp);
 
+  // Critical path — needed for LCP (catalog grid + hero). Block on these.
   const [catalog, genres, trending, session] = await Promise.all([
     fetchAnimeCatalog(filters).catch((err) => {
       if (process.env.NODE_ENV !== "production") console.error(err);
@@ -108,111 +110,31 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
     return <Landing featuredAnime={featuredAnime} featuredLists={featuredLists} />;
   }
 
-  // Hero needs full detail (synopsis) for the top picks. Fetch in parallel.
-  const heroSlides: HomeHeroSlide[] = trending
-    ? await Promise.all(
-        trending.data.slice(0, HERO_SLIDES).map(async (card, idx) => {
-          const detail = await fetchAnimeDetail(card.slug).catch(() => null);
-          return {
-            slug: card.slug,
-            title: card.title,
-            pitch: truncate(detail?.synopsis ?? null, 220) || "À découvrir cette saison.",
-            bannerUrl: detail?.bannerUrl ?? null,
-            coverUrl: card.coverUrl,
-            accentHex: card.accentHex,
-            rating: card.averageRating,
-            year: card.year,
-            format: card.format,
-            studio: card.studioName,
-            rank: idx + 1,
-          };
-        }),
-      )
-    : [];
-
-  const watchlistContinue: WatchlistItem[] = session
-    ? await fetchUserWatchlist("WATCHING").catch(() => [])
-    : [];
-
-  // "Pour toi" — server-side recommendations scored by genre + studio
-  // overlap with the user's WATCHING/COMPLETED entries. Already-tracked
-  // anime are excluded by the API.
-  let recommendations: AnimeCardDTO[] = [];
-  let topGenreLabel: string | null = null;
-  if (session && !isFiltered) {
-    const [recos, lifetime] = await Promise.all([
-      fetchRecommendations(8).catch(() => null),
-      fetchUserLifetimeStats().catch(() => null),
-    ]);
-    recommendations = recos ?? [];
-    topGenreLabel = lifetime?.stats.topGenre?.name ?? null;
-  }
-
   const totalPages = catalog ? Math.max(1, Math.ceil(catalog.total / PAGE_SIZE)) : 1;
 
   return (
     <>
-      {/* Editorial top — only when no filters are active (search is dedicated mode). */}
-      {!isFiltered && heroSlides.length > 0 && (
-        <HomeHero slides={heroSlides} showWatchlistCta={session !== null} />
+      {/* Editorial top — only when no filters are active (search is dedicated mode).
+          Suspense streams it independently so the catalog grid below renders as
+          soon as `catalog` resolves — hero hydrates a few hundred ms later. */}
+      {!isFiltered && trending && trending.data.length > 0 && (
+        <Suspense fallback={<HeroSkeleton />}>
+          <HeroSection trending={trending.data} sessioned={session !== null} />
+        </Suspense>
       )}
 
-      {!isFiltered && watchlistContinue.length > 0 && (
-        <div className="mx-auto mt-16 max-w-300">
-          <HorizontalSlider
-            eyebrow="Reprendre"
-            title="Continue à regarder"
-            count={watchlistContinue.length}
-            action={{ label: "Voir tout", href: "/watchlist" }}
-          >
-            {watchlistContinue.slice(0, 12).map((item) => (
-              <ContinueCard
-                key={item.animeId}
-                slug={item.anime.slug}
-                title={item.anime.title}
-                coverUrl={item.anime.coverUrl}
-                episodesWatched={item.currentEpisode}
-                episodesTotal={item.anime.episodeCount}
-                nextLabel={
-                  item.anime.episodeCount && item.currentEpisode < item.anime.episodeCount
-                    ? `Reprendre ép. ${item.currentEpisode + 1}`
-                    : null
-                }
-              />
-            ))}
-          </HorizontalSlider>
-        </div>
+      {/* WEBPERF-07: each lower section streams independently so a slow
+          recommendations query never blocks the catalog grid LCP. */}
+      {!isFiltered && session && (
+        <Suspense fallback={null}>
+          <ContinueWatchingSection />
+        </Suspense>
       )}
 
-      {!isFiltered && recommendations.length > 0 && (
-        <div className="mx-auto mt-16 max-w-300">
-          <HorizontalSlider
-            eyebrow={
-              topGenreLabel
-                ? `Tu regardes du ${topGenreLabel.toLowerCase()}`
-                : "Calibré sur ta watchlist"
-            }
-            title="Pour toi"
-            count={recommendations.length}
-            action={{ label: "Voir tout", href: "/for-you" }}
-          >
-            {recommendations.map((anime) => (
-              <Link
-                key={anime.id}
-                href={`/anime/${anime.slug}`}
-                className="w-44 shrink-0 snap-start rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
-              >
-                <AnimeCard
-                  title={anime.title}
-                  coverUrl={anime.coverUrl}
-                  studioName={anime.studioName}
-                  year={anime.year}
-                  rating={anime.averageRating}
-                />
-              </Link>
-            ))}
-          </HorizontalSlider>
-        </div>
+      {!isFiltered && session && (
+        <Suspense fallback={null}>
+          <ForYouSection />
+        </Suspense>
       )}
 
       {!isFiltered && trending && trending.data.length > 0 && (
@@ -286,6 +208,112 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
   );
 }
 
+// --- Streamed sections (each lives behind its own Suspense boundary) -------
+
+async function HeroSection({
+  trending,
+  sessioned,
+}: {
+  trending: AnimeCardDTO[];
+  sessioned: boolean;
+}) {
+  const heroSlides: HomeHeroSlide[] = await Promise.all(
+    trending.slice(0, HERO_SLIDES).map(async (card, idx) => {
+      const detail = await fetchAnimeDetail(card.slug).catch(() => null);
+      return {
+        slug: card.slug,
+        title: card.title,
+        pitch: truncate(detail?.synopsis ?? null, 220) || "À découvrir cette saison.",
+        bannerUrl: detail?.bannerUrl ?? null,
+        coverUrl: card.coverUrl,
+        accentHex: card.accentHex,
+        rating: card.averageRating,
+        year: card.year,
+        format: card.format,
+        studio: card.studioName,
+        rank: idx + 1,
+      };
+    }),
+  );
+  if (heroSlides.length === 0) return null;
+  return <HomeHero slides={heroSlides} showWatchlistCta={sessioned} />;
+}
+
+function HeroSkeleton() {
+  return <div className="h-130 w-full animate-pulse bg-bg-elevated" />;
+}
+
+async function ContinueWatchingSection() {
+  const items: WatchlistItem[] = await fetchUserWatchlist("WATCHING").catch(() => []);
+  if (items.length === 0) return null;
+  return (
+    <div className="mx-auto mt-16 max-w-300">
+      <HorizontalSlider
+        eyebrow="Reprendre"
+        title="Continue à regarder"
+        count={items.length}
+        action={{ label: "Voir tout", href: "/watchlist" }}
+      >
+        {items.slice(0, 12).map((item) => (
+          <ContinueCard
+            key={item.animeId}
+            slug={item.anime.slug}
+            title={item.anime.title}
+            coverUrl={item.anime.coverUrl}
+            episodesWatched={item.currentEpisode}
+            episodesTotal={item.anime.episodeCount}
+            nextLabel={
+              item.anime.episodeCount && item.currentEpisode < item.anime.episodeCount
+                ? `Reprendre ép. ${item.currentEpisode + 1}`
+                : null
+            }
+          />
+        ))}
+      </HorizontalSlider>
+    </div>
+  );
+}
+
+async function ForYouSection() {
+  const [recos, lifetime] = await Promise.all([
+    fetchRecommendations(8).catch(() => null),
+    fetchUserLifetimeStats().catch(() => null),
+  ]);
+  const recommendations = recos ?? [];
+  if (recommendations.length === 0) return null;
+  const topGenreLabel = lifetime?.stats.topGenre?.name ?? null;
+  return (
+    <div className="mx-auto mt-16 max-w-300">
+      <HorizontalSlider
+        eyebrow={
+          topGenreLabel
+            ? `Tu regardes du ${topGenreLabel.toLowerCase()}`
+            : "Calibré sur ta watchlist"
+        }
+        title="Pour toi"
+        count={recommendations.length}
+        action={{ label: "Voir tout", href: "/for-you" }}
+      >
+        {recommendations.map((anime) => (
+          <Link
+            key={anime.id}
+            href={`/anime/${anime.slug}`}
+            className="w-44 shrink-0 snap-start rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+          >
+            <AnimeCard
+              title={anime.title}
+              coverUrl={anime.coverUrl}
+              studioName={anime.studioName}
+              year={anime.year}
+              rating={anime.averageRating}
+            />
+          </Link>
+        ))}
+      </HorizontalSlider>
+    </div>
+  );
+}
+
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
@@ -293,4 +321,3 @@ function EmptyState({ message }: { message: string }) {
     </div>
   );
 }
-

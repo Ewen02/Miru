@@ -57,6 +57,8 @@ model Anime {
   @@index([year, averageRating])
   @@index([syncedAt])
   @@index([syncRetryAt])
+  // Catalog multi-dim filter: WHERE status=$1 AND year=$2 ORDER BY averageRating DESC.
+  @@index([status, year, averageRating(sort: Desc)])
 }
 
 model Studio {
@@ -144,6 +146,8 @@ model UserEpisode {
   @@id([userId, episodeId])
   @@index([userId])
   @@index([episodeId])
+  // lifetimeStats date_trunc('day', watchedAt) aggregation per user.
+  @@index([userId, watchedAt(sort: Desc)])
 }
 
 model Character {
@@ -413,6 +417,10 @@ model WatchlistEntry {
   // Profile favorites: WHERE userId=$1 AND isFavorite=true ORDER BY rating, updatedAt.
   // Partial index keeps it tiny — see migration for the WHERE clause.
   @@index([userId, isFavorite])
+  // Year-in-review: filter on COALESCE(completedAt, updatedAt) per user.
+  // Partial WHERE completedAt IS NOT NULL declared in the migration.
+  @@index([userId, completedAt])
+  @@index([userId, updatedAt])
 }
 
 // ---------------------------------------------------------------------------
@@ -602,6 +610,8 @@ model ActivityEvent {
   // Primary access pattern: fetch a user's own timeline (userId + createdAt DESC).
   // Feed queries use IN (followed_ids) which hits the same index per userId.
   @@index([userId, createdAt(sort: Desc)])
+  // Global trending feed (no userId filter) — /social/trending.
+  @@index([createdAt(sort: Desc)])
 }
 
 // Static-ish catalog of unlockable badges. Rows are seeded, rarely written.
@@ -706,7 +716,9 @@ model ForumThread {
   author User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
   posts  ForumPost[]
 
-  @@index([category, createdAt(sort: Desc)])
+  // listThreads orders by updatedAt; this index serves that path.
+  @@index([category, updatedAt(sort: Desc)])
+  // Homepage "latest threads" feed (global, no category filter).
   @@index([createdAt(sort: Desc)])
 }
 

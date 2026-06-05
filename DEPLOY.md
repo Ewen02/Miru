@@ -81,6 +81,59 @@ SQL plan.
 
 Créer deux projets Sentry distincts : `miru-api` (platform: nestjs) et `miru-web` (platform: nextjs). Récupérer les DSN, les coller dans les variables ci-dessus. Pour l'upload de source maps web, créer un token `SENTRY_AUTH_TOKEN` dans Sentry Settings → Auth Tokens avec les scopes `project:write` + `release:read`.
 
+## Disaster recovery runbook
+
+When something goes wrong with the prod DB, follow these steps in order.
+**Stop and assess before destructive actions.**
+
+### Symptom triage
+
+| Symptom                                  | Likely cause                                | First action                              |
+| ---------------------------------------- | ------------------------------------------- | ----------------------------------------- |
+| `/health/ready` flapping 503             | Connection pool exhaustion or pg restart    | Check `/health/db` for pool stats          |
+| Slow queries spike on Sentry             | Missing index or N+1                        | EXPLAIN ANALYZE the slowest query          |
+| Backups failing 2+ days                  | R2 credentials rotated, Railway URL changed | Check `backup-nightly` workflow logs       |
+| Data corruption / accidental destructive | Bad migration, manual SQL gone wrong        | **Don't deploy.** Restore from R2 backup   |
+| Railway region outage                    | Provider incident                           | Wait — promoting a standby is not worth it |
+
+### Restore from nightly R2 backup
+
+1. **Provision a fresh Postgres** in Railway (don't restore over the live one — keep evidence).
+2. **Run the restore script** from a trusted laptop with the age key:
+
+   ```bash
+   export BACKUP_R2_BUCKET=miru-backups
+   export BACKUP_R2_ENDPOINT=https://<accountid>.r2.cloudflarestorage.com
+   export AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=...
+   export AGE_IDENTITY_FILE=~/.age/miru.key
+   export TARGET_DATABASE_URL="postgres://...new-prod-db..."
+   export I_KNOW_WHAT_IM_DOING=1  # only set when sure
+   ./scripts/backup/restore.sh latest
+   ```
+
+3. **Validate** with smoke queries: `psql $TARGET_DATABASE_URL -c '\dt'`,
+   check row counts on User/Anime/WatchlistEntry.
+4. **Point Railway service** at the new DB (update `DATABASE_URL` env var).
+5. **Restart** the API service.
+6. **Confirm** `/health/db` returns expected size and table counts.
+
+### Rollback a bad migration
+
+1. **Don't ship more code** while investigating.
+2. If the migration is reversible (additive only), revert the schema and
+   create a new migration that undoes it. `prisma migrate deploy` is
+   append-only; never `--reset` in prod.
+3. If irreversible (DROP COLUMN, type change), restore from the last
+   nightly backup using the runbook above. Accept the data loss between
+   the backup and the bad deploy.
+
+### Recovery time targets
+
+- **RPO** ≤ 24 h (nightly backup cadence)
+- **RTO** ≤ 30 min for a 100 MB DB on Railway Pro (`pg_restore --jobs=4`)
+
+The Sunday `backup-restore-test` workflow drills this every week.
+
 ## Observability checklist post-launch
 
 - [ ] `/health` répond 200 depuis l'externe

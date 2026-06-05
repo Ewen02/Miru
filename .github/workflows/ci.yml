@@ -10,6 +10,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  migration-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check migration safety
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          PR_HAS_DESTRUCTIVE_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'db-destructive') }}
+        run: |
+          chmod +x scripts/ci/check-migration-safety.sh
+          ./scripts/ci/check-migration-safety.sh
+
   ci:
     runs-on: ubuntu-latest
     timeout-minutes: 15

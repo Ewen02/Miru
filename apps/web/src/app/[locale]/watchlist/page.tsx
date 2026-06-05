@@ -70,10 +70,16 @@ export default async function WatchlistPage({ params, searchParams }: WatchlistP
 
   const activeStatus = isWatchStatus(sp.status) ? sp.status : WatchStatus.WATCHING;
 
-  const [items, totalAll] = await Promise.all([
-    fetchUserWatchlist(activeStatus),
-    countAllStatuses(),
-  ]);
+  // RSC-A1: a single full fetch sliced locally for both the active tab
+  // and the per-status badge counts. Previously we hit /users/me/watchlist
+  // twice (filtered + unfiltered) per render — useless when the unfiltered
+  // result already contains everything we need.
+  const all = await fetchUserWatchlist();
+  const items = all.filter((entry) => entry.status === activeStatus);
+  const totalAll = new Map<WatchStatusType, number>();
+  for (const entry of all) {
+    totalAll.set(entry.status, (totalAll.get(entry.status) ?? 0) + 1);
+  }
 
   return (
     <main className="mx-auto max-w-300 px-7 py-14">
@@ -159,11 +165,3 @@ export default async function WatchlistPage({ params, searchParams }: WatchlistP
   );
 }
 
-async function countAllStatuses(): Promise<Map<WatchStatusType, number>> {
-  const all = await fetchUserWatchlist();
-  const counts = new Map<WatchStatusType, number>();
-  for (const item of all) {
-    counts.set(item.status, (counts.get(item.status) ?? 0) + 1);
-  }
-  return counts;
-}

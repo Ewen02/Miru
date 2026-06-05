@@ -410,6 +410,9 @@ model WatchlistEntry {
   @@index([userId])
   @@index([userId, status])
   @@index([animeId])
+  // Profile favorites: WHERE userId=$1 AND isFavorite=true ORDER BY rating, updatedAt.
+  // Partial index keeps it tiny — see migration for the WHERE clause.
+  @@index([userId, isFavorite])
 }
 
 // ---------------------------------------------------------------------------
@@ -522,8 +525,10 @@ model Notification {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Sort-aware: bell pagination is ORDER BY createdAt DESC.
+  @@index([userId, createdAt(sort: Desc)])
+  // Unread badge counter — partial on readAt IS NULL in the migration.
   @@index([userId, readAt])
-  @@index([userId, createdAt])
 }
 
 // Moderation — signaler une review ou une list. Resolved=true means an
@@ -674,6 +679,8 @@ model PollVote {
 
   @@unique([pollId, userId])
   @@index([optionId])
+  // "Polls this user voted on" — implicit unique covers (pollId, userId) only.
+  @@index([userId])
 }
 
 // ---------------------------------------------------------------------------
@@ -833,8 +840,10 @@ model Conversation {
 
   // One row per ordered pair — canonical order enforced at the application layer.
   @@unique([userAId, userBId])
-  @@index([userAId])
-  @@index([userBId])
+  // Inbox sort by recency, per user side. Both sides indexed so the OR
+  // can BitmapOr two index scans instead of a sequential scan.
+  @@index([userAId, lastMessageAt(sort: Desc)])
+  @@index([userBId, lastMessageAt(sort: Desc)])
 }
 
 // One row per message in a conversation.
@@ -852,6 +861,8 @@ model DirectMessage {
 
   // Primary access pattern: paginate a conversation's messages in order.
   @@index([conversationId, createdAt])
+  // markRead hot path — partial on readAt IS NULL declared in the migration.
+  @@index([conversationId, senderId])
 }
 
 // Web Push subscription. One row per (user × browser). Endpoint is unique

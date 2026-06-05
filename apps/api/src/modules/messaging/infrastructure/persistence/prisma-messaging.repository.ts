@@ -11,8 +11,12 @@ import {
 const CONVERSATION_DETAIL_INCLUDE = {
   userA: { select: { id: true, name: true, image: true } },
   userB: { select: { id: true, name: true, image: true } },
+  // PERF-15: fetch the 100 *most recent* messages (desc), then reverse
+  // in JS so the view stays chronological. With the older `asc + take:100`
+  // a conversation of 10k messages had to scan from the oldest and
+  // discard most of them — the desc index walk skips that work.
   messages: {
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: "desc" },
     take: 100,
   },
 } satisfies Prisma.ConversationInclude;
@@ -135,13 +139,18 @@ export class PrismaMessagingRepository implements MessagingRepositoryPort {
     return {
       id: row.id,
       peer: { id: peer.id, name: peer.name, image: peer.image },
-      messages: row.messages.map((message) => ({
-        id: message.id,
-        conversationId: message.conversationId,
-        senderId: message.senderId,
-        body: message.body,
-        createdAt: message.createdAt,
-      })),
+      // Messages came back desc (latest first) for the index walk; the
+      // view contract is chronological so we reverse here.
+      messages: row.messages
+        .slice()
+        .reverse()
+        .map((message) => ({
+          id: message.id,
+          conversationId: message.conversationId,
+          senderId: message.senderId,
+          body: message.body,
+          createdAt: message.createdAt,
+        })),
     };
   }
 }

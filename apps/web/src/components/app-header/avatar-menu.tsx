@@ -116,6 +116,30 @@ export function AvatarMenu({ user }: AvatarMenuProps) {
             </AvatarMenuItem>
           </nav>
 
+          {/* Soft donation CTA — Sympathisant. No paywall, just an invitation. */}
+          <div className="border-t border-border-subtle py-1">
+            <Link
+              role="menuitem"
+              href="/pricing"
+              onClick={() => setOpen(false)}
+              className={cn(
+                "flex items-center justify-between px-4 py-2 font-body text-sm",
+                "text-text-secondary transition-colors duration-200",
+                "hover:bg-bg-elevated hover:text-text-primary",
+                "focus-visible:outline-none focus-visible:bg-bg-elevated focus-visible:text-text-primary",
+              )}
+            >
+              <span className="inline-flex items-center gap-2">
+                <span
+                  aria-hidden
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: "var(--color-accent)" }}
+                />
+                {th("menuSupport")}
+              </span>
+            </Link>
+          </div>
+
           <div className="border-t border-border-subtle py-1">
             <button
               type="button"

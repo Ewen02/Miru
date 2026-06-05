@@ -135,7 +135,7 @@ export function WatchlistButton({
             disabled={pending}
             style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
-            + Ajouter à ma watchlist
+            {t("addLong")}
           </Button>
           <Button
             type="button"
@@ -144,7 +144,7 @@ export function WatchlistButton({
             disabled={pending}
             className="text-text-secondary"
           >
-            Marquer comme vu
+            {t("markAsWatched")}
           </Button>
         </div>
         {error && (
@@ -263,12 +263,12 @@ export function WatchlistButton({
               "disabled:cursor-not-allowed disabled:opacity-50",
             )}
           >
-            <span className="text-text-tertiary">Ma note</span>
+            <span className="text-text-tertiary">{t("myRating")}</span>
             <span
               className="font-mono text-sm"
               style={{ color: entry.rating != null ? "var(--color-accent)" : "var(--color-text-tertiary)" }}
             >
-              {entry.rating != null ? `${entry.rating}/10` : "Noter"}
+              {entry.rating != null ? `${entry.rating}/10` : t("rate")}
             </span>
           </button>
 
@@ -280,7 +280,7 @@ export function WatchlistButton({
             >
               <div className="mb-3 flex items-baseline justify-between">
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-text-tertiary">
-                  Ma note
+                  {t("myRating")}
                 </span>
                 <span
                   className="font-mono text-base"
@@ -315,7 +315,7 @@ export function WatchlistButton({
                     "disabled:cursor-not-allowed disabled:opacity-40",
                   )}
                 >
-                  Effacer
+                  {t("clear")}
                 </button>
                 <div className="flex gap-2">
                   <Button
@@ -324,7 +324,7 @@ export function WatchlistButton({
                     size="sm"
                     onClick={() => setRateOpen(false)}
                   >
-                    Annuler
+                    {t("cancel")}
                   </Button>
                   <Button
                     type="button"
@@ -333,7 +333,7 @@ export function WatchlistButton({
                     disabled={pending}
                     style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
                   >
-                    Enregistrer
+                    {t("save")}
                   </Button>
                 </div>
               </div>
@@ -350,7 +350,7 @@ export function WatchlistButton({
           disabled={pending}
           className="text-text-tertiary hover:text-error"
         >
-          Retirer
+          {t("remove")}
         </Button>
       </div>
 

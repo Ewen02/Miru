@@ -96,6 +96,8 @@
     },
     "watchlist": {
       "add": "Add to my list",
+      "addLong": "+ Add to my watchlist",
+      "markAsWatched": "Mark as watched",
       "watching": "Watching",
       "completed": "Completed",
       "planned": "Planned",
@@ -107,7 +109,12 @@
       "prevEpisode": "Previous episode",
       "nextEpisode": "Next episode",
       "rateAnime": "Rate this anime",
-      "ratingAria": "Rating from 1 to 10"
+      "ratingAria": "Rating from 1 to 10",
+      "myRating": "My rating",
+      "rate": "Rate",
+      "clear": "Clear",
+      "cancel": "Cancel",
+      "save": "Save"
     },
     "footer": {
       "discover": "Discover",

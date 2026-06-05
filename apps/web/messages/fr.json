@@ -96,6 +96,8 @@
     },
     "watchlist": {
       "add": "Ajouter à ma liste",
+      "addLong": "+ Ajouter à ma watchlist",
+      "markAsWatched": "Marquer comme vu",
       "watching": "En cours",
       "completed": "Terminé",
       "planned": "À voir",
@@ -107,7 +109,12 @@
       "prevEpisode": "Épisode précédent",
       "nextEpisode": "Épisode suivant",
       "rateAnime": "Noter cet anime",
-      "ratingAria": "Note de 1 à 10"
+      "ratingAria": "Note de 1 à 10",
+      "myRating": "Ma note",
+      "rate": "Noter",
+      "clear": "Effacer",
+      "cancel": "Annuler",
+      "save": "Enregistrer"
     },
     "footer": {
       "discover": "Découvrir",

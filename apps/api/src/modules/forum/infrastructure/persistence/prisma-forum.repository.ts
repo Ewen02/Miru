@@ -87,8 +87,11 @@ export class PrismaForumRepository implements ForumRepositoryPort {
   }
 
   async threadExists(threadId: string): Promise<boolean> {
-    const count = await this.prisma.forumThread.count({ where: { id: threadId } });
-    return count > 0;
+    const row = await this.prisma.forumThread.findUnique({
+      where: { id: threadId },
+      select: { id: true },
+    });
+    return row !== null;
   }
 
   private toDetailView(row: ThreadDetailRow): ForumThreadDetailView {

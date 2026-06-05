@@ -113,8 +113,11 @@ export class PrismaReviewRepository implements ReviewRepositoryPort {
   }
 
   async reviewExists(reviewId: string): Promise<boolean> {
-    const count = await this.prisma.review.count({ where: { id: reviewId } });
-    return count > 0;
+    const row = await this.prisma.review.findUnique({
+      where: { id: reviewId },
+      select: { id: true },
+    });
+    return row !== null;
   }
 }
 

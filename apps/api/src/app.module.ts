@@ -39,10 +39,15 @@ import { WatchPartyModule } from "@modules/watch-party/watch-party.module";
 import { auth } from "./auth/auth";
 
 const isDev = process.env.NODE_ENV !== "production";
+// API-A1: only wire SentryModule + SentryGlobalFilter when a DSN is set.
+// instrument.ts already guards `Sentry.init()` on the same env var; the
+// NestJS module/filter were unguarded, paying the middleware overhead on
+// every request even with Sentry effectively disabled.
+const sentryEnabled = Boolean(process.env.SENTRY_DSN);
 
 @Module({
   imports: [
-    SentryModule.forRoot(),
+    ...(sentryEnabled ? [SentryModule.forRoot()] : []),
     LoggerModule.forRoot({
       pinoHttp: {
         level: process.env.LOG_LEVEL ?? (isDev ? "debug" : "info"),
@@ -117,7 +122,7 @@ const isDev = process.env.NODE_ENV !== "production";
     // it captures every unhandled exception. Our DomainExceptionFilter still
     // runs (registered globally in main.ts) and converts known domain errors
     // to HTTP responses — Sentry records them either way.
-    { provide: APP_FILTER, useClass: SentryGlobalFilter },
+    ...(sentryEnabled ? [{ provide: APP_FILTER, useClass: SentryGlobalFilter }] : []),
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })

@@ -1,4 +1,11 @@
 {
+  "sentryDisclosure": {
+    "ariaLabel": "Avis de confidentialité",
+    "title": "On capte les erreurs anonymement.",
+    "body": "Sentry trace les bugs côté serveur et client pour les corriger. Pas de cookies publicitaires, pas de traçage marketing.",
+    "readMore": "Plus de détails",
+    "dismiss": "Fermer"
+  },
   "auth": {
     "loginTitle": "Bon retour",
     "loginSubtitle": "Reprends où tu en étais.",

@@ -7,6 +7,7 @@ import { AppHeader } from "@/components/app-header";
 import { HeaderProvider } from "@/components/app-header/header-context";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { SiteFooter } from "@/components/site-footer";
+import { SentryDisclosure } from "@/components/sentry-disclosure";
 import { JsonLd, organizationSchema, websiteSchema } from "@/lib/json-ld";
 import { routing } from "@/i18n/routing";
 
@@ -126,6 +127,7 @@ export default async function LocaleLayout({
           </HeaderProvider>
           <MobileBottomNav />
           <SiteFooter />
+          <SentryDisclosure />
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,4 +1,11 @@
 {
+  "sentryDisclosure": {
+    "ariaLabel": "Privacy notice",
+    "title": "We track errors anonymously.",
+    "body": "Sentry collects server and client crash traces so we can fix them. No advertising cookies, no marketing tracking.",
+    "readMore": "More details",
+    "dismiss": "Dismiss"
+  },
   "auth": {
     "loginTitle": "Welcome back",
     "loginSubtitle": "Pick up where you left off.",

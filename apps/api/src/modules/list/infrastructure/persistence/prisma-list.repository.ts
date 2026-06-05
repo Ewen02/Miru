@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { Prisma } from "@miru/db";
 import { ConflictException } from "@shared/domain/domain-exception";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { ListEntity } from "../../domain/entities/list.entity";
@@ -6,6 +7,7 @@ import {
   CreateListInput,
   ListAnimeItem,
   ListRepositoryPort,
+  ListSort,
   ListSummary,
   ListWithItems,
   UpdateListInput,
@@ -35,17 +37,25 @@ export class PrismaListRepository implements ListRepositoryPort {
     return records.map((r) => this.toSummary(r));
   }
 
-  async findPublic(limit: number): Promise<ListSummary[]> {
-    // Sort by the denormalized likeCount column instead of aggregating
-    // ListLike rows on every read. Backed by
-    // List_isPublic_likeCount_updatedAt_idx.
+  async findPublic(limit: number, sort: ListSort = "popular"): Promise<ListSummary[]> {
+    // "popular" sorts by the denormalized likeCount column (backed by
+    // List_isPublic_likeCount_updatedAt_idx). "recent" sorts by updatedAt
+    // only — the existing (userId, updatedAt) is good enough at our scale.
+    const orderBy: Prisma.ListOrderByWithRelationInput[] =
+      sort === "recent"
+        ? [{ updatedAt: "desc" }]
+        : [{ likeCount: "desc" }, { updatedAt: "desc" }];
     const records = await this.prisma.list.findMany({
       where: { isPublic: true },
-      orderBy: [{ likeCount: "desc" }, { updatedAt: "desc" }],
+      orderBy,
       take: limit,
       include: this.summaryInclude(),
     });
     return records.map((r) => this.toSummary(r));
+  }
+
+  async findTrending(limit: number): Promise<ListSummary[]> {
+    return this.findPublic(limit, "popular");
   }
 
   async findById(id: string): Promise<ListEntity | null> {

@@ -25,9 +25,15 @@ describe("ListUserListsUseCase", () => {
     expect(repo.findLikedByUserId).toHaveBeenCalledWith("u1");
   });
 
-  it("dispatches `public` to findPublic", async () => {
+  it("dispatches `public` to findPublic with the default popular sort", async () => {
     repo.findPublic.mockResolvedValue([]);
     await useCase.execute({ userId: "u1", filter: "public" });
-    expect(repo.findPublic).toHaveBeenCalledWith(24);
+    expect(repo.findPublic).toHaveBeenCalledWith(24, "popular");
+  });
+
+  it("forwards the recent sort when provided", async () => {
+    repo.findPublic.mockResolvedValue([]);
+    await useCase.execute({ userId: "u1", filter: "public", sort: "recent" });
+    expect(repo.findPublic).toHaveBeenCalledWith(24, "recent");
   });
 });

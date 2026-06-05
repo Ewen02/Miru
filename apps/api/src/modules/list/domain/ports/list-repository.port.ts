@@ -50,10 +50,19 @@ export interface UpdateListInput {
   isPublic?: boolean;
 }
 
+export type ListSort = "popular" | "recent";
+
 export interface ListRepositoryPort {
   findByUserId(userId: string): Promise<ListSummary[]>;
   findLikedByUserId(userId: string): Promise<ListSummary[]>;
-  findPublic(limit: number): Promise<ListSummary[]>;
+  /**
+   * Public lists, ordered by `sort`:
+   *  - "popular" (default) — likeCount desc, updatedAt desc tiebreak
+   *  - "recent" — updatedAt desc
+   */
+  findPublic(limit: number, sort?: ListSort): Promise<ListSummary[]>;
+  /** Same as findPublic('popular') but used by the dedicated /lists/trending page. */
+  findTrending(limit: number): Promise<ListSummary[]>;
   findById(id: string): Promise<ListEntity | null>;
   findWithItems(id: string): Promise<ListWithItems | null>;
   create(input: CreateListInput): Promise<ListEntity>;

@@ -592,6 +592,9 @@
     "tabMine": "My lists",
     "tabLiked": "Liked",
     "tabPublic": "Community",
+    "sortAria": "Sort",
+    "sortPopular": "Popular",
+    "sortRecent": "Recent",
     "emptyAnonymous": "Sign in to manage your lists and likes.",
     "emptyAnonymousCta": "Sign in",
     "emptyMine": "No list yet. Hit “Create a list” to start.",
@@ -618,6 +621,20 @@
     "errorDuplicate": "You already have a list with this name.",
     "errorGeneric": "Could not create the list.",
     "errorMinLength": "The title must be at least 2 characters."
+  },
+  "listsTrendingPage": {
+    "metaTitle": "Trending lists",
+    "metaDescription": "The most liked lists from the Miru community.",
+    "eyebrow": "Community",
+    "title": "Trending",
+    "subtitle": "What the community is opening the most right now.",
+    "seeAll": "All lists",
+    "titlesCount": "{count} titles",
+    "byOwner": "by {name}",
+    "likes": "❤",
+    "emptyTitle": "No trending list yet.",
+    "emptyBody": "Create yours or like the ones you enjoy — they bubble up here.",
+    "emptyCta": "Explore the catalogue"
   },
   "profile": {
     "metaTitle": "Profile",

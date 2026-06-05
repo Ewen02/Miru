@@ -11,7 +11,7 @@ import { CreateListButton } from "./create-list-button";
 
 interface ListsPageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; sort?: string }>;
 }
 
 export async function generateMetadata({ params }: ListsPageProps): Promise<Metadata> {
@@ -43,8 +43,11 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
   ]);
   const requestedTab = (sp.tab as Tab) ?? (session ? "mine" : "public");
   const activeTab = TAB_KEYS.includes(requestedTab) ? requestedTab : "mine";
+  const sort: "popular" | "recent" = sp.sort === "recent" ? "recent" : "popular";
 
-  const lists = await fetchLists(activeTab).catch(() => [] as ListSummaryDto[]);
+  const lists = await fetchLists(activeTab, activeTab === "public" ? sort : undefined).catch(
+    () => [] as ListSummaryDto[],
+  );
 
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
@@ -61,34 +64,54 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
       </header>
 
       <nav
-        className="mb-8 flex flex-wrap gap-1 border-b border-border-subtle"
+        className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle"
         aria-label={t("tabsAria")}
       >
-        {TAB_KEYS.map((key) => {
-          if (!session && (key === "mine" || key === "liked")) return null;
-          const isActive = activeTab === key;
-          return (
-            <Link
-              key={key}
-              href={key === "public" ? "/lists?tab=public" : `/lists?tab=${key}`}
-              role="tab"
-              aria-selected={isActive}
-              className="relative inline-flex h-10 items-center rounded-t-md px-4 font-body text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
-              style={{
-                color: isActive ? "var(--color-text-primary)" : "var(--color-text-secondary)",
-              }}
-            >
-              {t(TAB_LABEL[key])}
-              {isActive && (
-                <span
-                  aria-hidden
-                  className="absolute -bottom-px left-3 right-3 h-0.5"
-                  style={{ backgroundColor: "var(--color-accent)" }}
-                />
-              )}
-            </Link>
-          );
-        })}
+        <div className="flex flex-wrap gap-1">
+          {TAB_KEYS.map((key) => {
+            if (!session && (key === "mine" || key === "liked")) return null;
+            const isActive = activeTab === key;
+            return (
+              <Link
+                key={key}
+                href={key === "public" ? "/lists?tab=public" : `/lists?tab=${key}`}
+                role="tab"
+                aria-selected={isActive}
+                className="relative inline-flex h-10 items-center rounded-t-md px-4 font-body text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+                style={{
+                  color: isActive ? "var(--color-text-primary)" : "var(--color-text-secondary)",
+                }}
+              >
+                {t(TAB_LABEL[key])}
+                {isActive && (
+                  <span
+                    aria-hidden
+                    className="absolute -bottom-px left-3 right-3 h-0.5"
+                    style={{ backgroundColor: "var(--color-accent)" }}
+                  />
+                )}
+              </Link>
+            );
+          })}
+        </div>
+        {/* S3-07: sort selector only on the public surface. */}
+        {activeTab === "public" && (
+          <div
+            role="group"
+            aria-label={t("sortAria")}
+            className="flex items-center gap-1 self-end pb-2 font-mono text-[10px] uppercase tracking-wider"
+          >
+            <SortLink href="/lists?tab=public" active={sort === "popular"} label={t("sortPopular")} />
+            <span className="text-text-tertiary" aria-hidden>
+              ·
+            </span>
+            <SortLink
+              href="/lists?tab=public&sort=recent"
+              active={sort === "recent"}
+              label={t("sortRecent")}
+            />
+          </div>
+        )}
       </nav>
 
       {lists.length === 0 ? (
@@ -101,6 +124,18 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
         </div>
       )}
     </main>
+  );
+}
+
+function SortLink({ href, active, label }: { href: string; active: boolean; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="px-2 py-1 transition-colors duration-150 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+      style={{ color: active ? "var(--color-accent)" : "var(--color-text-tertiary)" }}
+    >
+      {label}
+    </Link>
   );
 }
 

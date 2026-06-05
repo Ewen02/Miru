@@ -47,4 +47,9 @@ export class ListsFilterDto {
   @IsOptional()
   @IsIn(["mine", "liked", "public"])
   filter?: "mine" | "liked" | "public";
+
+  /** Only applied when filter === "public". Default "popular". */
+  @IsOptional()
+  @IsIn(["popular", "recent"])
+  sort?: "popular" | "recent";
 }

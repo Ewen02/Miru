@@ -16,6 +16,7 @@ import { OptionalAuthGuard } from "@auth/optional-auth.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
 import { OptionalUserId } from "@auth/optional-user.decorator";
 import { ListUserListsUseCase } from "../../application/use-cases/list-user-lists.use-case";
+import { ListTrendingListsUseCase } from "../../application/use-cases/list-trending-lists.use-case";
 import { GetListDetailUseCase } from "../../application/use-cases/get-list-detail.use-case";
 import { CreateListUseCase } from "../../application/use-cases/create-list.use-case";
 import { DeleteListUseCase } from "../../application/use-cases/delete-list.use-case";
@@ -29,6 +30,7 @@ import { ListMapper } from "../../application/mappers/list.mapper";
 export class ListController {
   constructor(
     private readonly listUserLists: ListUserListsUseCase,
+    private readonly listTrendingLists: ListTrendingListsUseCase,
     private readonly getListDetail: GetListDetailUseCase,
     private readonly createList: CreateListUseCase,
     private readonly deleteList: DeleteListUseCase,
@@ -54,7 +56,18 @@ export class ListController {
     const summaries = await this.listUserLists.execute({
       userId: userId ?? "",
       filter,
+      sort: query.sort,
     });
+    return summaries.map((summary) => ListMapper.toSummaryDto(summary));
+  }
+
+  /**
+   * Trending public lists — anonymous-friendly, used by /lists/trending.
+   * Always ordered by likeCount desc, larger limit than /lists?filter=public.
+   */
+  @Get("trending")
+  async trending(): Promise<ListSummaryDto[]> {
+    const summaries = await this.listTrendingLists.execute();
     return summaries.map((summary) => ListMapper.toSummaryDto(summary));
   }
 

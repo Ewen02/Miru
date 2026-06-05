@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
 import { ListUserListsUseCase } from "./application/use-cases/list-user-lists.use-case";
+import { ListTrendingListsUseCase } from "./application/use-cases/list-trending-lists.use-case";
 import { GetListDetailUseCase } from "./application/use-cases/get-list-detail.use-case";
 import { CreateListUseCase } from "./application/use-cases/create-list.use-case";
 import { DeleteListUseCase } from "./application/use-cases/delete-list.use-case";
@@ -16,6 +17,7 @@ import { ListController } from "./infrastructure/http/list.controller";
   controllers: [ListController],
   providers: [
     ListUserListsUseCase,
+    ListTrendingListsUseCase,
     GetListDetailUseCase,
     CreateListUseCase,
     DeleteListUseCase,

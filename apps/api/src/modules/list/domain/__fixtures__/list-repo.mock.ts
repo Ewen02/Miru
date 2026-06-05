@@ -5,6 +5,7 @@ export function makeListRepoMock(): jest.Mocked<ListRepositoryPort> {
     findByUserId: jest.fn(),
     findLikedByUserId: jest.fn(),
     findPublic: jest.fn(),
+    findTrending: jest.fn(),
     findById: jest.fn(),
     findWithItems: jest.fn(),
     create: jest.fn(),

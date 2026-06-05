@@ -1,0 +1,53 @@
+name: backup-nightly
+
+on:
+  schedule:
+    # 03:00 UTC every day. Adjust to off-peak for your prod traffic.
+    - cron: "0 3 * * *"
+  workflow_dispatch: # allow manual trigger from the Actions tab
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-nightly
+  cancel-in-progress: false
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pg client, age and aws-cli
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            postgresql-client age awscli
+          age --version
+          pg_dump --version
+          aws --version
+
+      - name: Run backup
+        env:
+          DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BACKUP_AGE_PUBLIC_KEY: ${{ secrets.BACKUP_AGE_PUBLIC_KEY }}
+          BACKUP_R2_BUCKET: ${{ secrets.BACKUP_R2_BUCKET }}
+          BACKUP_R2_ENDPOINT: ${{ secrets.BACKUP_R2_ENDPOINT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_R2_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_R2_SECRET_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          chmod +x scripts/backup/dump-and-upload.sh
+          ./scripts/backup/dump-and-upload.sh
+
+      - name: Report failure to Sentry
+        if: failure() && env.SENTRY_DSN != ''
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          curl -sS -X POST "${SENTRY_DSN%/*}/api/0/store/" \
+            -H "Content-Type: application/json" \
+            -d "{\"message\":\"backup-nightly failed\",\"level\":\"error\",\"tags\":{\"job\":\"backup-nightly\"}}" \
+            || true

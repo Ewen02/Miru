@@ -4,6 +4,7 @@ import { ImportTrendingUseCase } from "./application/use-cases/import-trending.u
 import { ImportBySeasonUseCase } from "./application/use-cases/import-by-season.use-case";
 import { ImportEpisodesUseCase } from "./application/use-cases/import-episodes.use-case";
 import { EnrichEpisodesUseCase } from "./application/use-cases/enrich-episodes.use-case";
+import { RetryFailedSyncsUseCase } from "./application/use-cases/retry-failed-syncs.use-case";
 import { SyncSchedulerService } from "./infrastructure/scheduler/sync-scheduler.service";
 
 @Module({
@@ -13,6 +14,7 @@ import { SyncSchedulerService } from "./infrastructure/scheduler/sync-scheduler.
     ImportBySeasonUseCase,
     ImportEpisodesUseCase,
     EnrichEpisodesUseCase,
+    RetryFailedSyncsUseCase,
     SyncSchedulerService,
   ],
   exports: [
@@ -20,6 +22,7 @@ import { SyncSchedulerService } from "./infrastructure/scheduler/sync-scheduler.
     ImportBySeasonUseCase,
     ImportEpisodesUseCase,
     EnrichEpisodesUseCase,
+    RetryFailedSyncsUseCase,
   ],
 })
 export class SyncModule {}

@@ -59,8 +59,20 @@ export interface AnimeRepositoryPort extends RepositoryPort<AnimeEntity> {
       site: string | null;
     }>,
   ): Promise<number>;
-  /** Marks the anime as having failed its last sync attempt. */
+  /**
+   * Marks the anime as having failed its last sync attempt and schedules a
+   * retry with exponential backoff (1h → 4h → 24h, capped at 5 attempts;
+   * past that the row is abandoned by the retry cron).
+   */
   markSyncFailed(animeId: string): Promise<void>;
+  /**
+   * Returns animes whose retry window has elapsed (`syncRetryAt <= now`),
+   * up to `limit`. The caller should re-process each through the normal
+   * import path; on success it must call `clearSyncRetry`.
+   */
+  findReadyForRetry(limit: number): Promise<AnimeEntity[]>;
+  /** Resets the retry state after a successful sync. */
+  clearSyncRetry(animeId: string): Promise<void>;
   /** Episodes airing in [from, to] for the airing calendar. NSFW excluded. */
   findAiringEpisodesBetween(from: Date, to: Date): Promise<EpisodeAiringRow[]>;
   /**

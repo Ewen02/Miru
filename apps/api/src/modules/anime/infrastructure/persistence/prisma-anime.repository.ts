@@ -30,6 +30,9 @@ const NSFW_EXCLUDE: Prisma.AnimeWhereInput = {
   genres: { none: { slug: "hentai" } },
 };
 
+/** Past this many failed attempts, the retry cron stops picking up the row. */
+const MAX_SYNC_RETRY_ATTEMPTS = 5;
+
 @Injectable()
 export class PrismaAnimeRepository implements AnimeRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
@@ -282,9 +285,43 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
   }
 
   async markSyncFailed(animeId: string): Promise<void> {
+    // Exponential backoff: 1h, 4h, 12h, 24h, 48h. Past attempt 5 the row
+    // is abandoned by the retry cron (findReadyForRetry filters on count).
+    const current = await this.prisma.anime.findUnique({
+      where: { id: animeId },
+      select: { syncRetryCount: true },
+    });
+    const nextCount = (current?.syncRetryCount ?? 0) + 1;
+    const backoffHours = [1, 4, 12, 24, 48][Math.min(nextCount - 1, 4)] ?? 48;
+    const syncRetryAt = new Date(Date.now() + backoffHours * 60 * 60 * 1000);
+
     await this.prisma.anime.update({
       where: { id: animeId },
-      data: { syncFailedAt: new Date() },
+      data: {
+        syncFailedAt: new Date(),
+        syncRetryAt,
+        syncRetryCount: nextCount,
+      },
+    });
+  }
+
+  async findReadyForRetry(limit: number): Promise<AnimeEntity[]> {
+    const rows = await this.prisma.anime.findMany({
+      where: {
+        syncRetryAt: { lte: new Date(), not: null },
+        syncRetryCount: { lt: MAX_SYNC_RETRY_ATTEMPTS },
+      },
+      orderBy: { syncRetryAt: "asc" },
+      take: limit,
+      include: INCLUDE_CARD,
+    });
+    return rows.map(toDomainCard);
+  }
+
+  async clearSyncRetry(animeId: string): Promise<void> {
+    await this.prisma.anime.update({
+      where: { id: animeId },
+      data: { syncRetryAt: null, syncRetryCount: 0, syncFailedAt: null },
     });
   }
 

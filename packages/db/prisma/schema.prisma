@@ -31,8 +31,10 @@ model Anime {
   accentHex         String? @db.VarChar(7)
   averageRating     Float?
 
-  syncedAt     DateTime?
-  syncFailedAt DateTime?
+  syncedAt       DateTime?
+  syncFailedAt   DateTime?
+  syncRetryAt    DateTime?
+  syncRetryCount Int       @default(0)
 
   studioId       String?
   studio         Studio?           @relation(fields: [studioId], references: [id])
@@ -54,6 +56,7 @@ model Anime {
   @@index([averageRating])
   @@index([year, averageRating])
   @@index([syncedAt])
+  @@index([syncRetryAt])
 }
 
 model Studio {

@@ -3,6 +3,7 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { RunContextService } from "@shared/infrastructure/context/run-context.service";
 import { ImportTrendingUseCase } from "../../application/use-cases/import-trending.use-case";
 import { ImportEpisodesUseCase } from "../../application/use-cases/import-episodes.use-case";
+import { RetryFailedSyncsUseCase } from "../../application/use-cases/retry-failed-syncs.use-case";
 
 @Injectable()
 export class SyncSchedulerService implements OnModuleInit {
@@ -12,6 +13,7 @@ export class SyncSchedulerService implements OnModuleInit {
   constructor(
     private readonly importTrending: ImportTrendingUseCase,
     private readonly importEpisodes: ImportEpisodesUseCase,
+    private readonly retryFailed: RetryFailedSyncsUseCase,
     private readonly runContext: RunContextService,
   ) {}
 
@@ -51,6 +53,29 @@ export class SyncSchedulerService implements OnModuleInit {
         );
       } catch (err) {
         this.logger.warn(`[run=${runId}] Episodes sync failed: ${(err as Error).message}`);
+      }
+    });
+  }
+
+  /**
+   * Hourly: pick up animes whose retry window has elapsed and replay their
+   * episodes sync. Exponential backoff is computed at markSyncFailed time
+   * (1h → 4h → 12h → 24h → 48h, abandoned past attempt 5).
+   */
+  @Cron(CronExpression.EVERY_HOUR, { name: "sync-retry-failed" })
+  async handleRetryFailed(): Promise<void> {
+    if (!this.enabled) return;
+    await this.runContext.run("sync-retry-failed", async () => {
+      const runId = this.runContext.runId();
+      try {
+        const result = await this.retryFailed.execute({});
+        if (result.attempted > 0) {
+          this.logger.log(
+            `[run=${runId}] Retry pass: ${result.succeeded} succeeded / ${result.failed} re-failed / ${result.attempted} attempted`,
+          );
+        }
+      } catch (err) {
+        this.logger.warn(`[run=${runId}] Retry pass failed: ${(err as Error).message}`);
       }
     });
   }

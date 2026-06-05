@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@miru/ui";
 
@@ -11,11 +12,20 @@ import { cn } from "@miru/ui";
  * Hidden on auth pages and narrative content (editorial, year-in-review)
  * where chrome would distract.
  */
-const HIDE_ON: string[] = ["/login", "/register", "/onboard", "/year-in-review", "/maintenance"];
+const HIDE_ON: string[] = [
+  "/login",
+  "/register",
+  "/onboard",
+  "/year-in-review",
+  "/maintenance",
+  "/lifetime-stats",
+  "/achievements",
+];
 
 interface NavItem {
   href: string;
-  label: string;
+  /** Key in the `header` i18n namespace. */
+  labelKey: string;
   icon: React.ReactNode;
   match: (pathname: string) => boolean;
 }
@@ -23,46 +33,54 @@ interface NavItem {
 const ITEMS: NavItem[] = [
   {
     href: "/",
-    label: "Catalogue",
+    labelKey: "catalogue",
     icon: <HomeIcon />,
     match: (p) => p === "/" || p.startsWith("/anime") || p.startsWith("/genre") || p.startsWith("/seasons") || p.startsWith("/top"),
   },
   {
     href: "/calendar",
-    label: "Calendrier",
+    labelKey: "calendar",
     icon: <CalendarIcon />,
     match: (p) => p.startsWith("/calendar"),
   },
   {
     href: "/watchlist",
-    label: "Watchlist",
+    labelKey: "watchlist",
     icon: <ListIcon />,
     match: (p) => p.startsWith("/watchlist"),
   },
   {
+    href: "/messages",
+    labelKey: "messages",
+    icon: <MessageIcon />,
+    match: (p) => p.startsWith("/messages"),
+  },
+  {
     href: "/notifications",
-    label: "Inbox",
+    labelKey: "inbox",
     icon: <BellIcon />,
     match: (p) => p.startsWith("/notifications"),
   },
   {
     href: "/profile",
-    label: "Profil",
+    labelKey: "profile",
     icon: <UserIcon />,
     match: (p) => p.startsWith("/profile") || p.startsWith("/u/") || p.startsWith("/settings"),
   },
 ];
 
 export function MobileBottomNav() {
+  const t = useTranslations("a11y");
+  const th = useTranslations("header");
   const pathname = usePathname() ?? "/";
   if (HIDE_ON.some((p) => pathname.startsWith(p))) return null;
 
   return (
     <nav
-      aria-label="Navigation principale"
+      aria-label={t("mainNav")}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border-subtle bg-bg-overlay backdrop-blur-xl md:hidden"
     >
-      <ul className="m-0 grid grid-cols-5 p-0">
+      <ul className="m-0 grid grid-cols-6 p-0">
         {ITEMS.map((item) => {
           const active = item.match(pathname);
           return (
@@ -79,7 +97,7 @@ export function MobileBottomNav() {
                 }}
               >
                 {item.icon}
-                <span className="font-mono text-[9px] uppercase tracking-wider">{item.label}</span>
+                <span className="font-mono text-[9px] uppercase tracking-wider">{th(item.labelKey)}</span>
               </Link>
             </li>
           );
@@ -111,6 +129,14 @@ function ListIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
       <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+    </svg>
+  );
+}
+
+function MessageIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
     </svg>
   );
 }

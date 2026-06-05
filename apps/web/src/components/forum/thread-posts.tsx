@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import type { ForumThreadDetailDto } from "@miru/types";
 import { addForumPost } from "@/lib/forum-api";
+import { MonogramAvatar } from "@/components/monogram-avatar";
 
 /**
  * Renders a thread's posts and a reply form. The list updates in place from
@@ -45,25 +46,47 @@ export function ThreadPosts({
   return (
     <>
       <ul className="m-0 mb-8 flex list-none flex-col gap-3 p-0">
-        {posts.map((post, idx) => (
-          <li
-            key={post.id}
-            className="rounded-xl border border-border-subtle bg-bg-surface p-4"
-            style={idx === 0 ? { borderColor: "color-mix(in srgb, var(--color-accent) 30%, transparent)" } : undefined}
-          >
-            <div className="mb-1.5 flex items-baseline gap-2">
-              <span className="font-body text-sm font-semibold text-text-primary">
-                {post.author.name}
-              </span>
-              <time className="font-mono text-[10px] text-text-tertiary">
-                {new Date(post.createdAt).toLocaleDateString(locale)}
-              </time>
-            </div>
-            <p className="m-0 whitespace-pre-wrap font-body text-sm leading-relaxed text-text-secondary">
-              {post.body}
-            </p>
-          </li>
-        ))}
+        {posts.map((post, idx) => {
+          const isOriginal = idx === 0;
+          return (
+            <li
+              key={post.id}
+              className="relative flex gap-3 overflow-hidden rounded-xl border border-border-subtle bg-bg-surface p-4"
+            >
+              {isOriginal && (
+                <span aria-hidden className="absolute inset-y-0 left-0 w-0.5 bg-accent" />
+              )}
+              <Link
+                href={`/u/${post.author.id}`}
+                className="shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+                aria-label={post.author.name}
+              >
+                <MonogramAvatar name={post.author.name} image={post.author.image} size="sm" />
+              </Link>
+              <div className="min-w-0 flex-1">
+                <div className="mb-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                  <Link
+                    href={`/u/${post.author.id}`}
+                    className="font-body text-sm font-semibold text-text-primary transition-colors duration-200 hover:text-accent"
+                  >
+                    {post.author.name}
+                  </Link>
+                  {isOriginal && (
+                    <span className="inline-flex h-4 items-center rounded-sm border border-accent/40 bg-accent-subtle px-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-accent">
+                      {t("originalPost")}
+                    </span>
+                  )}
+                  <time className="font-mono text-[10px] text-text-tertiary">
+                    {new Date(post.createdAt).toLocaleDateString(locale)}
+                  </time>
+                </div>
+                <p className="m-0 whitespace-pre-wrap font-body text-sm leading-relaxed text-text-secondary text-pretty">
+                  {post.body}
+                </p>
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
       {isAuthenticated ? (
@@ -82,7 +105,7 @@ export function ThreadPosts({
               type="button"
               onClick={submit}
               disabled={pending || body.trim().length === 0}
-              className="inline-flex h-9 items-center rounded-md bg-accent px-4 font-body text-sm font-medium text-bg-base disabled:opacity-50"
+              className="inline-flex h-9 items-center rounded-md bg-accent px-4 font-body text-sm font-medium text-bg-base transition-opacity duration-200 hover:opacity-90 disabled:opacity-50"
             >
               {t("reply")}
             </button>

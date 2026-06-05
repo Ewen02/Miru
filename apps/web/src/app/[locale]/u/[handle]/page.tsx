@@ -10,6 +10,8 @@ import { JsonLd, profilePageSchema } from "@/lib/json-ld";
 import { getServerSession } from "@/lib/server-auth";
 import { fetchFollowStats } from "@/lib/server-social";
 import { FollowButton } from "@/components/follow-button";
+import { MessageButton } from "@/components/message-button";
+import { MonogramAvatar } from "@/components/monogram-avatar";
 import type { UserProfileReview } from "@miru/types";
 import { ShareProfileButton } from "./share-profile-button";
 
@@ -46,7 +48,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   const joinedLabel = profile.joinedAt ? formatJoinedAt(profile.joinedAt) : null;
   const handleSlug = profile.handle.toLowerCase().replace(/\s+/g, "");
-  const initial = profile.name.charAt(0).toUpperCase();
 
   return (
     <main className="mx-auto max-w-300 px-7 pb-20 pt-12">
@@ -59,7 +60,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       />
       {/* Identity header. Avatar (image or initial) + handle eyebrow + name + share. */}
       <header className="mb-14 flex flex-col gap-7 sm:flex-row sm:items-end">
-        <Avatar image={profile.image} initial={initial} />
+        <MonogramAvatar name={profile.name} image={profile.image} size="xl" />
         <div className="min-w-0 flex-1">
           <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
             @{handleSlug}
@@ -84,11 +85,14 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         </div>
         <div className="flex items-center gap-2">
           {!isOwnProfile && (
-            <FollowButton
-              userId={profile.id}
-              initialIsFollowing={followStats.isFollowing}
-              isAuthenticated={!!session}
-            />
+            <>
+              <FollowButton
+                userId={profile.id}
+                initialIsFollowing={followStats.isFollowing}
+                isAuthenticated={!!session}
+              />
+              <MessageButton userId={profile.id} isAuthenticated={!!session} />
+            </>
           )}
           <ShareProfileButton name={profile.name} />
         </div>
@@ -143,7 +147,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   className="absolute -left-2 -top-2 z-10 flex h-8 w-8 items-center justify-center rounded-sm font-display text-sm font-bold"
                   style={{
                     backgroundColor: "var(--color-accent)",
-                    color: "#08080c",
+                    color: "var(--color-on-accent)",
                   }}
                 >
                   {idx + 1}
@@ -174,25 +178,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         </div>
       )}
     </main>
-  );
-}
-
-function Avatar({ image, initial }: { image: string | null; initial: string }) {
-  if (image) {
-    return (
-      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-border">
-        <Image src={image} alt="" fill sizes="96px" className="object-cover" />
-      </div>
-    );
-  }
-  return (
-    <div
-      className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full border border-border font-display text-4xl text-text-primary"
-      style={{ background: "linear-gradient(160deg, #2d1844, #4a1d6b)" }}
-      aria-hidden
-    >
-      {initial}
-    </div>
   );
 }
 

@@ -47,9 +47,12 @@ export default async function ConversationPage({ params }: ConversationPageProps
         >
           {t("backToInbox")}
         </Link>
-        <h1 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">
+        <Link
+          href={`/u/${conversation.peer.id}`}
+          className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary transition-colors duration-200 hover:text-accent"
+        >
           {conversation.peer.name}
-        </h1>
+        </Link>
       </div>
       <ConversationView conversation={conversation} viewerId={session.user.id} />
     </main>

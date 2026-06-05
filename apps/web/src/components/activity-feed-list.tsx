@@ -47,7 +47,7 @@ export function ActivityFeedList({
             className="flex items-baseline gap-3 border-b border-border-subtle p-4 last:border-0"
           >
             <Link
-              href={`/u/${event.actorName}`}
+              href={`/u/${event.userId}`}
               className="shrink-0 font-body text-sm font-semibold text-text-primary hover:text-accent"
             >
               {event.actorName}

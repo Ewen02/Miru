@@ -79,12 +79,35 @@ export function PollCard({ poll: initial, isAuthenticated }: { poll: PollDto; is
                 />
               )}
               <span className="relative flex items-center justify-between gap-3">
-                <span className="font-body text-sm text-text-primary">
-                  {isMine && "✓ "}
-                  {option.label}
+                <span className="flex items-center gap-2">
+                  {isMine && (
+                    <span
+                      aria-hidden
+                      className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent font-mono text-[9px] text-bg-base"
+                    >
+                      ✓
+                    </span>
+                  )}
+                  <span
+                    className={
+                      isMine
+                        ? "font-body text-sm font-medium text-accent"
+                        : "font-body text-sm text-text-primary"
+                    }
+                  >
+                    {option.label}
+                  </span>
                 </span>
                 {revealed && (
-                  <span className="shrink-0 font-mono text-xs text-text-secondary">{pct}%</span>
+                  <span
+                    className={
+                      isMine
+                        ? "shrink-0 font-mono text-xs font-medium text-accent"
+                        : "shrink-0 font-mono text-xs text-text-secondary"
+                    }
+                  >
+                    {pct}%
+                  </span>
                 )}
               </span>
             </button>

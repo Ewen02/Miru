@@ -4,13 +4,16 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@miru/ui";
 
+interface NavRoute {
+  href: string;
+  label: string;
+  description: string;
+}
+
 /**
- * Header dropdown surfacing discovery routes (calendar, top, current-year
- * season). Active when the current path is one of the discovery routes.
- *
- * Adding a route: append to ROUTES — the dropdown auto-detects active state.
+ * Catalogue discovery routes — ways to browse the anime library itself.
  */
-const ROUTES: Array<{ href: string; label: string; description: string }> = [
+const DISCOVER_ROUTES: NavRoute[] = [
   {
     href: "/calendar",
     label: "Calendrier",
@@ -26,6 +29,13 @@ const ROUTES: Array<{ href: string; label: string; description: string }> = [
     label: "Saisons",
     description: "Tous les titres de l'année, filtrables par format.",
   },
+];
+
+/**
+ * Community routes — where people meet, talk, and play together. Kept distinct
+ * from catalogue discovery so the social surface is findable on its own.
+ */
+const COMMUNITY_ROUTES: NavRoute[] = [
   {
     href: "/trending",
     label: "Tendances",
@@ -58,12 +68,16 @@ const ROUTES: Array<{ href: string; label: string; description: string }> = [
   },
 ];
 
-export function DiscoverDropdown() {
+/**
+ * Generic header dropdown. Highlights itself when the current path matches one
+ * of its routes. Adding a route: append to the relevant ROUTES array.
+ */
+function NavDropdown({ label, routes }: { label: string; routes: NavRoute[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const isActive = ROUTES.some((r) => pathname?.startsWith(r.href));
+  const isActive = routes.some((r) => pathname?.startsWith(r.href));
 
   useEffect(() => {
     if (!open) return;
@@ -98,7 +112,7 @@ export function DiscoverDropdown() {
           isActive ? "text-text-primary" : "text-text-secondary hover:text-text-primary",
         )}
       >
-        Découvrir
+        {label}
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
           <path d="m6 9 6 6 6-6" />
         </svg>
@@ -115,7 +129,7 @@ export function DiscoverDropdown() {
           role="menu"
           className="absolute left-0 top-full z-30 mt-1 w-72 overflow-hidden rounded-xl border border-border bg-bg-surface p-1"
         >
-          {ROUTES.map((r) => (
+          {routes.map((r) => (
             <Link
               key={r.href}
               href={r.href}
@@ -130,4 +144,12 @@ export function DiscoverDropdown() {
       )}
     </div>
   );
+}
+
+export function DiscoverDropdown() {
+  return <NavDropdown label="Découvrir" routes={DISCOVER_ROUTES} />;
+}
+
+export function CommunityDropdown() {
+  return <NavDropdown label="Communauté" routes={COMMUNITY_ROUTES} />;
 }

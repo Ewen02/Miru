@@ -8,6 +8,7 @@ import { NotificationsSection } from "./notifications-section";
 import { QuietHoursSection } from "./quiet-hours-section";
 import { DeleteAccountSection } from "./delete-account-section";
 import { DataExportSection } from "./data-export-section";
+import { PrivacyToggleSection } from "./privacy-toggle-section";
 import { SignOutButton } from "./sign-out-button";
 import { BioSection } from "./bio-section";
 import { fetchBillingStatus } from "@/lib/server-billing";
@@ -124,7 +125,10 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
                 {t("privacyHint")}
               </p>
             </header>
-            <DataExportSection />
+            <div className="flex flex-col gap-4">
+              <PrivacyToggleSection initialIsPrivate={prefs.isPrivate} />
+              <DataExportSection />
+            </div>
           </section>
 
           <section id="advanced" className="scroll-mt-20">

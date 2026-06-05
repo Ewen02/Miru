@@ -1,6 +1,9 @@
 import { NotFoundException } from "@shared/domain/domain-exception";
 import { UserEntity } from "../../domain/entities/user.entity";
-import { UserRepositoryPort } from "../../domain/ports/user-repository.port";
+import {
+  DEFAULT_USER_PREFERENCES,
+  UserRepositoryPort,
+} from "../../domain/ports/user-repository.port";
 import { makeUserRepoMock } from "../../domain/__fixtures__/user-repo.mock";
 import { GetUserProfileUseCase } from "./get-user-profile.use-case";
 
@@ -28,6 +31,7 @@ describe("GetUserProfileUseCase", () => {
       bio: null,
     });
     repo.findByHandle.mockResolvedValue(user);
+    repo.preferencesByUserId.mockResolvedValue(DEFAULT_USER_PREFERENCES);
     repo.joinedAt.mockResolvedValue(new Date("2024-09-12T00:00:00Z"));
     repo.statsByUserId.mockResolvedValue({
       completedCount: 42,

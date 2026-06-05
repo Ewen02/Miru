@@ -12,6 +12,11 @@ import { UserEntity } from "../../domain/entities/user.entity";
 
 interface GetUserProfileInput {
   handle: string;
+  /**
+   * Authenticated viewer's id, or null if anonymous. Drives the
+   * privacy gate: a private profile is only visible to its owner.
+   */
+  viewerId?: string | null;
 }
 
 interface GetUserProfileOutput {
@@ -30,9 +35,19 @@ const REVIEWS_LIMIT = 3;
 export class GetUserProfileUseCase implements UseCase<GetUserProfileInput, GetUserProfileOutput> {
   constructor(@Inject(USER_REPOSITORY) private readonly users: UserRepositoryPort) {}
 
-  async execute({ handle }: GetUserProfileInput): Promise<GetUserProfileOutput> {
+  async execute({ handle, viewerId }: GetUserProfileInput): Promise<GetUserProfileOutput> {
     const user = await this.users.findByHandle(handle);
     if (!user) throw new NotFoundException(`User "${handle}" not found`);
+
+    // S4-02: privacy gate. Return a 404 (not 403) so private accounts
+    // are indistinguishable from non-existent ones — leaks no signal
+    // that the handle is taken or who owns it.
+    if (viewerId !== user.id) {
+      const prefs = await this.users.preferencesByUserId(user.id);
+      if (prefs.isPrivate) {
+        throw new NotFoundException(`User "${handle}" not found`);
+      }
+    }
 
     const [joinedAt, isPro, stats, favorites, reviews] = await Promise.all([
       this.users.joinedAt(user.id),

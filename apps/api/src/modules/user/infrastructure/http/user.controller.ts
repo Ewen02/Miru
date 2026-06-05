@@ -18,8 +18,10 @@ import type {
   YearInReviewDto,
 } from "@miru/types";
 import { AuthRequiredGuard } from "@auth/auth-required.guard";
+import { OptionalAuthGuard } from "@auth/optional-auth.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
 import { CurrentSessionId } from "@auth/current-session-id.decorator";
+import { OptionalUserId } from "@auth/optional-user.decorator";
 import { GetCurrentUserUseCase } from "../../application/use-cases/get-current-user.use-case";
 import { GetUserProfileUseCase } from "../../application/use-cases/get-user-profile.use-case";
 import { GetUserLifetimeStatsUseCase } from "../../application/use-cases/get-user-lifetime-stats.use-case";
@@ -243,9 +245,14 @@ export class UserController {
   }
 
   @Get(":handle")
-  async profile(@Param("handle") handle: string): Promise<UserProfile> {
+  @UseGuards(OptionalAuthGuard)
+  async profile(
+    @Param("handle") handle: string,
+    @OptionalUserId() viewerId: string | null,
+  ): Promise<UserProfile> {
     const { user, joinedAt, isPro, stats, favorites, reviews } = await this.getUserProfile.execute({
       handle,
+      viewerId,
     });
 
     return {

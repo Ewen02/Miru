@@ -258,6 +258,8 @@
     "quietEnable": "Activer les heures calmes",
     "quietDisable": "Désactiver",
     "privacyHint": "Récupère une copie complète de tes données ou demande la suppression de ton compte.",
+    "privacyToggleTitle": "Profil privé",
+    "privacyToggleHint": "Active pour cacher ton profil public, ta watchlist et tes reviews. Toi seul·e peux les voir. Les pages renvoient un 404 aux autres — aucun signal que le compte existe.",
     "exportTitle": "Télécharger mes données",
     "exportHint": "Un JSON unique avec ta watchlist, tes reviews, tes listes, tes achievements et tes préférences. RGPD article 20 — ta copie reste sur ton appareil, on ne la garde pas.",
     "exportCta": "Télécharger (.json)",

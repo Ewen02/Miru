@@ -258,6 +258,8 @@
     "quietEnable": "Enable quiet hours",
     "quietDisable": "Disable",
     "privacyHint": "Get a full copy of your data, or request account deletion.",
+    "privacyToggleTitle": "Private profile",
+    "privacyToggleHint": "Hide your public profile, watchlist and reviews. Only you can see them. Pages return a 404 to anyone else — no signal that the account exists.",
     "exportTitle": "Download my data",
     "exportHint": "A single JSON file with your watchlist, reviews, lists, achievements and preferences. GDPR article 20 — your copy stays on your device, we don't keep it.",
     "exportCta": "Download (.json)",

@@ -76,7 +76,9 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: ci
+    # CI-A1: ci and e2e are independent — e2e doesn't consume ci artifacts
+    # and both install pnpm deps from scratch. Removing `needs: ci` lets
+    # them overlap, cutting wall-clock by the duration of one job (~4 min).
 
     services:
       postgres:

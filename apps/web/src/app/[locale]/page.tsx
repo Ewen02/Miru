@@ -30,54 +30,107 @@ import { currentSeasonLabel } from "@/lib/dates";
 import type { AnimeCard as AnimeCardDTO, WatchlistItem } from "@miru/types";
 import { Landing } from "./landing";
 
+type SearchParamsShape = {
+  search?: string;
+  status?: string;
+  format?: string;
+  year?: string;
+  yearFrom?: string;
+  yearTo?: string;
+  episodesMin?: string;
+  episodesMax?: string;
+  genres?: string | string[];
+  streamingPlatforms?: string | string[];
+  sort?: string;
+  page?: string;
+};
+
 interface CatalogPageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{
-    search?: string;
-    status?: string;
-    format?: string;
-    year?: string;
-    genres?: string | string[];
-    page?: string;
-  }>;
+  searchParams: Promise<SearchParamsShape>;
 }
 
 const PAGE_SIZE = 20;
 const HERO_SLIDES = 4;
 const TRENDING_SLIDER = 8;
 
-function parseFilters(sp: Awaited<CatalogPageProps["searchParams"]>): CatalogFilters {
+const VALID_SORTS = ["RATING", "POPULARITY", "RECENCY", "EPISODE_COUNT"] as const;
+type CatalogSort = (typeof VALID_SORTS)[number];
+
+function parseIntOpt(raw: string | undefined): number | undefined {
+  if (raw == null) return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function parseFilters(sp: SearchParamsShape): CatalogFilters {
   const genres = sp.genres ? (Array.isArray(sp.genres) ? sp.genres : [sp.genres]) : undefined;
-  const year = sp.year ? Number(sp.year) : undefined;
+  const platforms = sp.streamingPlatforms
+    ? Array.isArray(sp.streamingPlatforms)
+      ? sp.streamingPlatforms
+      : [sp.streamingPlatforms]
+    : undefined;
   const page = sp.page ? Math.max(1, Number(sp.page)) : 1;
+  const sort = sp.sort && (VALID_SORTS as readonly string[]).includes(sp.sort)
+    ? (sp.sort as CatalogSort)
+    : undefined;
   return {
     search: sp.search?.trim() || undefined,
     status: sp.status || undefined,
     format: sp.format || undefined,
-    year: Number.isFinite(year) ? year : undefined,
+    year: parseIntOpt(sp.year),
+    yearFrom: parseIntOpt(sp.yearFrom),
+    yearTo: parseIntOpt(sp.yearTo),
+    episodesMin: parseIntOpt(sp.episodesMin),
+    episodesMax: parseIntOpt(sp.episodesMax),
     genres: genres?.filter(Boolean),
+    streamingPlatforms: platforms?.filter(Boolean),
+    sort,
     page,
     pageSize: PAGE_SIZE,
   };
 }
 
-function buildPageHref(sp: Awaited<CatalogPageProps["searchParams"]>, targetPage: number): string {
+function buildPageHref(sp: SearchParamsShape, targetPage: number): string {
   const params = new URLSearchParams();
   if (sp.search) params.set("search", sp.search);
   if (sp.status) params.set("status", sp.status);
   if (sp.format) params.set("format", sp.format);
   if (sp.year) params.set("year", sp.year);
+  if (sp.yearFrom) params.set("yearFrom", sp.yearFrom);
+  if (sp.yearTo) params.set("yearTo", sp.yearTo);
+  if (sp.episodesMin) params.set("episodesMin", sp.episodesMin);
+  if (sp.episodesMax) params.set("episodesMax", sp.episodesMax);
   if (sp.genres) {
     const list = Array.isArray(sp.genres) ? sp.genres : [sp.genres];
     for (const g of list) params.append("genres", g);
   }
+  if (sp.streamingPlatforms) {
+    const list = Array.isArray(sp.streamingPlatforms)
+      ? sp.streamingPlatforms
+      : [sp.streamingPlatforms];
+    for (const p of list) params.append("streamingPlatforms", p);
+  }
+  if (sp.sort) params.set("sort", sp.sort);
   if (targetPage > 1) params.set("page", String(targetPage));
   const qs = params.toString();
   return qs ? `/?${qs}` : "/";
 }
 
-function hasActiveFilters(sp: Awaited<CatalogPageProps["searchParams"]>): boolean {
-  return Boolean(sp.search || sp.status || sp.format || sp.year || sp.genres);
+function hasActiveFilters(sp: SearchParamsShape): boolean {
+  return Boolean(
+    sp.search ||
+      sp.status ||
+      sp.format ||
+      sp.year ||
+      sp.yearFrom ||
+      sp.yearTo ||
+      sp.episodesMin ||
+      sp.episodesMax ||
+      sp.genres ||
+      sp.streamingPlatforms ||
+      sp.sort,
+  );
 }
 
 function truncate(text: string | null, max: number): string {

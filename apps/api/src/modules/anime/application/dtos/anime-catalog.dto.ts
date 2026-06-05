@@ -1,6 +1,18 @@
-import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from "class-validator";
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from "class-validator";
 import { Transform, Type } from "class-transformer";
 import { AnimeStatus, AnimeFormat } from "@miru/types";
+
+export type CatalogSort = "RATING" | "POPULARITY" | "RECENCY" | "EPISODE_COUNT";
 
 export class AnimeCatalogQueryDto {
   @IsOptional()
@@ -24,6 +36,47 @@ export class AnimeCatalogQueryDto {
   @Type(() => Number)
   @IsInt()
   year?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1900)
+  @Max(2100)
+  yearFrom?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1900)
+  @Max(2100)
+  yearTo?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(5000)
+  episodesMin?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(5000)
+  episodesMax?: number;
+
+  /** Streaming platform slug(s). Accepts repeated query param or single value. */
+  @IsOptional()
+  @Transform(({ value }) => (value == null ? undefined : Array.isArray(value) ? value : [value]))
+  @IsArray()
+  @ArrayMaxSize(8)
+  @IsString({ each: true })
+  @MaxLength(40, { each: true })
+  streamingPlatforms?: string[];
+
+  @IsOptional()
+  @IsEnum(["RATING", "POPULARITY", "RECENCY", "EPISODE_COUNT"])
+  sort?: CatalogSort;
 
   @IsOptional()
   @Type(() => Number)

@@ -3,14 +3,35 @@ import { AnimeEntity } from "../entities/anime.entity";
 import { EpisodeInput } from "./episode-sync.port";
 import { AnimeStatus, AnimeFormat } from "@miru/types";
 
+/**
+ * Catalog sort options. Default is RECENCY (year DESC).
+ *  - RATING        — averageRating DESC nulls last
+ *  - POPULARITY    — reviewCount DESC (proxy for "the community talks about it")
+ *  - RECENCY       — year DESC, then averageRating DESC
+ *  - EPISODE_COUNT — episodeCount DESC nulls last
+ */
+export type AnimeSort = "RATING" | "POPULARITY" | "RECENCY" | "EPISODE_COUNT";
+
 export interface AnimeFilters {
   status?: AnimeStatus;
   format?: AnimeFormat;
   genres?: string[];
+  /** Single year (kept for the existing /seasons UI). */
   year?: number;
+  /** Inclusive lower bound on year. */
+  yearFrom?: number;
+  /** Inclusive upper bound on year. */
+  yearTo?: number;
+  /** Inclusive lower bound on episodeCount. */
+  episodesMin?: number;
+  /** Inclusive upper bound on episodeCount. */
+  episodesMax?: number;
   search?: string;
   /** Slug of a studio — single match (not array, studios are 1-to-many in DB). */
   studioSlug?: string;
+  /** Streaming platform slug(s). Matches AnimeOnPlatform.platform.slug. */
+  streamingPlatforms?: string[];
+  sort?: AnimeSort;
 }
 
 export interface AnimeAccentPreview {

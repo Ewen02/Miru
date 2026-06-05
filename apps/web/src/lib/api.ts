@@ -39,12 +39,20 @@ interface Paginated<T> {
   hasNext: boolean;
 }
 
+export type CatalogSort = "RATING" | "POPULARITY" | "RECENCY" | "EPISODE_COUNT";
+
 export interface CatalogFilters {
   search?: string;
   status?: string;
   format?: string;
   year?: number;
+  yearFrom?: number;
+  yearTo?: number;
+  episodesMin?: number;
+  episodesMax?: number;
   genres?: string[];
+  streamingPlatforms?: string[];
+  sort?: CatalogSort;
   page?: number;
   pageSize?: number;
 }
@@ -57,9 +65,20 @@ export async function fetchAnimeCatalog(
   if (filters.status) url.searchParams.set("status", filters.status);
   if (filters.format) url.searchParams.set("format", filters.format);
   if (filters.year != null) url.searchParams.set("year", String(filters.year));
+  if (filters.yearFrom != null) url.searchParams.set("yearFrom", String(filters.yearFrom));
+  if (filters.yearTo != null) url.searchParams.set("yearTo", String(filters.yearTo));
+  if (filters.episodesMin != null)
+    url.searchParams.set("episodesMin", String(filters.episodesMin));
+  if (filters.episodesMax != null)
+    url.searchParams.set("episodesMax", String(filters.episodesMax));
   if (filters.genres?.length) {
     for (const g of filters.genres) url.searchParams.append("genres", g);
   }
+  if (filters.streamingPlatforms?.length) {
+    for (const p of filters.streamingPlatforms)
+      url.searchParams.append("streamingPlatforms", p);
+  }
+  if (filters.sort) url.searchParams.set("sort", filters.sort);
   if (filters.page) url.searchParams.set("page", String(filters.page));
   if (filters.pageSize) url.searchParams.set("pageSize", String(filters.pageSize));
 

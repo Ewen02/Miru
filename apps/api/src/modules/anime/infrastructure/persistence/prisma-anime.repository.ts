@@ -6,6 +6,7 @@ import {
   AnimeAccentPreview,
   AnimeFilters,
   AnimeRepositoryPort,
+  AnimeSort,
   EpisodeAiringRow,
 } from "../../domain/ports/anime-repository.port";
 import { EpisodeInput } from "../../domain/ports/episode-sync.port";
@@ -78,7 +79,22 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
 
     if (filters.status) where.status = filters.status;
     if (filters.format) where.format = filters.format;
-    if (filters.year) where.year = filters.year;
+    // Single year wins over the range — keeps the existing /seasons flow
+    // and the search-pill UX intact.
+    if (filters.year) {
+      where.year = filters.year;
+    } else if (filters.yearFrom != null || filters.yearTo != null) {
+      where.year = {
+        ...(filters.yearFrom != null ? { gte: filters.yearFrom } : {}),
+        ...(filters.yearTo != null ? { lte: filters.yearTo } : {}),
+      };
+    }
+    if (filters.episodesMin != null || filters.episodesMax != null) {
+      where.episodeCount = {
+        ...(filters.episodesMin != null ? { gte: filters.episodesMin } : {}),
+        ...(filters.episodesMax != null ? { lte: filters.episodesMax } : {}),
+      };
+    }
     if (filters.search) {
       where.OR = [
         { title: { contains: filters.search, mode: "insensitive" } },
@@ -97,6 +113,13 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     if (filters.studioSlug) {
       where.studio = { slug: filters.studioSlug };
     }
+    if (filters.streamingPlatforms?.length) {
+      where.platforms = {
+        some: { platform: { slug: { in: filters.streamingPlatforms } } },
+      };
+    }
+
+    const orderBy = sortToOrderBy(filters.sort);
 
     const [records, total] = await Promise.all([
       this.prisma.anime.findMany({
@@ -104,7 +127,7 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
         include: INCLUDE_CARD,
         skip: (pagination.page - 1) * pagination.pageSize,
         take: pagination.pageSize,
-        orderBy: { averageRating: "desc" },
+        orderBy,
       }),
       this.prisma.anime.count({ where }),
     ]);
@@ -436,5 +459,24 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
     const indexById = new Map(rows.map((r, i) => [r.id, i]));
     records.sort((a, b) => (indexById.get(a.id) ?? 0) - (indexById.get(b.id) ?? 0));
     return records.map(toDomainCard);
+  }
+}
+
+/**
+ * Map the public sort enum to the Prisma orderBy array. Defaults to RATING
+ * because that's what the existing UI expected (orderBy: averageRating desc).
+ * Multi-column orderings break ties so the page is stable across reloads.
+ */
+function sortToOrderBy(sort: AnimeSort | undefined): Prisma.AnimeOrderByWithRelationInput[] {
+  switch (sort) {
+    case "POPULARITY":
+      return [{ reviewCount: "desc" }, { averageRating: "desc" }];
+    case "RECENCY":
+      return [{ year: { sort: "desc", nulls: "last" } }, { averageRating: "desc" }];
+    case "EPISODE_COUNT":
+      return [{ episodeCount: { sort: "desc", nulls: "last" } }, { averageRating: "desc" }];
+    case "RATING":
+    default:
+      return [{ averageRating: { sort: "desc", nulls: "last" } }];
   }
 }

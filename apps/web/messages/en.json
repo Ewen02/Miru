@@ -826,7 +826,12 @@
   },
   "watchPartyPage": {
     "metaTitle": "Watch party",
+    "metaTitleWithCode": "Watch party · {code}",
     "metaDescription": "Watch an anime in sync with your friends.",
+    "titleWithCode": "Watch party {code}",
+    "introJoin": "Joining an ongoing session. If the host is gone, start a new party.",
+    "copyLink": "Copy link",
+    "copied": "Copied ✓",
     "eyebrow": "Community",
     "title": "Watch party",
     "intro": "Create a session and share the code, or join a friend's.",

@@ -24,18 +24,26 @@ interface ChatMessage {
  * playback to guests; everyone shares a live chat. Pure client/real-time —
  * no persistence, so a refresh leaves the party.
  */
-export function WatchPartyRoom({ isAuthenticated }: { isAuthenticated: boolean }) {
+export function WatchPartyRoom({
+  isAuthenticated,
+  initialCode,
+}: {
+  isAuthenticated: boolean;
+  /** S3-08 — when present, auto-join this code once the socket is connected. */
+  initialCode?: string;
+}) {
   const t = useTranslations("watchPartyPage");
   const router = useRouter();
   const socketRef = useRef<Socket | null>(null);
   const [code, setCode] = useState<string | null>(null);
-  const [joinCode, setJoinCode] = useState("");
+  const [joinCode, setJoinCode] = useState(initialCode ?? "");
   const [isHost, setIsHost] = useState(false);
   const [playback, setPlayback] = useState<Playback>({ playing: false, positionSeconds: 0, updatedAtMs: 0 });
   const [members, setMembers] = useState<number>(1);
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -44,9 +52,30 @@ export function WatchPartyRoom({ isAuthenticated }: { isAuthenticated: boolean }
     socket.on("playback", (p: Playback) => setPlayback(p));
     socket.on("members", (m: { members: string[] }) => setMembers(m.members.length));
     socket.on("chat", (m: ChatMessage) => setChat((prev) => [...prev.slice(-99), m]));
+
+    // S3-08: auto-join when the page was loaded with a code in the URL.
+    if (initialCode) {
+      socket.emit(
+        "join",
+        { code: initialCode },
+        (res: { error?: string; state?: { code: string; playback: Playback; members: string[] } }) => {
+          if (res.error || !res.state) {
+            setError(t("notFound"));
+            return;
+          }
+          setCode(res.state.code);
+          setIsHost(false);
+          setPlayback(res.state.playback);
+          setMembers(res.state.members.length);
+        },
+      );
+    }
+
     return () => {
       socket.disconnect();
     };
+    // initialCode only changes on a brand-new page load — intentional dep.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   if (!isAuthenticated) {
@@ -66,7 +95,24 @@ export function WatchPartyRoom({ isAuthenticated }: { isAuthenticated: boolean }
       if (res.error || !res.code) return setError(res.error ?? "error");
       setCode(res.code);
       setIsHost(true);
+      // S3-08: bump the URL to the persistent /party/{code} variant so the
+      // host can copy from the address bar AND a refresh re-joins the same
+      // party (the gateway is in-memory, the auto-join uses initialCode).
+      router.replace(`/party/${res.code}`, { scroll: false });
     });
+  };
+
+  const copyShareLink = async () => {
+    if (!code || typeof window === "undefined") return;
+    const url = `${window.location.origin}/party/${code}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2400);
+    } catch {
+      // Clipboard blocked — the URL is already in the address bar, no need
+      // to surface an error to the user.
+    }
   };
 
   const join = () => {
@@ -128,8 +174,17 @@ export function WatchPartyRoom({ isAuthenticated }: { isAuthenticated: boolean }
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between rounded-xl border border-border-subtle bg-bg-surface px-4 py-3">
-        <span className="font-mono text-sm uppercase tracking-widest text-accent">{code}</span>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-subtle bg-bg-surface px-4 py-3">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-sm uppercase tracking-widest text-accent">{code}</span>
+          <button
+            type="button"
+            onClick={copyShareLink}
+            className="inline-flex h-7 items-center rounded-md border border-border-subtle bg-bg-base px-2 font-mono text-[10px] uppercase tracking-wider text-text-tertiary transition-colors duration-150 hover:border-border hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+          >
+            {copied ? t("copied") : t("copyLink")}
+          </button>
+        </div>
         <span className="font-mono text-[11px] text-text-tertiary">
           {t("members", { count: members })} · {isHost ? t("host") : t("guest")}
         </span>

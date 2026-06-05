@@ -6,6 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { AuthModule } from "@thallesp/nestjs-better-auth";
 import { LoggerModule } from "nestjs-pino";
 import { SentryModule, SentryGlobalFilter } from "@sentry/nestjs/setup";
+import { ContextModule } from "@shared/infrastructure/context/context.module";
 import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
 import { MailModule } from "@shared/mail/mail.module";
 import { HealthController } from "@shared/infrastructure/http/health.controller";
@@ -79,6 +80,7 @@ const isDev = process.env.NODE_ENV !== "production";
       // routes that need a user instead of decorating every public endpoint.
       disableGlobalAuthGuard: true,
     }),
+    ContextModule,
     PrismaModule,
     MailModule,
     AchievementModule,

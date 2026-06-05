@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import { RunContextService } from "@shared/infrastructure/context/run-context.service";
 import { ImportTrendingUseCase } from "../../application/use-cases/import-trending.use-case";
 import { ImportEpisodesUseCase } from "../../application/use-cases/import-episodes.use-case";
 
@@ -11,6 +12,7 @@ export class SyncSchedulerService implements OnModuleInit {
   constructor(
     private readonly importTrending: ImportTrendingUseCase,
     private readonly importEpisodes: ImportEpisodesUseCase,
+    private readonly runContext: RunContextService,
   ) {}
 
   onModuleInit(): void {
@@ -21,29 +23,35 @@ export class SyncSchedulerService implements OnModuleInit {
   @Cron("0 4 * * *", { name: "sync-trending-daily" })
   async handleTrendingDaily(): Promise<void> {
     if (!this.enabled) return;
-    this.logger.log("Cron tick: sync:trending");
-    try {
-      const result = await this.importTrending.execute({ pages: 3, perPage: 20 });
-      this.logger.log(
-        `Trending sync done: ${result.imported} imported across ${result.pagesFetched} pages`,
-      );
-    } catch (err) {
-      this.logger.warn(`Trending sync failed: ${(err as Error).message}`);
-    }
+    await this.runContext.run("sync-trending-daily", async () => {
+      const runId = this.runContext.runId();
+      this.logger.log(`[run=${runId}] Cron tick: sync:trending`);
+      try {
+        const result = await this.importTrending.execute({ pages: 3, perPage: 20 });
+        this.logger.log(
+          `[run=${runId}] Trending sync done: ${result.imported} imported across ${result.pagesFetched} pages`,
+        );
+      } catch (err) {
+        this.logger.warn(`[run=${runId}] Trending sync failed: ${(err as Error).message}`);
+      }
+    });
   }
 
-  /** Horaire : rafraîchit les épisodes des animes en cours de diffusion. */
+  /** Toutes les 10 minutes : rafraîchit les épisodes des animes en cours de diffusion. */
   @Cron(CronExpression.EVERY_10_MINUTES, { name: "sync-episodes-airing" })
   async handleEpisodesHourly(): Promise<void> {
     if (!this.enabled) return;
-    this.logger.log("Cron tick: sync:episodes airingOnly");
-    try {
-      const result = await this.importEpisodes.execute({ airingOnly: true });
-      this.logger.log(
-        `Airing episodes sync done: ${result.episodesImported} episodes across ${result.animesProcessed} anime (skipped ${result.skipped})`,
-      );
-    } catch (err) {
-      this.logger.warn(`Episodes sync failed: ${(err as Error).message}`);
-    }
+    await this.runContext.run("sync-episodes-airing", async () => {
+      const runId = this.runContext.runId();
+      this.logger.log(`[run=${runId}] Cron tick: sync:episodes airingOnly`);
+      try {
+        const result = await this.importEpisodes.execute({ airingOnly: true });
+        this.logger.log(
+          `[run=${runId}] Airing episodes sync done: ${result.episodesImported} episodes across ${result.animesProcessed} anime (skipped ${result.skipped})`,
+        );
+      } catch (err) {
+        this.logger.warn(`[run=${runId}] Episodes sync failed: ${(err as Error).message}`);
+      }
+    });
   }
 }

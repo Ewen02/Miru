@@ -17,6 +17,8 @@ export const DEFAULT_PREFERENCES: UserPreferencesDto = {
   inAppMention: true,
   quietFromHour: null,
   quietToHour: null,
+  favoriteGenres: [],
+  isPrivate: false,
 };
 
 export async function fetchUserPreferences(): Promise<UserPreferencesDto> {

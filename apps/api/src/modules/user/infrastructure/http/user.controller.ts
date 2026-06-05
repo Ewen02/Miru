@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Post,
   UseGuards,
 } from "@nestjs/common";
 import type {
@@ -29,7 +30,10 @@ import { GetUserPreferencesUseCase } from "../../application/use-cases/get-user-
 import { UpdateUserPreferencesUseCase } from "../../application/use-cases/update-user-preferences.use-case";
 import { DeleteUserAccountUseCase } from "../../application/use-cases/delete-user-account.use-case";
 import { UpdateMyBioUseCase } from "../../application/use-cases/update-my-bio.use-case";
+import { CompleteOnboardingUseCase } from "../../application/use-cases/complete-onboarding.use-case";
+import { GetOnboardingSnapshotUseCase } from "../../application/use-cases/get-onboarding-snapshot.use-case";
 import { UpdateUserPreferencesDto } from "../../application/dtos/update-preferences.dto";
+import { CompleteOnboardingDto } from "../../application/dtos/complete-onboarding.dto";
 import { DeleteAccountDto } from "../../application/dtos/delete-account.dto";
 import { UpdateBioDto } from "../../application/dtos/update-bio.dto";
 
@@ -56,6 +60,8 @@ export class UserController {
     private readonly updateUserPreferences: UpdateUserPreferencesUseCase,
     private readonly deleteUserAccount: DeleteUserAccountUseCase,
     private readonly updateMyBio: UpdateMyBioUseCase,
+    private readonly completeOnboarding: CompleteOnboardingUseCase,
+    private readonly getOnboardingSnapshot: GetOnboardingSnapshotUseCase,
   ) {}
 
   @Get("me")
@@ -168,6 +174,56 @@ export class UserController {
     @Body() body: UpdateBioDto,
   ): Promise<{ bio: string | null }> {
     return this.updateMyBio.execute({ userId, bio: body.bio });
+  }
+
+  /**
+   * Persist the user's investment from /onboard: picks become WatchlistEntry
+   * PLANNED rows, genres land on UserPreferences, and onboardedAt is stamped
+   * for first-finish-only nudges. Idempotent — replaying the call is safe.
+   */
+  @Post("me/onboarding/complete")
+  @UseGuards(AuthRequiredGuard)
+  onboardingComplete(
+    @CurrentUserId() userId: string,
+    @Body() body: CompleteOnboardingDto,
+  ): Promise<{
+    onboardedAt: string;
+    picksAdded: number;
+    picksAlreadyPresent: number;
+    genresStored: number;
+  }> {
+    return this.completeOnboarding
+      .execute({ userId, animeIds: body.animeIds, genres: body.genres })
+      .then((r) => ({
+        onboardedAt: r.onboardedAt.toISOString(),
+        picksAdded: r.picksAdded,
+        picksAlreadyPresent: r.picksAlreadyPresent,
+        genresStored: r.genresStored,
+      }));
+  }
+
+  /**
+   * Lightweight "where is the user in their journey?" snapshot used by the
+   * home page to decide whether to render the AniList-import banner or
+   * other new-user nudges. Cheap (one indexed query + one count).
+   */
+  @Get("me/onboarding/snapshot")
+  @UseGuards(AuthRequiredGuard)
+  async onboardingSnapshot(@CurrentUserId() userId: string): Promise<{
+    onboardedAt: string | null;
+    watchlistCount: number;
+    joinedAt: string | null;
+    daysSinceJoined: number;
+    shouldNudgeImport: boolean;
+  }> {
+    const snap = await this.getOnboardingSnapshot.execute(userId);
+    return {
+      onboardedAt: snap.onboardedAt ? snap.onboardedAt.toISOString() : null,
+      watchlistCount: snap.watchlistCount,
+      joinedAt: snap.joinedAt ? snap.joinedAt.toISOString() : null,
+      daysSinceJoined: snap.daysSinceJoined,
+      shouldNudgeImport: snap.shouldNudgeImport,
+    };
   }
 
   @Get(":handle")

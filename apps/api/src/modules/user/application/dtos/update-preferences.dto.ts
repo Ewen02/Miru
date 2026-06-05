@@ -1,4 +1,4 @@
-import { IsBoolean, IsInt, IsOptional, Max, Min, ValidateIf } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min, ValidateIf } from "class-validator";
 
 /**
  * PATCH /users/me/preferences. Every field optional — client sends only
@@ -47,4 +47,17 @@ export class UpdateUserPreferencesDto {
   @Min(0)
   @Max(23)
   quietToHour?: number | null;
+
+  /** Genre slugs the user enjoys — used by the cold-start recommender. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(24)
+  @IsString({ each: true })
+  @MaxLength(40, { each: true })
+  favoriteGenres?: string[];
+
+  /** When true, the public profile is hidden from everyone but the owner. */
+  @IsOptional()
+  @IsBoolean()
+  isPrivate?: boolean;
 }

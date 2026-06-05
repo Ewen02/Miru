@@ -290,6 +290,26 @@ export interface UserPreferencesDto {
   /** 0-23, or null when quiet hours disabled. */
   quietFromHour: number | null;
   quietToHour: number | null;
+  /** Genre slugs the user enjoys — fed to the cold-start recommender. */
+  favoriteGenres: string[];
+  /** When true, /u/[handle] returns 404 to anyone but the owner. */
+  isPrivate: boolean;
+}
+
+export interface OnboardingSnapshotDto {
+  onboardedAt: string | null;
+  watchlistCount: number;
+  joinedAt: string | null;
+  daysSinceJoined: number;
+  /** True when the home page should render the "import from AniList" nudge. */
+  shouldNudgeImport: boolean;
+}
+
+export interface OnboardingCompleteResultDto {
+  onboardedAt: string;
+  picksAdded: number;
+  picksAlreadyPresent: number;
+  genresStored: number;
 }
 
 export interface UserActiveSessionDto {

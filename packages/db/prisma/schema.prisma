@@ -251,6 +251,10 @@ model User {
   bio           String?  @db.VarChar(280)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  /// Set the first time the user finishes the onboarding flow. NULL = never
+  /// onboarded (either pre-feature or skipped). Used to surface re-engagement
+  /// nudges (AniList import banner, empty-watchlist hints) for new accounts.
+  onboardedAt   DateTime?
 
   sessions        Session[]
   accounts        Account[]
@@ -260,6 +264,7 @@ model User {
   lists           List[]
   listLikes       ListLike[]
   notifications   Notification[]
+  notifDedup      NotificationDedup[]
   episodesWatched UserEpisode[]
   pushSubs        PushSubscription[]
 
@@ -325,6 +330,16 @@ model UserPreferences {
   inAppEpisodeAired   Boolean @default(true)
   inAppRecommendation Boolean @default(true)
   inAppMention        Boolean @default(true)
+
+  /// Genres chosen during onboarding (slug list). Used by the cold-start
+  /// recommendation scorer to bias picks until the user has a meaningful
+  /// watchlist. Updated when the user edits taste from /settings.
+  favoriteGenres String[] @default([])
+
+  /// When true, /u/[handle] returns 404 to anyone but the owner and the
+  /// trending feed strips this user's events. Default OFF so existing
+  /// behaviour is unchanged.
+  isPrivate Boolean @default(false)
 
   // Quiet hours — when set, no notification (email or in-app) fires
   // between fromHour and toHour (Europe/Paris). 0 ≤ hour ≤ 23.
@@ -546,6 +561,23 @@ model Notification {
   @@index([userId, createdAt(sort: Desc)])
   // Unread badge counter — partial on readAt IS NULL in the migration.
   @@index([userId, readAt])
+}
+
+/// Per-user, per-kind, per-key idempotency record. Stops the cron from
+/// double-pushing an episode notification when retries or clock skew make
+/// it re-run for the same (user, episode). Keys are short strings the
+/// caller picks (e.g. `episode:<episodeId>`); retention sweeps rows after
+/// 60 days so the table stays bounded.
+model NotificationDedup {
+  userId    String
+  kind      String   @db.VarChar(16)
+  dedupKey  String   @db.VarChar(120)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, kind, dedupKey])
+  @@index([createdAt])
 }
 
 // Moderation — signaler une review ou une list. Resolved=true means an

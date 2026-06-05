@@ -124,6 +124,29 @@ export interface UserRepositoryPort {
   deleteById(userId: string): Promise<void>;
   /** Updates the user's public bio. `null` clears it. */
   updateBio(userId: string, bio: string | null): Promise<void>;
+  /**
+   * Stamp `onboardedAt = now()` if not already set. Idempotent — repeat
+   * calls keep the original timestamp so we always know when the user
+   * first finished the flow.
+   */
+  markOnboarded(userId: string): Promise<void>;
+  /** Returns the onboardedAt timestamp, or null when never onboarded. */
+  onboardedAt(userId: string): Promise<Date | null>;
+  /**
+   * Snapshot fields used to compute re-engagement nudges (AniList import
+   * banner, empty-watchlist hint). Bundled so the home page can ask one
+   * question instead of three.
+   */
+  onboardingSnapshot(userId: string): Promise<UserOnboardingSnapshot>;
+}
+
+export interface UserOnboardingSnapshot {
+  /** When the user first finished /onboard. NULL = never. */
+  onboardedAt: Date | null;
+  /** Watchlist entries across all statuses — non-zero means they got going. */
+  watchlistCount: number;
+  /** Account creation timestamp — drives the "new user" window. */
+  joinedAt: Date | null;
 }
 
 export interface UserPreferences {
@@ -137,6 +160,18 @@ export interface UserPreferences {
   /** 0-23, or null when quiet hours disabled. */
   quietFromHour: number | null;
   quietToHour: number | null;
+  /**
+   * Genre slugs the user said they enjoy (typically picked during onboarding).
+   * Used by the cold-start recommendation scorer until the watchlist has
+   * enough signal of its own.
+   */
+  favoriteGenres: string[];
+  /**
+   * When true, the public profile (/u/[handle]) returns 404 to anyone but
+   * the owner and the user's events are stripped from the global trending
+   * feed.
+   */
+  isPrivate: boolean;
 }
 
 export type UserPreferencesPatch = Partial<UserPreferences>;
@@ -151,4 +186,6 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   inAppMention: true,
   quietFromHour: null,
   quietToHour: null,
+  favoriteGenres: [],
+  isPrivate: false,
 };

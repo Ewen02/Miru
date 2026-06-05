@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Logo, cn } from "@miru/ui";
@@ -46,12 +46,14 @@ const DEFAULT_PRESELECTED_GENRES = new Set([
 export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
   const ta11y = useTranslations("a11y");
   const t = useTranslations("onboardPage");
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [picks, setPicks] = useState<Set<string>>(new Set());
   const [anilistUsername, setAnilistUsername] = useState("");
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [importing, startImport] = useTransition();
+  const [finishing, startFinish] = useTransition();
   const [selectedGenres, setSelectedGenres] = useState<Set<string>>(() => {
     // Preselect the curated default set, intersected with what the API
     // actually returned — avoids ticking a genre that no longer exists.
@@ -83,6 +85,28 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
   const canAdvance =
     step === 0 || (step === 1 && picks.size >= PICKS_REQUIRED) || step === 2;
   const isFinal = step === TOTAL_STEPS - 1;
+
+  function handleFinish() {
+    // Best-effort: even if /onboarding/complete fails (network, 401), we
+    // still let the user land on / so the flow never feels broken. The
+    // banner on / will re-nudge if the watchlist stays empty.
+    startFinish(async () => {
+      try {
+        await fetch(`${API_URL}/users/me/onboarding/complete`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            animeIds: Array.from(picks),
+            genres: Array.from(selectedGenres),
+          }),
+        });
+      } catch {
+        // Silent — see comment above.
+      }
+      router.push("/?onboarded=true");
+    });
+  }
 
   function handleAniListImport(e: React.FormEvent) {
     e.preventDefault();
@@ -334,13 +358,15 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
           {t("previous")}
         </button>
         {isFinal ? (
-          <Link
-            href="/"
-            className="inline-flex h-10 items-center rounded-md px-5 font-body text-sm font-semibold"
+          <button
+            type="button"
+            onClick={handleFinish}
+            disabled={finishing}
+            className="inline-flex h-10 items-center rounded-md px-5 font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
             style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
-            {t("finish")}
-          </Link>
+            {finishing ? t("finishing") : t("finish")}
+          </button>
         ) : (
           <button
             type="button"

@@ -49,6 +49,8 @@ export class NotificationService {
         inAppMention: true,
         quietFromHour: null,
         quietToHour: null,
+        favoriteGenres: [],
+        isPrivate: false,
       };
     }
 

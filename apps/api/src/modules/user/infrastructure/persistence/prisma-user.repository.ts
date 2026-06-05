@@ -354,17 +354,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
       where: { userId },
     });
     if (!row) return DEFAULT_USER_PREFERENCES;
-    return {
-      emailNewEpisodes: row.emailNewEpisodes,
-      emailWeeklyRecap: row.emailWeeklyRecap,
-      emailReviewReply: row.emailReviewReply,
-      emailNewFollower: row.emailNewFollower,
-      inAppEpisodeAired: row.inAppEpisodeAired,
-      inAppRecommendation: row.inAppRecommendation,
-      inAppMention: row.inAppMention,
-      quietFromHour: row.quietFromHour,
-      quietToHour: row.quietToHour,
-    };
+    return rowToPreferences(row);
   }
 
   async updatePreferences(userId: string, patch: UserPreferencesPatch): Promise<UserPreferences> {
@@ -373,27 +363,50 @@ export class PrismaUserRepository implements UserRepositoryPort {
       create: { userId, ...DEFAULT_USER_PREFERENCES, ...patch },
       update: patch,
     });
-    return {
-      emailNewEpisodes: row.emailNewEpisodes,
-      emailWeeklyRecap: row.emailWeeklyRecap,
-      emailReviewReply: row.emailReviewReply,
-      emailNewFollower: row.emailNewFollower,
-      inAppEpisodeAired: row.inAppEpisodeAired,
-      inAppRecommendation: row.inAppRecommendation,
-      inAppMention: row.inAppMention,
-      quietFromHour: row.quietFromHour,
-      quietToHour: row.quietToHour,
-    };
+    return rowToPreferences(row);
   }
 
   async updateBio(userId: string, bio: string | null): Promise<void> {
     await this.prisma.user.update({ where: { id: userId }, data: { bio } });
   }
 
+  async markOnboarded(userId: string): Promise<void> {
+    // Idempotent: only stamp when null so subsequent runs preserve the
+    // original timestamp. The "is null" filter on update guards races.
+    await this.prisma.user.updateMany({
+      where: { id: userId, onboardedAt: null },
+      data: { onboardedAt: new Date() },
+    });
+  }
+
+  async onboardedAt(userId: string): Promise<Date | null> {
+    const row = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { onboardedAt: true },
+    });
+    return row?.onboardedAt ?? null;
+  }
+
+  async onboardingSnapshot(userId: string) {
+    // One round trip: User { onboardedAt, createdAt } + WatchlistEntry count.
+    const [row, watchlistCount] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { onboardedAt: true, createdAt: true },
+      }),
+      this.prisma.watchlistEntry.count({ where: { userId } }),
+    ]);
+    return {
+      onboardedAt: row?.onboardedAt ?? null,
+      watchlistCount,
+      joinedAt: row?.createdAt ?? null,
+    };
+  }
+
   async deleteById(userId: string): Promise<void> {
     // Cascades: WatchlistEntry, Review, List, ListItem, ListLike,
     // Notification, UserEpisode, PushSubscription, UserPreferences,
-    // Session, Account, TwoFactor, Report (filed).
+    // Session, Account, TwoFactor, Report (filed), NotificationDedup.
     await this.prisma.user.delete({ where: { id: userId } });
   }
 
@@ -472,4 +485,34 @@ function startOfUtcDay(d: Date): Date {
 
 function unixDay(d: Date): number {
   return Math.floor(d.getTime() / 86_400_000);
+}
+
+interface UserPreferencesRow {
+  emailNewEpisodes: boolean;
+  emailWeeklyRecap: boolean;
+  emailReviewReply: boolean;
+  emailNewFollower: boolean;
+  inAppEpisodeAired: boolean;
+  inAppRecommendation: boolean;
+  inAppMention: boolean;
+  quietFromHour: number | null;
+  quietToHour: number | null;
+  favoriteGenres: string[];
+  isPrivate: boolean;
+}
+
+function rowToPreferences(row: UserPreferencesRow): UserPreferences {
+  return {
+    emailNewEpisodes: row.emailNewEpisodes,
+    emailWeeklyRecap: row.emailWeeklyRecap,
+    emailReviewReply: row.emailReviewReply,
+    emailNewFollower: row.emailNewFollower,
+    inAppEpisodeAired: row.inAppEpisodeAired,
+    inAppRecommendation: row.inAppRecommendation,
+    inAppMention: row.inAppMention,
+    quietFromHour: row.quietFromHour,
+    quietToHour: row.quietToHour,
+    favoriteGenres: row.favoriteGenres,
+    isPrivate: row.isPrivate,
+  };
 }

@@ -318,7 +318,8 @@
     "genresUnavailable": "La liste des genres est temporairement indisponible. Passe cette étape pour l'instant.",
     "previous": "← Précédent",
     "next": "Suivant →",
-    "finish": "Terminer →"
+    "finish": "Terminer →",
+    "finishing": "On y va…"
   },
   "calendarPage": {
     "metaTitle": "Calendrier",

@@ -10,11 +10,7 @@
  */
 
 const MIN_AUTH_SECRET_LEN = 32;
-const FORBIDDEN_PROD_CREDENTIALS = [
-  "miru:miru@",
-  "postgres:postgres@",
-  "user:password@",
-];
+const FORBIDDEN_PROD_CREDENTIALS = ["miru:miru@", "postgres:postgres@", "user:password@"];
 
 export interface EnvValidationResult {
   errors: string[];
@@ -32,9 +28,7 @@ export function validateEnv(env: NodeJS.ProcessEnv = process.env): EnvValidation
     errors.push("DATABASE_URL is required");
   } else if (isProd) {
     if (!dbUrl.includes("sslmode=require")) {
-      errors.push(
-        "DATABASE_URL must include `?sslmode=require` in production (got: no sslmode)",
-      );
+      errors.push("DATABASE_URL must include `?sslmode=require` in production (got: no sslmode)");
     }
     for (const forbidden of FORBIDDEN_PROD_CREDENTIALS) {
       if (dbUrl.includes(forbidden)) {

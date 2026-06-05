@@ -44,17 +44,17 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private installSlowQueryListener(): void {
     // Prisma's `query` event type is loose — cast through Prisma namespace to
     // get the right signature without pulling the whole runtime types.
-    (this as unknown as {
-      $on(event: "query", cb: (e: Prisma.QueryEvent) => void): void;
-    }).$on("query", (event) => {
+    (
+      this as unknown as {
+        $on(event: "query", cb: (e: Prisma.QueryEvent) => void): void;
+      }
+    ).$on("query", (event) => {
       const duration = event.duration;
       if (duration < SLOW_QUERY_THRESHOLD_MS) return;
 
       const summary = event.query.slice(0, 120);
       const level = duration >= VERY_SLOW_QUERY_THRESHOLD_MS ? "error" : "warn";
-      this.logger[level === "error" ? "error" : "warn"](
-        `slow query ${duration}ms — ${summary}`,
-      );
+      this.logger[level === "error" ? "error" : "warn"](`slow query ${duration}ms — ${summary}`);
 
       // Sentry: breadcrumb for warn-level, real event for error-level.
       // Don't add params to the message — they may contain user data.

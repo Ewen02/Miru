@@ -128,8 +128,9 @@ export async function syncCharacters(
             select: { id: true, externalAnilistId: true },
           })
         )
-          .filter((row): row is { id: string; externalAnilistId: number } =>
-            row.externalAnilistId != null,
+          .filter(
+            (row): row is { id: string; externalAnilistId: number } =>
+              row.externalAnilistId != null,
           )
           .map((row) => [row.externalAnilistId, row.id]),
   );

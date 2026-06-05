@@ -30,9 +30,10 @@ const RETRY_CONCURRENCY = 3;
  * retry queue because the daily cron will pick up the slack regardless.
  */
 @Injectable()
-export class RetryFailedSyncsUseCase
-  implements UseCase<RetryFailedSyncsInput, RetryFailedSyncsOutput>
-{
+export class RetryFailedSyncsUseCase implements UseCase<
+  RetryFailedSyncsInput,
+  RetryFailedSyncsOutput
+> {
   private readonly logger = new Logger(RetryFailedSyncsUseCase.name);
 
   constructor(

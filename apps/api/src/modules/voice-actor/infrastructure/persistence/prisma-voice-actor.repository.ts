@@ -50,9 +50,7 @@ export class PrismaVoiceActorRepository implements VoiceActorRepositoryPort {
     // PERF-04: was 2 full DISTINCT fetches (loaded every id into Node
     // just to take its length). One COUNT DISTINCT per dimension, one
     // round-trip total.
-    const rows = await this.prisma.$queryRaw<
-      Array<{ anime_count: bigint; role_count: bigint }>
-    >`
+    const rows = await this.prisma.$queryRaw<Array<{ anime_count: bigint; role_count: bigint }>>`
       SELECT
         count(DISTINCT "animeId")::bigint     AS anime_count,
         count(DISTINCT "characterId")::bigint AS role_count

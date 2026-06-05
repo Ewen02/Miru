@@ -3,11 +3,7 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { Prisma } from "@miru/db";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { RunContextService } from "@shared/infrastructure/context/run-context.service";
-import {
-  RETENTION_BATCH_SIZE,
-  RETENTION_RULES,
-  RetentionRule,
-} from "./retention.config";
+import { RETENTION_BATCH_SIZE, RETENTION_RULES, RetentionRule } from "./retention.config";
 
 /**
  * Nightly cron that enforces retention policies on transactional tables
@@ -40,9 +36,7 @@ export class RetentionScheduler {
     if (!this.enabled) return;
     await this.runContext.run("retention-nightly", async () => {
       const runId = this.runContext.runId();
-      this.logger.log(
-        `[run=${runId}] Retention pass starting (dryRun=${this.dryRun})`,
-      );
+      this.logger.log(`[run=${runId}] Retention pass starting (dryRun=${this.dryRun})`);
       for (const rule of RETENTION_RULES) {
         await this.applyRule(rule, runId);
       }

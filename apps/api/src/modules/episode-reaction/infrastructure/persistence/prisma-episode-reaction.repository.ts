@@ -37,9 +37,7 @@ export class PrismaEpisodeReactionRepository implements EpisodeReactionRepositor
     // bucketSeconds is an integer chosen by the caller (no user input
     // ever reaches it), so the integer interpolation is safe here.
     const bucket = Math.max(1, Math.floor(bucketSeconds));
-    const rows = await this.prisma.$queryRaw<
-      Array<{ from: number; kind: string; count: bigint }>
-    >`
+    const rows = await this.prisma.$queryRaw<Array<{ from: number; kind: string; count: bigint }>>`
       SELECT
         (("secondMark" / ${bucket}) * ${bucket})::int AS from,
         kind,

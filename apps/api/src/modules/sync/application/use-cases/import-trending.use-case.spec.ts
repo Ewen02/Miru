@@ -1,6 +1,7 @@
 import { AnimeRepositoryPort } from "@modules/anime/domain/ports/anime-repository.port";
 import { AnimeSyncPort } from "@modules/anime/domain/ports/anime-sync.port";
 import { makeAnimeEntity } from "@modules/anime/domain/entities/__fixtures__/anime.fixture";
+import { RunContextService } from "@shared/infrastructure/context/run-context.service";
 import { ImportTrendingUseCase } from "./import-trending.use-case";
 
 function makeSyncMock(): jest.Mocked<AnimeSyncPort> {
@@ -42,7 +43,7 @@ describe("ImportTrendingUseCase", () => {
   beforeEach(() => {
     sync = makeSyncMock();
     repo = makeRepoMock();
-    useCase = new ImportTrendingUseCase(sync, repo);
+    useCase = new ImportTrendingUseCase(sync, repo, new RunContextService());
   });
 
   it("walks every page and saves every entity returned", async () => {

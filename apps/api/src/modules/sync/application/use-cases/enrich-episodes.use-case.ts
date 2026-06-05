@@ -1,6 +1,7 @@
 import { Injectable, Inject, Logger } from "@nestjs/common";
 import { AniListUnavailableError } from "@miru/anilist";
 import { UseCase } from "@shared/domain/use-case.base";
+import { RunContextService } from "@shared/infrastructure/context/run-context.service";
 import { AnimeRepositoryPort } from "@modules/anime/domain/ports/anime-repository.port";
 import { AnimeSyncPort } from "@modules/anime/domain/ports/anime-sync.port";
 import { ANIME_REPOSITORY, ANIME_SYNC } from "@modules/anime/application/tokens";
@@ -25,11 +26,15 @@ export class EnrichEpisodesUseCase implements UseCase<EnrichEpisodesInput, Enric
   constructor(
     @Inject(ANIME_REPOSITORY) private readonly repo: AnimeRepositoryPort,
     @Inject(ANIME_SYNC) private readonly sync: AnimeSyncPort,
+    private readonly runContext: RunContextService,
   ) {}
 
   async execute({ limit, airingOnly }: EnrichEpisodesInput): Promise<EnrichEpisodesOutput> {
+    const runId = this.runContext.runId();
     const animes = await this.repo.findAllWithAnilistId({ limit, airingOnly });
-    this.logger.log(`Enriching ${animes.length} anime(s) via AniList streamingEpisodes`);
+    this.logger.log(
+      `[run=${runId}] Enriching ${animes.length} anime(s) via AniList streamingEpisodes`,
+    );
 
     let episodesEnriched = 0;
     let skipped = 0;
@@ -48,7 +53,9 @@ export class EnrichEpisodesUseCase implements UseCase<EnrichEpisodesInput, Enric
         }
         const updated = await this.repo.enrichEpisodes(anime.id, streaming);
         episodesEnriched += updated;
-        this.logger.log(`"${anime.title}" (AniList ${anilistId}) → ${updated} episode(s) enriched`);
+        this.logger.log(
+          `[run=${runId}] "${anime.title}" (AniList ${anilistId}) → ${updated} episode(s) enriched`,
+        );
       } catch (err) {
         if (err instanceof AniListUnavailableError) {
           // AniList is down — bail out of the batch entirely. Retrying every
@@ -56,7 +63,7 @@ export class EnrichEpisodesUseCase implements UseCase<EnrichEpisodesInput, Enric
           // delays the rest of the scheduler.
           const remaining = animes.length - skipped - episodesEnriched;
           this.logger.warn(
-            `AniList unavailable, aborting enrich batch (${remaining} anime skipped, retry in ~${Math.round(err.retryAfterMs / 1000)}s)`,
+            `[run=${runId}] AniList unavailable, aborting enrich batch (${remaining} anime skipped, retry in ~${Math.round(err.retryAfterMs / 1000)}s)`,
           );
           return {
             animesProcessed: animes.length - skipped - remaining,
@@ -68,7 +75,7 @@ export class EnrichEpisodesUseCase implements UseCase<EnrichEpisodesInput, Enric
         skipped += 1;
         await this.repo.markSyncFailed(anime.id).catch(() => undefined);
         this.logger.warn(
-          `Enrich failed for "${anime.title}" (AniList ${anilistId}): ${(err as Error).message}`,
+          `[run=${runId}] Enrich failed for "${anime.title}" (AniList ${anilistId}): ${(err as Error).message}`,
         );
       }
     }

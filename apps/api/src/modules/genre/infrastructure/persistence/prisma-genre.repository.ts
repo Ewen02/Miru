@@ -28,21 +28,28 @@ export class PrismaGenreRepository implements GenreRepositoryPort {
       return { totalAnimes: 0, thisYearAnimes: 0, averageRating: null };
     }
     const year = new Date().getFullYear();
-    const baseWhere = { genres: { some: { slug } } } as const;
 
-    const [total, thisYear, agg] = await Promise.all([
-      this.prisma.anime.count({ where: baseWhere }),
-      this.prisma.anime.count({ where: { ...baseWhere, year } }),
-      this.prisma.anime.aggregate({
-        where: { ...baseWhere, averageRating: { not: null } },
-        _avg: { averageRating: true },
-      }),
-    ]);
+    // PERF-03: 3 separate count/aggregate queries collapsed into one
+    // raw SELECT — Postgres scans the matching rows once.
+    const rows = await this.prisma.$queryRaw<
+      Array<{ total: bigint; this_year: bigint; avg_rating: number | null }>
+    >`
+      SELECT
+        count(*)::bigint                                             AS total,
+        count(*) FILTER (WHERE a."year" = ${year})::bigint           AS this_year,
+        avg(a."averageRating") FILTER (WHERE a."averageRating" IS NOT NULL)::float8
+                                                                     AS avg_rating
+      FROM "Anime" a
+      JOIN "_AnimeGenres" ag ON ag."A" = a.id
+      JOIN "Genre" g         ON g.id = ag."B"
+      WHERE g.slug = ${slug}
+    `;
+    const row = rows[0];
 
     return {
-      totalAnimes: total,
-      thisYearAnimes: thisYear,
-      averageRating: agg._avg.averageRating ?? null,
+      totalAnimes: Number(row?.total ?? 0n),
+      thisYearAnimes: Number(row?.this_year ?? 0n),
+      averageRating: row?.avg_rating ?? null,
     };
   }
 }

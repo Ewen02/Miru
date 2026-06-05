@@ -5,6 +5,13 @@ import { StudioRepositoryPort, StudioStats } from "../../domain/ports/studio-rep
 
 const NSFW_HENTAI = "hentai";
 
+interface StatsRow {
+  total: bigint;
+  tv: bigint;
+  movie: bigint;
+  avg_rating: number | null;
+}
+
 @Injectable()
 export class PrismaStudioRepository implements StudioRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
@@ -15,28 +22,33 @@ export class PrismaStudioRepository implements StudioRepositoryPort {
   }
 
   async statsBySlug(slug: string): Promise<StudioStats> {
-    // NSFW exclusion mirrors the catalog defaults — same titles can't show up
-    // here either, even if a studio happens to have them in the DB.
-    const baseWhere = {
-      studio: { slug },
-      genres: { none: { slug: NSFW_HENTAI } },
-    } as const;
-
-    const [total, tvCount, movieCount, agg] = await Promise.all([
-      this.prisma.anime.count({ where: baseWhere }),
-      this.prisma.anime.count({ where: { ...baseWhere, format: "TV" } }),
-      this.prisma.anime.count({ where: { ...baseWhere, format: "MOVIE" } }),
-      this.prisma.anime.aggregate({
-        where: { ...baseWhere, averageRating: { not: null } },
-        _avg: { averageRating: true },
-      }),
-    ]);
+    // PERF-03: 4 separate count/aggregate calls collapsed into a single
+    // GROUP-less aggregate with conditional COUNT — Postgres scans the
+    // matching rows once and emits all four columns in one shot.
+    // NSFW exclusion mirrors the catalog defaults.
+    const rows = await this.prisma.$queryRaw<StatsRow[]>`
+      SELECT
+        count(*)::bigint                                       AS total,
+        count(*) FILTER (WHERE a."format" = 'TV')::bigint      AS tv,
+        count(*) FILTER (WHERE a."format" = 'MOVIE')::bigint   AS movie,
+        avg(a."averageRating") FILTER (WHERE a."averageRating" IS NOT NULL)::float8
+                                                               AS avg_rating
+      FROM "Anime" a
+      JOIN "Studio" s ON s.id = a."studioId"
+      WHERE s.slug = ${slug}
+        AND NOT EXISTS (
+          SELECT 1 FROM "_AnimeGenres" ag
+          JOIN "Genre" g ON g.id = ag."B"
+          WHERE ag."A" = a.id AND g.slug = ${NSFW_HENTAI}
+        )
+    `;
+    const row = rows[0];
 
     return {
-      totalAnimes: total,
-      averageRating: agg._avg.averageRating ?? null,
-      tvCount,
-      movieCount,
+      totalAnimes: Number(row?.total ?? 0n),
+      averageRating: row?.avg_rating ?? null,
+      tvCount: Number(row?.tv ?? 0n),
+      movieCount: Number(row?.movie ?? 0n),
     };
   }
 }

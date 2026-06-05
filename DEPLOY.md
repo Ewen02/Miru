@@ -57,6 +57,26 @@ DATABASE_URL="postgresql://...railway..." pnpm --filter @miru/db db:seed
 
 Puis activer `ENABLE_SCHEDULER=true` côté Railway pour que les crons prennent le relais.
 
+## Postgres tuning (Railway)
+
+Enable in Railway → Postgres add-on → "Custom Postgres Settings":
+
+```
+log_min_duration_statement = 500     # log queries slower than 500ms to Railway logs
+shared_preload_libraries   = pg_stat_statements
+```
+
+Then activate the extension once:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+```
+
+This complements the in-app slow-query listener (`PrismaService` reports
+≥500ms as breadcrumbs and ≥2s as Sentry messages). The two layers catch
+different things: Prisma sees the ORM-level call, Postgres sees the raw
+SQL plan.
+
 ## Sentry
 
 Créer deux projets Sentry distincts : `miru-api` (platform: nestjs) et `miru-web` (platform: nextjs). Récupérer les DSN, les coller dans les variables ci-dessus. Pour l'upload de source maps web, créer un token `SENTRY_AUTH_TOKEN` dans Sentry Settings → Auth Tokens avec les scopes `project:write` + `release:read`.

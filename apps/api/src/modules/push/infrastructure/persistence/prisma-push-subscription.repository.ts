@@ -37,9 +37,15 @@ export class PrismaPushSubscriptionRepository implements PushSubscriptionReposit
   }
 
   async findByUserId(userId: string): Promise<PushSubscriptionRecord[]> {
+    // PERF-05: hard cap. A single user accumulating 50+ subscriptions
+    // (multi-device, browser-profile churn) would fan-out N push sends
+    // per notification. 20 active devices is already excessive — past
+    // that we drop the oldest ones at the next subscribe.
     const rows = await this.prisma.pushSubscription.findMany({
       where: { userId },
       select: { endpoint: true, p256dh: true, auth: true },
+      orderBy: { createdAt: "desc" },
+      take: 20,
     });
     return rows;
   }

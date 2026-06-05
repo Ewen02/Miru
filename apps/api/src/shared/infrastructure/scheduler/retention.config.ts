@@ -59,6 +59,17 @@ export const RETENTION_RULES: RetentionRule[] = [
     keepDays: 60,
     description: "Notification dedup keys older than 60 days",
   },
+  {
+    // S4-03: hard-delete users whose 30-day grace window has elapsed.
+    // Cascades wipe every row owned by the user (watchlist, reviews,
+    // lists, notifications, sessions, etc.). Marked separately from the
+    // app-data tables above because the deletion semantics are different:
+    // here keepDays measures the grace period, not the retention window.
+    table: "User",
+    keepDays: 30,
+    description: "Users soft-deleted more than 30 days ago",
+    dateColumn: "deletedAt",
+  },
 ];
 
 /** Batch size for DELETE … WHERE id IN (LIMIT N). Avoids long table locks. */

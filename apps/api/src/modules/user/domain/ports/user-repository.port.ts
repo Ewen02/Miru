@@ -132,8 +132,22 @@ export interface UserRepositoryPort {
    */
   preferencesByUserId(userId: string): Promise<UserPreferences>;
   updatePreferences(userId: string, patch: UserPreferencesPatch): Promise<UserPreferences>;
-  /** Hard delete. Cascades to all owned rows (watchlist, reviews, …). */
+  /**
+   * Hard delete (irreversible). Cascades to all owned rows (watchlist,
+   * reviews, …). Used by the retention scheduler once the 30-day grace
+   * window from softDelete has elapsed.
+   */
   deleteById(userId: string): Promise<void>;
+  /**
+   * Mark the account for deletion in 30 days. Idempotent — calling on an
+   * already-soft-deleted account is a no-op (the original deletedAt is
+   * preserved so the grace timer doesn't restart).
+   */
+  softDelete(userId: string): Promise<void>;
+  /** Cancel a pending soft deletion. No-op if the user wasn't soft-deleted. */
+  restoreDeletion(userId: string): Promise<void>;
+  /** Returns the soft-delete timestamp or null if the account is active. */
+  deletedAt(userId: string): Promise<Date | null>;
   /** Updates the user's public bio. `null` clears it. */
   updateBio(userId: string, bio: string | null): Promise<void>;
   /**

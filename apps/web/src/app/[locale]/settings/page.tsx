@@ -132,7 +132,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           </section>
 
           <section id="advanced" className="scroll-mt-20">
-            <DeleteAccountSection />
+            <DeleteAccountSection initialDeletedAt={me?.deletedAt ?? null} />
           </section>
         </div>
       </div>

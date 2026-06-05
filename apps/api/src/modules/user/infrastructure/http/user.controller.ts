@@ -22,6 +22,9 @@ import { OptionalAuthGuard } from "@auth/optional-auth.guard";
 import { CurrentUserId } from "@auth/current-user.decorator";
 import { CurrentSessionId } from "@auth/current-session-id.decorator";
 import { OptionalUserId } from "@auth/optional-user.decorator";
+import { Inject } from "@nestjs/common";
+import { USER_REPOSITORY } from "../../application/tokens";
+import type { UserRepositoryPort } from "../../domain/ports/user-repository.port";
 import { GetCurrentUserUseCase } from "../../application/use-cases/get-current-user.use-case";
 import { GetUserProfileUseCase } from "../../application/use-cases/get-user-profile.use-case";
 import { GetUserLifetimeStatsUseCase } from "../../application/use-cases/get-user-lifetime-stats.use-case";
@@ -35,6 +38,7 @@ import { UpdateMyBioUseCase } from "../../application/use-cases/update-my-bio.us
 import { CompleteOnboardingUseCase } from "../../application/use-cases/complete-onboarding.use-case";
 import { GetOnboardingSnapshotUseCase } from "../../application/use-cases/get-onboarding-snapshot.use-case";
 import { ExportUserDataUseCase, type UserDataExport } from "../../application/use-cases/export-user-data.use-case";
+import { RestoreUserAccountUseCase } from "../../application/use-cases/restore-user-account.use-case";
 import { UpdateUserPreferencesDto } from "../../application/dtos/update-preferences.dto";
 import { CompleteOnboardingDto } from "../../application/dtos/complete-onboarding.dto";
 import { DeleteAccountDto } from "../../application/dtos/delete-account.dto";
@@ -48,6 +52,8 @@ interface UserDto {
   image: string | null;
   twoFactorEnabled: boolean;
   bio: string | null;
+  /** ISO string when the account is in its soft-delete grace window. */
+  deletedAt: string | null;
 }
 
 @Controller("users")
@@ -66,12 +72,17 @@ export class UserController {
     private readonly completeOnboarding: CompleteOnboardingUseCase,
     private readonly getOnboardingSnapshot: GetOnboardingSnapshotUseCase,
     private readonly exportUserData: ExportUserDataUseCase,
+    private readonly restoreUserAccount: RestoreUserAccountUseCase,
+    @Inject(USER_REPOSITORY) private readonly users: UserRepositoryPort,
   ) {}
 
   @Get("me")
   @UseGuards(AuthRequiredGuard)
   async me(@CurrentUserId() userId: string): Promise<UserDto> {
-    const user = await this.getCurrentUser.execute(userId);
+    const [user, deletedAt] = await Promise.all([
+      this.getCurrentUser.execute(userId),
+      this.users.deletedAt(userId),
+    ]);
     return {
       id: user.id,
       email: user.email,
@@ -80,6 +91,7 @@ export class UserController {
       image: user.image,
       twoFactorEnabled: user.twoFactorEnabled,
       bio: user.bio,
+      deletedAt: deletedAt ? deletedAt.toISOString() : null,
     };
   }
 
@@ -153,18 +165,30 @@ export class UserController {
   }
 
   /**
-   * Hard delete. Requires the user to literally type "DELETE" in the
-   * body (see DeleteAccountDto). Cascades to every row owned by the
-   * user — there's no soft-delete recovery window in our model.
+   * Schedule the account for deletion. Requires the user to literally type
+   * "DELETE" in the body (see DeleteAccountDto). The account is soft-deleted
+   * now and hard-deleted by the retention scheduler after a 30-day grace
+   * window; calling POST /users/me/restore during that window cancels.
    */
   @Delete("me")
   @UseGuards(AuthRequiredGuard)
-  @HttpCode(204)
   async deleteAccount(
     @CurrentUserId() userId: string,
     @Body() _body: DeleteAccountDto,
-  ): Promise<void> {
-    await this.deleteUserAccount.execute({ userId });
+  ): Promise<{ deletedAt: string }> {
+    const { deletedAt } = await this.deleteUserAccount.execute({ userId });
+    return { deletedAt: deletedAt.toISOString() };
+  }
+
+  /**
+   * Cancel a pending soft deletion. No-op + restored=false if the account
+   * is already active. Used by /settings#privacy when the user changes
+   * their mind during the grace window.
+   */
+  @Post("me/restore")
+  @UseGuards(AuthRequiredGuard)
+  async restoreAccount(@CurrentUserId() userId: string): Promise<{ restored: boolean }> {
+    return this.restoreUserAccount.execute({ userId });
   }
 
   /**

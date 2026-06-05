@@ -27,5 +27,8 @@ export function makeUserRepoMock(): jest.Mocked<UserRepositoryPort> {
     onboardingSnapshot: jest.fn(),
     recentAchievementsByUserId: jest.fn(),
     followCountsByUserId: jest.fn(),
+    softDelete: jest.fn(),
+    restoreDeletion: jest.fn(),
+    deletedAt: jest.fn(),
   };
 }

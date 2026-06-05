@@ -25,18 +25,27 @@ export class PrismaUserRepository implements UserRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<UserEntity | null> {
+    // findById is used both by "is this still my session" and by other
+    // modules joining on the user — we deliberately leak the soft-deleted
+    // row here so the caller can decide. The /users/me preferences/export
+    // paths still work for the owner during the grace window so they can
+    // restore. Public-facing surfaces use findByHandle which filters.
     const record = await this.prisma.user.findUnique({ where: { id } });
     return record ? this.toEntity(record) : null;
   }
 
   async findByHandle(handle: string): Promise<UserEntity | null> {
-    // First try the raw id (cuid). Then case-insensitive name match — that's
-    // our public "handle" until we add a dedicated `username` column.
+    // Public path — soft-deleted users are invisible (no signal that the
+    // handle exists). The owner's /settings still functions through
+    // findById on their session id, which doesn't filter.
     const byId = await this.prisma.user.findUnique({ where: { id: handle } });
-    if (byId) return this.toEntity(byId);
+    if (byId && !byId.deletedAt) return this.toEntity(byId);
 
     const byName = await this.prisma.user.findFirst({
-      where: { name: { equals: handle, mode: "insensitive" } },
+      where: {
+        name: { equals: handle, mode: "insensitive" },
+        deletedAt: null,
+      },
     });
     return byName ? this.toEntity(byName) : null;
   }
@@ -431,6 +440,29 @@ export class PrismaUserRepository implements UserRepositoryPort {
     // Notification, UserEpisode, PushSubscription, UserPreferences,
     // Session, Account, TwoFactor, Report (filed), NotificationDedup.
     await this.prisma.user.delete({ where: { id: userId } });
+  }
+
+  async softDelete(userId: string): Promise<void> {
+    // Only stamp when null so a re-trigger doesn't reset the grace window.
+    await this.prisma.user.updateMany({
+      where: { id: userId, deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async restoreDeletion(userId: string): Promise<void> {
+    await this.prisma.user.updateMany({
+      where: { id: userId, deletedAt: { not: null } },
+      data: { deletedAt: null },
+    });
+  }
+
+  async deletedAt(userId: string): Promise<Date | null> {
+    const row = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { deletedAt: true },
+    });
+    return row?.deletedAt ?? null;
   }
 
   private toEntity(record: {

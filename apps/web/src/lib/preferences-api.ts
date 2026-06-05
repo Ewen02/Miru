@@ -19,14 +19,30 @@ export async function updatePreferences(
   return (await res.json()) as UserPreferencesDto;
 }
 
-export async function deleteAccount(): Promise<{ ok: true } | { error: string }> {
+export async function deleteAccount(): Promise<
+  { ok: true; deletedAt: string } | { error: string }
+> {
   const res = await fetch(new URL("/users/me", API_URL), {
     method: "DELETE",
     credentials: "include",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ confirm: "DELETE" }),
   });
-  if (res.status === 204) return { ok: true };
   if (res.status === 401) return { error: "auth-required" };
-  return { error: `http-${res.status}` };
+  if (!res.ok) return { error: `http-${res.status}` };
+  const body = (await res.json()) as { deletedAt: string };
+  return { ok: true, deletedAt: body.deletedAt };
+}
+
+export async function restoreAccount(): Promise<
+  { ok: true; restored: boolean } | { error: string }
+> {
+  const res = await fetch(new URL("/users/me/restore", API_URL), {
+    method: "POST",
+    credentials: "include",
+  });
+  if (res.status === 401) return { error: "auth-required" };
+  if (!res.ok) return { error: `http-${res.status}` };
+  const body = (await res.json()) as { restored: boolean };
+  return { ok: true, restored: body.restored };
 }

@@ -10,6 +10,7 @@ import { RevokeUserSessionUseCase } from "./application/use-cases/revoke-user-se
 import { GetUserPreferencesUseCase } from "./application/use-cases/get-user-preferences.use-case";
 import { UpdateUserPreferencesUseCase } from "./application/use-cases/update-user-preferences.use-case";
 import { DeleteUserAccountUseCase } from "./application/use-cases/delete-user-account.use-case";
+import { RestoreUserAccountUseCase } from "./application/use-cases/restore-user-account.use-case";
 import { UpdateMyBioUseCase } from "./application/use-cases/update-my-bio.use-case";
 import { CompleteOnboardingUseCase } from "./application/use-cases/complete-onboarding.use-case";
 import { GetOnboardingSnapshotUseCase } from "./application/use-cases/get-onboarding-snapshot.use-case";
@@ -33,6 +34,7 @@ import { UserController } from "./infrastructure/http/user.controller";
     GetUserPreferencesUseCase,
     UpdateUserPreferencesUseCase,
     DeleteUserAccountUseCase,
+    RestoreUserAccountUseCase,
     UpdateMyBioUseCase,
     CompleteOnboardingUseCase,
     GetOnboardingSnapshotUseCase,

@@ -11,6 +11,8 @@ export interface MeDto {
   image: string | null;
   twoFactorEnabled: boolean;
   bio: string | null;
+  /** ISO string when the account is scheduled for deletion, else null. */
+  deletedAt: string | null;
 }
 
 /**

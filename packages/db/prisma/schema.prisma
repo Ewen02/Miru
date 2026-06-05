@@ -255,6 +255,11 @@ model User {
   /// onboarded (either pre-feature or skipped). Used to surface re-engagement
   /// nudges (AniList import banner, empty-watchlist hints) for new accounts.
   onboardedAt   DateTime?
+  /// S4-03 — soft delete grace window. When set, the account is scheduled
+  /// for deletion: login / public profile flows treat the user as gone, but
+  /// the data is kept for 30 days so the owner can cancel the deletion.
+  /// The retention scheduler hard-deletes rows where deletedAt < now - 30d.
+  deletedAt     DateTime?
 
   sessions        Session[]
   accounts        Account[]

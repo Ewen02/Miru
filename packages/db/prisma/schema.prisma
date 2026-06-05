@@ -30,6 +30,10 @@ model Anime {
   bannerUrl         String?
   accentHex         String? @db.VarChar(7)
   averageRating     Float?
+  // Denormalized: how many community reviews back the rating. Updated by
+  // the review repository on save()/remove() inside the same transaction
+  // that recomputes averageRating.
+  reviewCount       Int     @default(0)
 
   syncedAt       DateTime?
   syncFailedAt   DateTime?

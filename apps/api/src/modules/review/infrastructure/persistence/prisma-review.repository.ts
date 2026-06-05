@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import type { Prisma } from "@miru/db";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
 import { ReviewEntity } from "../../domain/entities/review.entity";
 import {
@@ -40,35 +41,46 @@ export class PrismaReviewRepository implements ReviewRepositoryPort {
 
   async save(review: ReviewEntity): Promise<void> {
     const snap = review.toSnapshot();
-    await this.prisma.review.upsert({
-      where: { userId_animeId: { userId: snap.userId, animeId: snap.animeId } },
-      create: {
-        id: snap.id,
-        userId: snap.userId,
-        animeId: snap.animeId,
-        rating: snap.rating,
-        body: snap.body,
-      },
-      update: {
-        rating: snap.rating,
-        body: snap.body,
-      },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.review.upsert({
+        where: { userId_animeId: { userId: snap.userId, animeId: snap.animeId } },
+        create: {
+          id: snap.id,
+          userId: snap.userId,
+          animeId: snap.animeId,
+          rating: snap.rating,
+          body: snap.body,
+        },
+        update: {
+          rating: snap.rating,
+          body: snap.body,
+        },
+      });
+      await refreshAnimeReviewStats(tx, snap.animeId);
     });
   }
 
   async remove(id: string): Promise<void> {
-    await this.prisma.review.deleteMany({ where: { id } });
+    await this.prisma.$transaction(async (tx) => {
+      const removed = await tx.review.findUnique({
+        where: { id },
+        select: { animeId: true },
+      });
+      await tx.review.deleteMany({ where: { id } });
+      if (removed) await refreshAnimeReviewStats(tx, removed.animeId);
+    });
   }
 
   async statsForAnime(animeId: string): Promise<AnimeReviewStats> {
-    const result = await this.prisma.review.aggregate({
-      where: { animeId },
-      _avg: { rating: true },
-      _count: { _all: true },
+    // Read straight from the denormalized columns instead of re-aggregating.
+    // Same payload shape as before — callers don't change.
+    const row = await this.prisma.anime.findUnique({
+      where: { id: animeId },
+      select: { averageRating: true, reviewCount: true },
     });
     return {
-      averageRating: result._avg.rating,
-      count: result._count._all,
+      averageRating: row?.averageRating ?? null,
+      count: row?.reviewCount ?? 0,
     };
   }
 
@@ -119,6 +131,31 @@ export class PrismaReviewRepository implements ReviewRepositoryPort {
     });
     return row !== null;
   }
+}
+
+/**
+ * Recompute Anime.averageRating + Anime.reviewCount from scratch inside
+ * the caller's transaction. Cheap — one AVG + COUNT scan per affected
+ * anime — and stays consistent under concurrent review writes because
+ * the surrounding transaction serialises Review and Anime updates for
+ * the same animeId.
+ */
+async function refreshAnimeReviewStats(
+  tx: Prisma.TransactionClient,
+  animeId: string,
+): Promise<void> {
+  const agg = await tx.review.aggregate({
+    where: { animeId },
+    _avg: { rating: true },
+    _count: { _all: true },
+  });
+  await tx.anime.update({
+    where: { id: animeId },
+    data: {
+      averageRating: agg._avg.rating,
+      reviewCount: agg._count._all,
+    },
+  });
 }
 
 interface ReviewRow {

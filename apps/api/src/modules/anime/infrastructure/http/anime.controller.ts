@@ -56,6 +56,7 @@ export class AnimeController {
         episodesMin: query.episodesMin,
         episodesMax: query.episodesMax,
         streamingPlatforms: query.streamingPlatforms,
+        sources: query.sources,
         sort: query.sort,
       },
       page: query.page ?? 1,

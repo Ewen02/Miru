@@ -31,6 +31,11 @@ export interface AnimeFilters {
   studioSlug?: string;
   /** Streaming platform slug(s). Matches AnimeOnPlatform.platform.slug. */
   streamingPlatforms?: string[];
+  /**
+   * Source material codes (MANGA, LIGHT_NOVEL, ORIGINAL, …). Any-match.
+   * Strings are passed through verbatim — the catalog DTO whitelists.
+   */
+  sources?: string[];
   sort?: AnimeSort;
 }
 

@@ -118,6 +118,9 @@ export class PrismaAnimeRepository implements AnimeRepositoryPort {
         some: { platform: { slug: { in: filters.streamingPlatforms } } },
       };
     }
+    if (filters.sources?.length) {
+      where.source = { in: filters.sources };
+    }
 
     const orderBy = sortToOrderBy(filters.sort);
 

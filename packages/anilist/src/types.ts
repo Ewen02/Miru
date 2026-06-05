@@ -21,6 +21,7 @@ export const AniListAnimeSchema = z.object({
   }),
   bannerImage: z.string().nullable().optional(),
   format: z.string().nullable().optional(),
+  source: z.string().nullable().optional(),
   status: z.string().nullable().optional(),
   season: z.string().nullable().optional(),
   seasonYear: z.number().int().nullable().optional(),

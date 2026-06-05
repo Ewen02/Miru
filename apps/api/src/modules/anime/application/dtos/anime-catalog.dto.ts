@@ -74,6 +74,15 @@ export class AnimeCatalogQueryDto {
   @MaxLength(40, { each: true })
   streamingPlatforms?: string[];
 
+  /** Source material codes — same any-match shape as genres/platforms. */
+  @IsOptional()
+  @Transform(({ value }) => (value == null ? undefined : Array.isArray(value) ? value : [value]))
+  @IsArray()
+  @ArrayMaxSize(8)
+  @IsString({ each: true })
+  @MaxLength(20, { each: true })
+  sources?: string[];
+
   @IsOptional()
   @IsEnum(["RATING", "POPULARITY", "RECENCY", "EPISODE_COUNT"])
   sort?: CatalogSort;

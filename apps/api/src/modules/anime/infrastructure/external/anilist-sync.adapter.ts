@@ -163,6 +163,7 @@ export class AniListSyncAdapter implements AnimeSyncPort {
       bannerUrl: a.bannerImage ?? null,
       accentHex,
       averageRating: a.averageScore != null ? a.averageScore / 10 : null,
+      source: a.source ?? null,
       externalAnilistId: a.id,
       externalMalId: a.idMal,
       genres: a.genres ?? [],

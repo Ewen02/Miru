@@ -65,6 +65,12 @@ interface AnimeProps {
   bannerUrl: string | null;
   accentHex: string | null;
   averageRating: number | null;
+  /**
+   * Source material code (MANGA, LIGHT_NOVEL, ORIGINAL, NOVEL, VIDEO_GAME,
+   * ANIME, OTHER, …). String rather than enum so AniList can introduce
+   * new values without a code migration.
+   */
+  source: string | null;
   externalAnilistId: number | null;
   externalMalId: number | null;
   genres: string[];
@@ -129,6 +135,10 @@ export class AnimeEntity extends Entity<AnimeProps> {
 
   get averageRating(): number | null {
     return this.props.averageRating;
+  }
+
+  get source(): string | null {
+    return this.props.source;
   }
 
   get coverUrl(): string | null {

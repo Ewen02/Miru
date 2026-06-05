@@ -49,6 +49,8 @@ export interface AnimeCard {
   studioName: string | null;
   averageRating: number | null;
   genres: string[];
+  /** Source material code (MANGA, LIGHT_NOVEL, ORIGINAL, …). Null when unknown. */
+  source: string | null;
 }
 
 export interface PaginatedResult<T> {

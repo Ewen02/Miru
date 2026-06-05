@@ -30,6 +30,11 @@ model Anime {
   bannerUrl         String?
   accentHex         String? @db.VarChar(7)
   averageRating     Float?
+  /// Source material the anime was adapted from. AniList values: MANGA,
+  /// LIGHT_NOVEL, ORIGINAL, NOVEL, VIDEO_GAME, ANIME, OTHER, … (subset known
+  /// today). Stored as a string so new AniList values land without a
+  /// migration; the catalog filter validates against a curated whitelist.
+  source            String? @db.VarChar(20)
   // Denormalized: how many community reviews back the rating. Updated by
   // the review repository on save()/remove() inside the same transaction
   // that recomputes averageRating.

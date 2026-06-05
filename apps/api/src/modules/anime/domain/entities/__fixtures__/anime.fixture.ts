@@ -43,6 +43,7 @@ export function makeAnimeEntity(overrides: OverrideProps = {}): AnimeEntity {
     bannerUrl: null,
     accentHex: null,
     averageRating: overrides.averageRating ?? 8.5,
+    source: null,
     externalAnilistId: overrides.externalAnilistId ?? 1,
     externalMalId: null,
     genres: [],

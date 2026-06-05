@@ -32,6 +32,7 @@ export class AnimeMapper {
       studioName: entity.studioName,
       averageRating: entity.averageRating,
       genres: entity.genres,
+      source: entity.source,
     };
   }
 

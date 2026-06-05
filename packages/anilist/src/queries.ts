@@ -7,6 +7,7 @@ export const MEDIA_FRAGMENT = `
     coverImage { large extraLarge color }
     bannerImage
     format
+    source
     status
     season
     seasonYear

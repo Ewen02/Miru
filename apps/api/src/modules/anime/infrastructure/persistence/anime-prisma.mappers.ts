@@ -54,6 +54,7 @@ export function toDomainCard(record: AnimeCardRecord): AnimeEntity {
     bannerUrl: record.bannerUrl,
     accentHex: record.accentHex,
     averageRating: record.averageRating,
+    source: record.source,
     externalAnilistId: record.externalAnilistId,
     externalMalId: record.externalMalId,
     genres: record.genres.map((g) => g.slug),
@@ -89,6 +90,7 @@ export function toDomainFull(record: AnimeFullRecord): AnimeEntity {
     bannerUrl: record.bannerUrl,
     accentHex: record.accentHex,
     averageRating: record.averageRating,
+    source: record.source,
     externalAnilistId: record.externalAnilistId,
     externalMalId: record.externalMalId,
     genres: record.genres.map((g) => g.slug),
@@ -143,6 +145,7 @@ export function toPersistence(snap: ReturnType<AnimeEntity["toSnapshot"]>) {
     bannerUrl: snap.bannerUrl,
     accentHex: snap.accentHex,
     averageRating: snap.averageRating,
+    source: snap.source,
     externalAnilistId: snap.externalAnilistId,
     externalMalId: snap.externalMalId,
   };

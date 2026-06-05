@@ -349,6 +349,7 @@ function SynopsisSection({ anime, t }: { anime: AnimeDetail; t: T }) {
 
   const infoRows: Array<[string, React.ReactNode]> = [
     [t("infoFormat"), anime.format],
+    [t("infoSource"), anime.source ? formatSource(anime.source) : "—"],
     [t("infoStatus"), anime.status],
     [t("infoYear"), anime.year?.toString() ?? "—"],
     [t("infoEpisodes"), anime.episodeCount != null ? anime.episodeCount.toString() : "—"],
@@ -434,6 +435,32 @@ function PlatformsSection({ platforms }: { platforms: PlatformLink[] }) {
  * (and minimal) because we don't ship studioSlug from the API yet — when
  * the API exposes it, drop this and use the field directly.
  */
+/**
+ * Convert an AniList source code (MANGA, LIGHT_NOVEL, …) to the human label
+ * we put in the info table. Unknown codes fall back to a Title Cased version
+ * so a fresh AniList value never breaks the table — it just looks slightly
+ * less polished.
+ */
+function formatSource(raw: string): string {
+  const known: Record<string, string> = {
+    MANGA: "Manga",
+    LIGHT_NOVEL: "Light novel",
+    NOVEL: "Roman",
+    ORIGINAL: "Original",
+    VIDEO_GAME: "Jeu vidéo",
+    ANIME: "Anime",
+    VISUAL_NOVEL: "Visual novel",
+    DOUJINSHI: "Dōjinshi",
+    OTHER: "Autre",
+  };
+  if (known[raw]) return known[raw];
+  return raw
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 function slugifyStudio(name: string): string {
   return name
     .toLowerCase()

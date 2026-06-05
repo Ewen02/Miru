@@ -16,7 +16,10 @@ import { fetchLists } from "@/lib/server-lists";
 import { fetchUserWatchlist } from "@/lib/server-watchlist";
 import { fetchUserLifetimeStats } from "@/lib/server-lifetime-stats";
 import { fetchRecommendations } from "@/lib/server-recommendations";
+import { fetchOnboardingSnapshot } from "@/lib/server-onboarding";
+import { fetchMe } from "@/lib/server-me";
 import { getServerSession } from "@/lib/server-auth";
+import { HomeBanners } from "@/components/home-banners";
 import { currentSeasonLabel } from "@/lib/dates";
 import type { AnimeCard as AnimeCardDTO, WatchlistItem } from "@miru/types";
 import { Landing } from "./landing";
@@ -114,6 +117,13 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
 
   return (
     <>
+      {/* New-user nudges streamed independently — never blocks LCP. */}
+      {session && (
+        <Suspense fallback={null}>
+          <NewUserBanners />
+        </Suspense>
+      )}
+
       {/* Editorial top — only when no filters are active (search is dedicated mode).
           Suspense streams it independently so the catalog grid below renders as
           soon as `catalog` resolves — hero hydrates a few hundred ms later. */}
@@ -209,6 +219,15 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
 }
 
 // --- Streamed sections (each lives behind its own Suspense boundary) -------
+
+async function NewUserBanners() {
+  // Parallel-fetch the two signals the client banners need. Both wrapped
+  // in React.cache(), so subsequent server-component callers in the same
+  // render hit the dedup'd promise rather than the network.
+  const [snapshot, me] = await Promise.all([fetchOnboardingSnapshot(), fetchMe()]);
+  if (!snapshot && !me) return null;
+  return <HomeBanners snapshot={snapshot} emailVerified={me?.emailVerified ?? true} />;
+}
 
 async function HeroSection({
   trending,

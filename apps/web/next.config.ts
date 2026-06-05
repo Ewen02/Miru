@@ -14,6 +14,19 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.hidive.com" },
       { protocol: "https", hostname: "**.funimation.com" },
     ],
+    // Tight breakpoint list — defaults bake 8 sizes per image which is
+    // overkill for our card grid + hero. Aligned with the design system
+    // breakpoints (mobile / tablet / desktop / wide).
+    deviceSizes: [640, 768, 1024, 1280, 1920],
+    // Used by Image.sizes for fixed-width covers (180px hero, ~240px card).
+    imageSizes: [96, 180, 240, 360],
+    // Prefer AVIF then WebP. Both are ~30% smaller than JPEG; AVIF needs a
+    // bit more CPU to encode so the order matters (Next picks the first
+    // format the client accepts).
+    formats: ["image/avif", "image/webp"],
+    // Cache the optimised image for 24h instead of the 60s default —
+    // covers don't change once an anime is imported.
+    minimumCacheTTL: 86400,
   },
 };
 

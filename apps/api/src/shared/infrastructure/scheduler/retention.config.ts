@@ -50,6 +50,15 @@ export const RETENTION_RULES: RetentionRule[] = [
     description: "Expired sessions older than 60 days",
     dateColumn: "expiresAt",
   },
+  {
+    // S2-05: NotificationDedup keys live as long as the dedup window we care
+    // about — an episode notification can't be "duplicated" 60 days later
+    // since the cron's airedAt window is hourly. 60 days is generous and
+    // keeps the table bounded.
+    table: "NotificationDedup",
+    keepDays: 60,
+    description: "Notification dedup keys older than 60 days",
+  },
 ];
 
 /** Batch size for DELETE … WHERE id IN (LIMIT N). Avoids long table locks. */

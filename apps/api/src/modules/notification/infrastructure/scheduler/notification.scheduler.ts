@@ -58,9 +58,13 @@ export class NotificationScheduler {
   /**
    * Episode aired — runs every hour, scans Episode.airedAt in the last hour,
    * finds users with that anime in WATCHING status, pushes one EPISODE_AIRED
-   * per (user, episode). De-duplication uses the existing payload uniqueness
-   * is best-effort: re-running within the hour will resend; with a real
-   * dedup table we'd track sent (userId, episodeId) pairs.
+   * per (user, episode).
+   *
+   * QW-04 / S2-05: per-(user, episode) idempotency through NotificationDedup.
+   * Each candidate notification is reserved with `createMany skipDuplicates`
+   * before push; an insert that doesn't claim a fresh row means we already
+   * notified this user for this episode and we silently skip. Survives
+   * cron retries, clock skew, and a future move to a more eager schedule.
    */
   @Cron(CronExpression.EVERY_HOUR)
   async announceAiredEpisodes(): Promise<void> {
@@ -91,8 +95,14 @@ export class NotificationScheduler {
     });
 
     let pushed = 0;
+    let skipped = 0;
     for (const ep of episodes) {
       for (const entry of ep.anime.watchlist) {
+        const fresh = await this.claimDedup(entry.userId, "EPISODE_AIRED", `episode:${ep.id}`);
+        if (!fresh) {
+          skipped += 1;
+          continue;
+        }
         await this.notifications.push({
           userId: entry.userId,
           kind: "EPISODE_AIRED",
@@ -106,11 +116,30 @@ export class NotificationScheduler {
       }
     }
 
-    if (pushed > 0) {
+    if (pushed > 0 || skipped > 0) {
       this.logger.log(
-        `Episode aired: pushed ${pushed} notification(s) across ${episodes.length} episode(s)`,
+        `Episode aired: pushed ${pushed} notification(s) across ${episodes.length} episode(s)` +
+          (skipped > 0 ? ` — ${skipped} already-sent skipped` : ""),
       );
     }
+  }
+
+  /**
+   * Inserts a dedup row keyed by (userId, kind, dedupKey). Returns true if
+   * the insert won the race (first time we see this combination) — caller
+   * proceeds to actually push the notification. Returns false on conflict —
+   * caller skips.
+   *
+   * createMany skipDuplicates is the only Prisma primitive that lets us
+   * detect "first insert vs already-existed" without a SELECT round-trip,
+   * so it's the cheapest path to idempotency.
+   */
+  private async claimDedup(userId: string, kind: string, dedupKey: string): Promise<boolean> {
+    const inserted = await this.prisma.notificationDedup.createMany({
+      data: [{ userId, kind, dedupKey }],
+      skipDuplicates: true,
+    });
+    return inserted.count > 0;
   }
 
   /**

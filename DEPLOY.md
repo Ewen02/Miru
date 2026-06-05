@@ -6,7 +6,7 @@ Vercel pour le web, Railway pour l'API et Postgres.
 
 | Variable | API | Web | Notes |
 |---|---|---|---|
-| `DATABASE_URL` | ✓ | — | Postgres connection string (Railway fournit `DATABASE_URL` auto sur son add-on). |
+| `DATABASE_URL` | ✓ | — | Postgres connection string. En prod ajouter `?sslmode=require&connection_limit=10&pool_timeout=20` (Railway fournit `DATABASE_URL` brut, complète-la). |
 | `BETTER_AUTH_SECRET` | ✓ | — | 32+ chars random. `openssl rand -base64 32`. |
 | `WEB_ORIGIN` | ✓ | — | URL publique du web (`https://miru.app`). Sert le CORS + trustedOrigins Better Auth. |
 | `API_BASE_URL` | ✓ | — | URL publique de l'API. Sert le `baseURL` Better Auth (callbacks, redirects). |

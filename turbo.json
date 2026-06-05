@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["NODE_ENV", "CI"],
   "tasks": {
     "dev": {
       "cache": false,
@@ -7,7 +8,20 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "dist/**"]
+      "outputs": [".next/**", "dist/**"],
+      "env": [
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_SITE_URL",
+        "NEXT_PUBLIC_SENTRY_DSN",
+        "NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE",
+        "SENTRY_DSN",
+        "SENTRY_ORG",
+        "SENTRY_PROJECT",
+        "SENTRY_AUTH_TOKEN",
+        "SENTRY_RELEASE",
+        "API_BASE_URL",
+        "WEB_ORIGIN"
+      ]
     },
     "lint": {
       "dependsOn": ["^build"]

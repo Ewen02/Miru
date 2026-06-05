@@ -36,9 +36,12 @@ export class PrismaListRepository implements ListRepositoryPort {
   }
 
   async findPublic(limit: number): Promise<ListSummary[]> {
+    // Sort by the denormalized likeCount column instead of aggregating
+    // ListLike rows on every read. Backed by
+    // List_isPublic_likeCount_updatedAt_idx.
     const records = await this.prisma.list.findMany({
       where: { isPublic: true },
-      orderBy: [{ likes: { _count: "desc" } }, { updatedAt: "desc" }],
+      orderBy: [{ likeCount: "desc" }, { updatedAt: "desc" }],
       take: limit,
       include: this.summaryInclude(),
     });
@@ -70,7 +73,6 @@ export class PrismaListRepository implements ListRepositoryPort {
             },
           },
         },
-        _count: { select: { likes: true } },
       },
     });
     if (!record) return null;
@@ -91,7 +93,7 @@ export class PrismaListRepository implements ListRepositoryPort {
       list: this.toEntity(record),
       ownerName: record.user.name,
       itemCount: items.length,
-      likeCount: record._count.likes,
+      likeCount: record.likeCount,
       items,
     };
   }
@@ -169,15 +171,35 @@ export class PrismaListRepository implements ListRepositoryPort {
   }
 
   async like(userId: string, listId: string): Promise<void> {
-    await this.prisma.listLike.upsert({
-      where: { userId_listId: { userId, listId } },
-      update: {},
-      create: { userId, listId },
+    // Upsert + bump the denormalized counter atomically. createMany
+    // skipDuplicates is the only Prisma primitive that lets us detect
+    // "was inserted vs already-existed" — fall back to a transaction.
+    await this.prisma.$transaction(async (tx) => {
+      const inserted = await tx.listLike.createMany({
+        data: [{ userId, listId }],
+        skipDuplicates: true,
+      });
+      if (inserted.count > 0) {
+        await tx.list.update({
+          where: { id: listId },
+          data: { likeCount: { increment: 1 } },
+        });
+      }
     });
   }
 
   async unlike(userId: string, listId: string): Promise<void> {
-    await this.prisma.listLike.deleteMany({ where: { userId, listId } });
+    await this.prisma.$transaction(async (tx) => {
+      const removed = await tx.listLike.deleteMany({ where: { userId, listId } });
+      if (removed.count > 0) {
+        await tx.list.update({
+          where: { id: listId },
+          // Clamp at 0 to defend against any drift introduced before
+          // backfill or by manual SQL.
+          data: { likeCount: { decrement: 1 } },
+        });
+      }
+    });
   }
 
   async isLikedBy(userId: string, listId: string): Promise<boolean> {
@@ -195,7 +217,10 @@ export class PrismaListRepository implements ListRepositoryPort {
         take: PREVIEW_COVER_COUNT,
         select: { anime: { select: { coverUrl: true } } },
       },
-      _count: { select: { items: true, likes: true } },
+      // likeCount comes from the denormalized List.likeCount column now.
+      // _count: { likes } would re-trigger the LEFT JOIN aggregation we
+      // explicitly killed in findPublic — keep only items.
+      _count: { select: { items: true } },
     };
   }
 
@@ -207,10 +232,11 @@ export class PrismaListRepository implements ListRepositoryPort {
     slug: string;
     isPublic: boolean;
     coverArtSeed: number | null;
+    likeCount: number;
     updatedAt: Date;
     user: { name: string };
     items: Array<{ anime: { coverUrl: string | null } }>;
-    _count: { items: number; likes: number };
+    _count: { items: number };
   }): ListSummary {
     return {
       id: record.id,
@@ -223,7 +249,7 @@ export class PrismaListRepository implements ListRepositoryPort {
       coverArtSeed: record.coverArtSeed,
       previewCovers: record.items.map((it) => it.anime.coverUrl),
       itemCount: record._count.items,
-      likeCount: record._count.likes,
+      likeCount: record.likeCount,
       updatedAt: record.updatedAt,
     };
   }

@@ -474,6 +474,9 @@ model List {
   slug         String  @db.VarChar(100)
   isPublic     Boolean @default(true)
   coverArtSeed Int?
+  // Denormalized counter — maintained by the list repo on like/unlike.
+  // Lets findPublic sort by popularity without a LEFT JOIN aggregation.
+  likeCount    Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -485,6 +488,8 @@ model List {
 
   @@unique([userId, slug])
   @@index([userId])
+  // Public ranking: ORDER BY likeCount DESC, updatedAt DESC LIMIT N.
+  @@index([isPublic, likeCount(sort: Desc), updatedAt(sort: Desc)])
 }
 
 model ListItem {

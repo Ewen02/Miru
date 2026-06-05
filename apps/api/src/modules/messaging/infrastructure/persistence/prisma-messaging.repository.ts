@@ -35,20 +35,32 @@ export class PrismaMessagingRepository implements MessagingRepositoryPort {
       },
     });
 
-    return Promise.all(
-      rows.map(async (row) => {
-        const peer = row.userAId === userId ? row.userB : row.userA;
-        const unreadCount = await this.prisma.directMessage.count({
-          where: { conversationId: row.id, senderId: peer.id, readAt: null },
-        });
-        return {
-          id: row.id,
-          peer: { id: peer.id, name: peer.name, image: peer.image },
-          lastMessageAt: row.lastMessageAt,
-          unreadCount,
-        };
-      }),
+    if (rows.length === 0) return [];
+
+    // PERF-01: collapse N+1 (one count per conversation) into a single
+    // GROUP BY against the partial unread index.
+    const unreadGroups = await this.prisma.directMessage.groupBy({
+      by: ["conversationId"],
+      where: {
+        conversationId: { in: rows.map((r) => r.id) },
+        senderId: { not: userId },
+        readAt: null,
+      },
+      _count: { _all: true },
+    });
+    const unreadByConv = new Map<string, number>(
+      unreadGroups.map((g) => [g.conversationId, g._count._all]),
     );
+
+    return rows.map((row) => {
+      const peer = row.userAId === userId ? row.userB : row.userA;
+      return {
+        id: row.id,
+        peer: { id: peer.id, name: peer.name, image: peer.image },
+        lastMessageAt: row.lastMessageAt,
+        unreadCount: unreadByConv.get(row.id) ?? 0,
+      };
+    });
   }
 
   async getOrCreateConversation(userId: string, peerId: string): Promise<string> {

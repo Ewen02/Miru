@@ -156,11 +156,17 @@ export function HomeHero({
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <Button asChild size="lg" style={{ backgroundColor: accent, color: "var(--color-on-accent)" }}>
-            <Link href={`/anime/${current.slug}`}>Voir la fiche</Link>
+            {/* prefetch=true on hero CTAs: the most likely next navigation,
+                worth eagerly warming the RSC payload for. */}
+            <Link href={`/anime/${current.slug}`} prefetch>
+              Voir la fiche
+            </Link>
           </Button>
           {showWatchlistCta && (
             <Button asChild size="lg" variant="outline">
-              <Link href={`/anime/${current.slug}`}>+ Watchlist</Link>
+              <Link href={`/anime/${current.slug}`} prefetch>
+                + Watchlist
+              </Link>
             </Button>
           )}
           <span className="mx-2 h-6 w-px bg-border" aria-hidden />

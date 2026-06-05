@@ -48,7 +48,7 @@ export function Landing({ featuredAnime, featuredLists }: LandingProps) {
               <Link
                 href="/register"
                 className="inline-flex h-12 items-center rounded-md px-6 font-body text-base font-semibold"
-                style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+                style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
               >
                 Créer un compte
               </Link>
@@ -157,7 +157,7 @@ export function Landing({ featuredAnime, featuredLists }: LandingProps) {
           <Link
             href="/register"
             className="inline-flex h-12 items-center rounded-md px-6 font-body text-base font-semibold"
-            style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
             Commencer
           </Link>
@@ -198,7 +198,7 @@ export function Landing({ featuredAnime, featuredLists }: LandingProps) {
             <Link
               href="/register"
               className="inline-flex h-12 items-center rounded-md px-6 font-body text-base font-semibold"
-              style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
             >
               Créer un compte
             </Link>

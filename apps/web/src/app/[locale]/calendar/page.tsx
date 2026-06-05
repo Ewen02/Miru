@@ -144,7 +144,7 @@ function NavButton({
           ? "inline-flex h-9 items-center rounded-md px-3 font-mono text-xs uppercase tracking-wider"
           : "inline-flex h-9 items-center rounded-md border border-border bg-bg-surface px-3 font-mono text-xs text-text-secondary uppercase tracking-wider transition-colors duration-200 hover:bg-bg-elevated hover:text-text-primary"
       }
-      style={primary ? { backgroundColor: "var(--color-accent)", color: "#08080c" } : undefined}
+      style={primary ? { backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" } : undefined}
     >
       {label}
     </Link>

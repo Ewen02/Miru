@@ -76,7 +76,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
           <button
             type="submit"
             className="inline-flex h-12 items-center rounded-md px-5 font-body text-sm font-semibold"
-            style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
             {t("submit")}
           </button>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@miru/ui";
 
@@ -15,10 +15,11 @@ interface MaintenancePageProps {
 export default async function MaintenancePage({ params }: MaintenancePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("a11y");
   return (
     <main className="mx-auto flex min-h-[70vh] w-full max-w-3xl items-center justify-center px-7 py-14">
       <div className="flex w-full max-w-xl flex-col items-center gap-5 rounded-2xl border border-border-subtle bg-bg-surface px-6 py-14 text-center">
-        <Link href="/" aria-label="Accueil Miru" className="text-text-primary">
+        <Link href="/" aria-label={t("homeMiru")} className="text-text-primary">
           <Logo size={22} />
         </Link>
         <div
@@ -47,7 +48,7 @@ export default async function MaintenancePage({ params }: MaintenancePageProps) 
           <Link
             href="/status"
             className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
-            style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
             Voir le statut →
           </Link>

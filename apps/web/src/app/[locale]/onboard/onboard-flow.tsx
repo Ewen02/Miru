@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Logo, cn } from "@miru/ui";
 import { API_URL } from "@/lib/env";
 
@@ -23,8 +24,8 @@ interface OnboardFlowProps {
   genres: GenreOption[];
 }
 
-const STEPS = ["Import", "Favoris", "Genres"] as const;
-const TOTAL_STEPS = STEPS.length;
+const STEP_KEYS = ["stepImport", "stepFavorites", "stepGenres"] as const;
+const TOTAL_STEPS = STEP_KEYS.length;
 const PICKS_REQUIRED = 3;
 
 interface ImportResult {
@@ -43,6 +44,8 @@ const DEFAULT_PRESELECTED_GENRES = new Set([
 ]);
 
 export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
+  const ta11y = useTranslations("a11y");
+  const t = useTranslations("onboardPage");
   const [step, setStep] = useState(0);
   const [picks, setPicks] = useState<Set<string>>(new Set());
   const [anilistUsername, setAnilistUsername] = useState("");
@@ -94,22 +97,22 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
           body: JSON.stringify({ username: anilistUsername.trim() }),
         });
         if (res.status === 401) {
-          setImportError("Connecte-toi pour importer.");
+          setImportError(t("importErrorAuth"));
           return;
         }
         if (!res.ok) {
           const body = await res.text();
           setImportError(
             body.includes("not found") || body.includes("introuvable")
-              ? "Username introuvable, ou liste privée côté AniList."
-              : "L'import a échoué.",
+              ? t("importErrorNotFound")
+              : t("importErrorFailed"),
           );
           return;
         }
         const data = (await res.json()) as ImportResult;
         setImportResult(data);
       } catch {
-        setImportError("Impossible de joindre l'API.");
+        setImportError(t("importErrorNetwork"));
       }
     });
   }
@@ -117,14 +120,14 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-10">
       <header className="mb-8 flex items-center justify-between">
-        <Link href="/" aria-label="Accueil" className="text-text-primary">
+        <Link href="/" aria-label={ta11y("homeMiru")} className="text-text-primary">
           <Logo size={20} />
         </Link>
         <Link
           href="/"
           className="font-mono text-xs uppercase tracking-wider text-text-tertiary transition-colors duration-200 hover:text-text-secondary"
         >
-          Plus tard
+          {t("skip")}
         </Link>
       </header>
 
@@ -139,16 +142,16 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
       </div>
 
       <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-        Étape {step + 1} / {TOTAL_STEPS} · {STEPS[step]}
+        {t("stepLabel", { current: step + 1, total: TOTAL_STEPS, name: t(STEP_KEYS[step]) })}
       </p>
 
       {step === 0 && (
         <section className="mb-12">
           <h1 className="m-0 mb-3 font-display text-3xl font-semibold tracking-[-0.025em] text-text-primary sm:text-4xl">
-            On part de zéro ou on importe ta liste ?
+            {t("importTitle")}
           </h1>
           <p className="m-0 mb-8 font-body text-base text-text-secondary">
-            Importe ta watchlist publique AniList en un clic, ou passe cette étape pour commencer à blanc.
+            {t("importSubtitle")}
           </p>
 
           <form
@@ -157,13 +160,13 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
           >
             <label className="flex flex-col gap-2">
               <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-                Username AniList
+                {t("anilistUsername")}
               </span>
               <input
                 type="text"
                 value={anilistUsername}
                 onChange={(e) => setAnilistUsername(e.target.value)}
-                placeholder="ex. lea_anime"
+                placeholder={t("anilistPlaceholder")}
                 maxLength={50}
                 className="h-11 rounded-md border border-border bg-bg-base px-3 font-body text-base text-text-primary placeholder:text-text-quaternary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
               />
@@ -172,12 +175,12 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
               type="submit"
               disabled={importing || anilistUsername.trim().length < 2}
               className="inline-flex h-11 items-center justify-center rounded-md font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
             >
-              {importing ? "Import en cours…" : "Importer depuis AniList"}
+              {importing ? t("importing") : t("importCta")}
             </button>
             <p className="m-0 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
-              Ta liste AniList doit être publique. Aucune connexion à un compte AniList n'est requise.
+              {t("importHint")}
             </p>
 
             {importError && (
@@ -198,9 +201,9 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
                   color: "var(--color-success)",
                 }}
               >
-                ✓ {importResult.imported} anime ajoutés à ta watchlist
+                ✓ {t("importSuccess", { count: importResult.imported })}
                 {importResult.skipped > 0 && (
-                  <> · {importResult.skipped} ignorés (pas encore dans notre catalogue)</>
+                  <> · {t("importSkipped", { count: importResult.skipped })}</>
                 )}
               </p>
             )}
@@ -211,16 +214,15 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
       {step === 1 && (
         <section className="mb-12">
           <h1 className="m-0 mb-3 font-display text-3xl font-semibold tracking-[-0.025em] text-text-primary sm:text-4xl">
-            Choisis {PICKS_REQUIRED} favoris pour démarrer
+            {t("favoritesTitle", { count: PICKS_REQUIRED })}
           </h1>
           <p className="m-0 mb-8 font-body text-base text-text-secondary">
-            Ça calibre les recommandations dès le premier jour.
+            {t("favoritesSubtitle")}
           </p>
           {starters.length === 0 ? (
             <div className="rounded-xl border border-border-subtle bg-bg-surface p-10 text-center">
               <p className="m-0 font-body text-sm text-text-tertiary">
-                Le catalogue est temporairement indisponible. Tu peux passer cette étape et
-                revenir plus tard.
+                {t("favoritesUnavailable")}
               </p>
             </div>
           ) : (
@@ -260,7 +262,7 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
                       <span
                         aria-hidden
                         className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-sm"
-                        style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+                        style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
                       >
                         ✓
                       </span>
@@ -274,7 +276,10 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
             </div>
           )}
           <p className="mt-4 font-mono text-xs text-text-tertiary">
-            {picks.size} sélectionné{picks.size > 1 ? "s" : ""} · {PICKS_REQUIRED} minimum requis
+            {t(picks.size > 1 ? "favoritesCountPlural" : "favoritesCount", {
+              count: picks.size,
+              required: PICKS_REQUIRED,
+            })}
           </p>
         </section>
       )}
@@ -282,14 +287,14 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
       {step === 2 && (
         <section className="mb-12">
           <h1 className="m-0 mb-3 font-display text-3xl font-semibold tracking-[-0.025em] text-text-primary sm:text-4xl">
-            Quels genres t'intéressent ?
+            {t("genresTitle")}
           </h1>
           <p className="m-0 mb-8 font-body text-base text-text-secondary">
-            On filtre les reco. Tu pourras les changer plus tard depuis ton profil.
+            {t("genresSubtitle")}
           </p>
           {genres.length === 0 ? (
             <p className="m-0 font-body text-sm text-text-tertiary">
-              La liste des genres est temporairement indisponible. Passe cette étape pour l'instant.
+              {t("genresUnavailable")}
             </p>
           ) : (
             <div className="mb-8 flex flex-wrap gap-2">
@@ -326,15 +331,15 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
           disabled={step === 0}
           className="font-mono text-xs uppercase tracking-wider text-text-tertiary transition-colors duration-200 hover:text-text-secondary disabled:opacity-40"
         >
-          ← Précédent
+          {t("previous")}
         </button>
         {isFinal ? (
           <Link
             href="/"
             className="inline-flex h-10 items-center rounded-md px-5 font-body text-sm font-semibold"
-            style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
-            Terminer →
+            {t("finish")}
           </Link>
         ) : (
           <button
@@ -342,9 +347,9 @@ export function OnboardFlow({ starters, genres }: OnboardFlowProps) {
             onClick={() => canAdvance && setStep((s) => s + 1)}
             disabled={!canAdvance}
             className="inline-flex h-10 items-center rounded-md px-5 font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-            style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
-            Suivant →
+            {t("next")}
           </button>
         )}
       </footer>

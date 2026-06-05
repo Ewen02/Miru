@@ -2,6 +2,7 @@
 
 import { useRouter } from "@/i18n/navigation";
 import { useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { listsApi } from "@/lib/lists-api";
 
 export function RemoveItemButton({
@@ -12,6 +13,7 @@ export function RemoveItemButton({
   animeId: string;
 }) {
   const router = useRouter();
+  const t = useTranslations("listsPage");
   const [pending, startTransition] = useTransition();
 
   function handleRemove() {
@@ -30,7 +32,7 @@ export function RemoveItemButton({
       type="button"
       onClick={handleRemove}
       disabled={pending}
-      aria-label="Retirer de la liste"
+      aria-label={t("removeFromList")}
       className="shrink-0 rounded-md border border-border bg-bg-base px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-text-tertiary transition-colors duration-200 hover:border-error/40 hover:text-error disabled:cursor-not-allowed disabled:opacity-50"
     >
       Retirer

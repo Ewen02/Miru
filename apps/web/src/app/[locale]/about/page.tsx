@@ -116,7 +116,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-10 items-center gap-2 rounded-md px-4 font-body text-sm font-semibold"
-              style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
             >
               {t("openSourceCta")}
             </a>

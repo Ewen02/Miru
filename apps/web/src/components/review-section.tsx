@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import type { ReviewItem } from "@miru/types";
 import { Button, cn } from "@miru/ui";
@@ -57,6 +58,7 @@ function ReviewForm({
   initial: ReviewItem | null;
   onSubmitted: () => void;
 }) {
+  const t = useTranslations("components.review");
   const initialBodyHasSpoiler = initial?.body?.startsWith(SPOILER_TAG) ?? false;
   const initialCleanBody = initialBodyHasSpoiler
     ? initial!.body!.slice(SPOILER_TAG.length).trimStart()
@@ -158,7 +160,7 @@ function ReviewForm({
             aria-valuemin={1}
             aria-valuemax={10}
             aria-valuenow={rating}
-            aria-label="Ta note de 1 à 10"
+            aria-label={t("ratingAria")}
             className={cn(
               "h-7 w-full cursor-pointer appearance-none bg-transparent",
               // WebKit
@@ -204,7 +206,7 @@ function ReviewForm({
           onChange={(e) => setBody(e.target.value)}
           rows={4}
           maxLength={4000}
-          placeholder="Qu'est-ce qui t'a marqué ?"
+          placeholder={t("bodyPlaceholder")}
           className="resize-y rounded-lg border border-border-subtle bg-bg-base px-3 py-2 font-body text-sm leading-relaxed text-text-primary placeholder:text-text-tertiary focus-visible:border-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
         />
       </label>
@@ -232,7 +234,7 @@ function ReviewForm({
         <Button
           type="submit"
           disabled={pending}
-          style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
         >
           {pending ? "Envoi…" : initial ? "Mettre à jour" : "Publier l'avis"}
         </Button>

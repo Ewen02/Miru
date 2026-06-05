@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Logo } from "@miru/ui";
 import { Link } from "@/i18n/navigation";
 import { buildAlternates } from "@/lib/alternates";
@@ -27,6 +27,7 @@ export async function generateMetadata({ params }: VerifyEmailPageProps): Promis
 export default async function VerifyEmailPage({ params, searchParams }: VerifyEmailPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("a11y");
   const { error } = await searchParams;
   const failed = Boolean(error);
 
@@ -36,7 +37,7 @@ export default async function VerifyEmailPage({ params, searchParams }: VerifyEm
         <div className="mb-7 flex flex-col items-center gap-4">
           <Link
             href="/"
-            aria-label="Accueil Miru"
+            aria-label={t("homeMiru")}
             className="rounded-md text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
           >
             <Logo size={24} />
@@ -63,7 +64,7 @@ export default async function VerifyEmailPage({ params, searchParams }: VerifyEm
             <Link
               href="/login"
               className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
-              style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
             >
               Aller à la connexion
             </Link>
@@ -92,7 +93,7 @@ export default async function VerifyEmailPage({ params, searchParams }: VerifyEm
             <Link
               href="/onboard"
               className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
-              style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
             >
               Démarrer
             </Link>

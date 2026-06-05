@@ -104,7 +104,7 @@ export default async function HelpPage({ params }: HelpPageProps) {
         <a
           href="mailto:contact@miru.app"
           className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
-          style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
         >
           {t("contactUs")}
         </a>

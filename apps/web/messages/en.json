@@ -41,6 +41,43 @@
     "verifyError": "Link invalid or expired.",
     "backToLogin": "Back to sign in"
   },
+  "a11y": {
+    "homeMiru": "Miru home",
+    "mainNav": "Main navigation",
+    "search": "Search",
+    "userMenu": "User menu",
+    "sections": "Sections",
+    "messages": "Messages"
+  },
+  "header": {
+    "catalogue": "Catalogue",
+    "watchlist": "Watchlist",
+    "calendar": "Calendar",
+    "messages": "Messages",
+    "inbox": "Inbox",
+    "profile": "Profile",
+    "search": "Search",
+    "signIn": "Sign in",
+    "menuProfile": "Profile",
+    "menuWatchlist": "My watchlist",
+    "menuLists": "My lists",
+    "menuMessages": "Messages",
+    "menuActivity": "Activity",
+    "menuAchievements": "Badges",
+    "menuStats": "My stats",
+    "menuNotifications": "Notifications",
+    "menuSettings": "Settings",
+    "menuSecurity": "Security",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
+    "palettePlaceholder": "Search an anime, a studio, a person…",
+    "paletteMinChars": "Type at least 2 characters to search.",
+    "paletteSearching": "Searching…",
+    "paletteNoResults": "No results for “{query}”.",
+    "paletteNavigate": "Navigate",
+    "paletteOpen": "Open",
+    "paletteClose": "Close"
+  },
   "components": {
     "review": {
       "title": "Community reviews",
@@ -53,7 +90,8 @@
       "edit": "Edit",
       "delete": "Delete",
       "cancel": "Cancel",
-      "empty": "No reviews yet. Be the first."
+      "empty": "No reviews yet. Be the first.",
+      "ratingAria": "Your rating from 1 to 10"
     },
     "watchlist": {
       "add": "Add to my list",
@@ -64,7 +102,11 @@
       "onHold": "On hold",
       "remove": "Remove",
       "loginToTrack": "Sign in to track",
-      "loginRationale": "Track progress, rate, and get new episode alerts."
+      "loginRationale": "Track progress, rate, and get new episode alerts.",
+      "prevEpisode": "Previous episode",
+      "nextEpisode": "Next episode",
+      "rateAnime": "Rate this anime",
+      "ratingAria": "Rating from 1 to 10"
     },
     "footer": {
       "discover": "Discover",
@@ -239,10 +281,44 @@
     "settingsAria": "Notification settings",
     "emptyTitle": "All caught up.",
     "emptyBody": "No notifications yet. New episodes and recaps will show up here.",
+    "emptyCta": "Explore the catalogue",
     "relJustNow": "Just now",
     "relMin": "{n} min",
     "relHour": "{n}h",
     "relDay": "{n}d"
+  },
+  "onboardPage": {
+    "metaTitle": "Welcome",
+    "metaDescription": "Set up Miru in 3 steps.",
+    "skip": "Later",
+    "stepLabel": "Step {current} / {total} · {name}",
+    "stepImport": "Import",
+    "stepFavorites": "Favorites",
+    "stepGenres": "Genres",
+    "importTitle": "Start fresh or import your list?",
+    "importSubtitle": "Import your public AniList watchlist in one click, or skip this step to start from scratch.",
+    "anilistUsername": "AniList username",
+    "anilistPlaceholder": "e.g. lea_anime",
+    "importCta": "Import from AniList",
+    "importing": "Importing…",
+    "importHint": "Your AniList list must be public. No AniList account connection is required.",
+    "importErrorAuth": "Sign in to import.",
+    "importErrorNotFound": "Username not found, or private list on AniList.",
+    "importErrorFailed": "Import failed.",
+    "importErrorNetwork": "Couldn't reach the API.",
+    "importSuccess": "{count} anime added to your watchlist",
+    "importSkipped": "{count} skipped (not in our catalog yet)",
+    "favoritesTitle": "Pick {count} favorites to get started",
+    "favoritesSubtitle": "It calibrates your recommendations from day one.",
+    "favoritesUnavailable": "The catalog is temporarily unavailable. You can skip this step and come back later.",
+    "favoritesCount": "{count} selected · {required} minimum required",
+    "favoritesCountPlural": "{count} selected · {required} minimum required",
+    "genresTitle": "Which genres interest you?",
+    "genresSubtitle": "We filter your recs. You'll be able to change them later from your profile.",
+    "genresUnavailable": "The genre list is temporarily unavailable. Skip this step for now.",
+    "previous": "← Previous",
+    "next": "Next →",
+    "finish": "Finish →"
   },
   "calendarPage": {
     "metaTitle": "Calendar",
@@ -475,9 +551,27 @@
     "emptyMine": "No list yet. Hit “Create a list” to start.",
     "emptyLiked": "You haven't liked any public list yet.",
     "emptyPublic": "No public lists yet.",
+    "emptyMineCta": "Explore the catalogue",
+    "emptyPublicCta": "See what's trending",
     "privateBadge": "Private",
     "titlesCount": "{count} titles",
-    "byOwner": "by {name}"
+    "byOwner": "by {name}",
+    "removeFromList": "Remove from list",
+    "createCta": "+ Create a list",
+    "createModalAria": "Create a list",
+    "createEyebrow": "New list",
+    "createTitle": "Create a list",
+    "fieldTitle": "Title",
+    "titlePlaceholder": "My 2026 watchlist, Comfort watch, …",
+    "fieldDescription": "Description (optional)",
+    "descriptionPlaceholder": "A word about the selection…",
+    "publicToggle": "Public list (visible to everyone)",
+    "createCancel": "Cancel",
+    "createSubmit": "Create",
+    "createSubmitting": "Creating…",
+    "errorDuplicate": "You already have a list with this name.",
+    "errorGeneric": "Could not create the list.",
+    "errorMinLength": "The title must be at least 2 characters."
   },
   "profile": {
     "metaTitle": "Profile",
@@ -664,7 +758,8 @@
     "following": "Following",
     "followCta": "Follow",
     "followers": "Followers",
-    "followingCount": "Following"
+    "followingCount": "Following",
+    "message": "Message"
   },
   "watchPartyPage": {
     "metaTitle": "Watch party",
@@ -728,6 +823,8 @@
     "join": "Join",
     "leave": "Leave",
     "members": "{count} members",
+    "ownedBy": "Hosted by {name}",
+    "ownerBadge": "Host",
     "wall": "Wall",
     "postPlaceholder": "Share something with the club…",
     "post": "Post",
@@ -748,6 +845,7 @@
     "body": "Message",
     "publish": "Publish",
     "reply": "Reply",
+    "originalPost": "Author",
     "replyPlaceholder": "Write a reply…",
     "postsCount": "{count} posts",
     "loginToPost": "Sign in to take part.",
@@ -825,6 +923,8 @@
     "unlockedOn": "Unlocked on {date}",
     "locked": "Locked",
     "progress": "{unlocked} / {total} unlocked",
-    "empty": "No badges yet — explore and organize to unlock some."
+    "empty": "No badges yet — explore and organize to unlock some.",
+    "emptyDesc": "Watch anime, post reviews and organize your lists to unlock your first badges.",
+    "emptyCta": "Explore the catalogue"
   }
 }

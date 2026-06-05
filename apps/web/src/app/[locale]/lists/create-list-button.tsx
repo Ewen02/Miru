@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ModalShell, cn } from "@miru/ui";
 import { listsApi } from "@/lib/lists-api";
 
 export function CreateListButton() {
+  const t = useTranslations("listsPage");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -19,7 +21,7 @@ export function CreateListButton() {
     setError(null);
     const trimmed = title.trim();
     if (trimmed.length < 2) {
-      setError("Le titre doit faire au moins 2 caractères.");
+      setError(t("errorMinLength"));
       return;
     }
     startTransition(async () => {
@@ -35,11 +37,7 @@ export function CreateListButton() {
         router.push(`/lists/${id}`);
       } catch (err) {
         const msg = (err as Error).message;
-        setError(
-          msg.includes("409")
-            ? "Tu as déjà une liste avec ce nom."
-            : "Erreur lors de la création.",
-        );
+        setError(msg.includes("409") ? t("errorDuplicate") : t("errorGeneric"));
       }
     });
   }
@@ -50,33 +48,33 @@ export function CreateListButton() {
         type="button"
         onClick={() => setOpen(true)}
         className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
-        style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+        style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
       >
-        + Créer une liste
+        {t("createCta")}
       </button>
 
-      <ModalShell open={open} onClose={() => setOpen(false)} ariaLabel="Créer une liste">
+      <ModalShell open={open} onClose={() => setOpen(false)} ariaLabel={t("createModalAria")}>
         <form onSubmit={handleSubmit}>
           <header className="border-b border-border-subtle px-5 py-4">
             <p className="m-0 mb-1 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-              Nouvelle liste
+              {t("createEyebrow")}
             </p>
             <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-text-primary">
-              Créer une liste
+              {t("createTitle")}
             </h2>
           </header>
 
           <div className="flex flex-col gap-4 px-5 py-4">
             <label className="flex flex-col gap-2">
               <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-                Titre
+                {t("fieldTitle")}
               </span>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={80}
-                placeholder="Ma watchlist 2026, Comfort watch, …"
+                placeholder={t("titlePlaceholder")}
                 className="h-10 rounded-md border border-border bg-bg-base px-3 font-body text-sm text-text-primary placeholder:text-text-quaternary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
                 autoFocus
               />
@@ -84,14 +82,14 @@ export function CreateListButton() {
 
             <label className="flex flex-col gap-2">
               <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
-                Description (optionnel)
+                {t("fieldDescription")}
               </span>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 maxLength={2000}
                 rows={3}
-                placeholder="Un mot sur la sélection…"
+                placeholder={t("descriptionPlaceholder")}
                 className="rounded-md border border-border bg-bg-base px-3 py-2 font-body text-sm text-text-primary placeholder:text-text-quaternary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
               />
             </label>
@@ -104,7 +102,7 @@ export function CreateListButton() {
                 className="accent-(--color-accent)"
               />
               <span className="font-body text-sm text-text-secondary">
-                Liste publique (visible par tous)
+                {t("publicToggle")}
               </span>
             </label>
 
@@ -121,7 +119,7 @@ export function CreateListButton() {
               onClick={() => setOpen(false)}
               className="inline-flex h-9 items-center rounded-md px-3 font-body text-sm text-text-secondary transition-colors duration-200 hover:text-text-primary"
             >
-              Annuler
+              {t("createCancel")}
             </button>
             <button
               type="submit"
@@ -130,9 +128,9 @@ export function CreateListButton() {
                 "inline-flex h-9 items-center rounded-md px-4 font-body text-sm font-semibold",
                 "disabled:cursor-not-allowed disabled:opacity-50",
               )}
-              style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
             >
-              {pending ? "Création…" : "Créer"}
+              {pending ? t("createSubmitting") : t("createSubmit")}
             </button>
           </footer>
         </form>

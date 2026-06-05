@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo, cn } from "@miru/ui";
 import { API_URL } from "@/lib/env";
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations("a11y");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -42,7 +44,7 @@ export default function ForgotPasswordPage() {
         <div className="mb-7 flex flex-col items-center gap-4 text-center">
           <Link
             href="/"
-            aria-label="Accueil Miru"
+            aria-label={t("homeMiru")}
             className="rounded-md text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
           >
             <Logo size={24} />
@@ -97,7 +99,7 @@ export default function ForgotPasswordPage() {
               type="submit"
               disabled={loading || email.length === 0}
               className="mt-2 inline-flex h-11 items-center justify-center rounded-md font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
             >
               {loading ? "Envoi…" : "Envoyer le lien"}
             </button>

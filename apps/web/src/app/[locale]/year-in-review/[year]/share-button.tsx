@@ -48,7 +48,7 @@ export function ShareButton({
         type="button"
         onClick={openTwitter}
         className="inline-flex h-11 items-center rounded-md px-5 font-body text-sm font-semibold"
-        style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+        style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
       >
         Partager sur X
       </button>

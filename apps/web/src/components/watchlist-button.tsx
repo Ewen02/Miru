@@ -133,7 +133,7 @@ export function WatchlistButton({
             type="button"
             onClick={() => setStatus("PLANNED")}
             disabled={pending}
-            style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
             + Ajouter à ma watchlist
           </Button>
@@ -220,7 +220,7 @@ export function WatchlistButton({
               type="button"
               onClick={() => bumpEpisode(-1)}
               disabled={pending || entry.currentEpisode <= 0}
-              aria-label="Épisode précédent"
+              aria-label={t("prevEpisode")}
               className="flex h-full w-9 items-center justify-center text-text-secondary transition-colors duration-150 hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-40"
             >
               <MinusIcon />
@@ -237,7 +237,7 @@ export function WatchlistButton({
               disabled={
                 pending || (episodeCount != null && entry.currentEpisode >= episodeCount)
               }
-              aria-label="Épisode suivant"
+              aria-label={t("nextEpisode")}
               className="flex h-full w-9 items-center justify-center text-text-secondary transition-colors duration-150 hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-40"
             >
               <PlusIcon />
@@ -275,7 +275,7 @@ export function WatchlistButton({
           {rateOpen && (
             <div
               role="dialog"
-              aria-label="Noter cet anime"
+              aria-label={t("rateAnime")}
               className="absolute left-0 top-full z-30 mt-1 w-72 rounded-lg border border-border bg-bg-surface p-4"
             >
               <div className="mb-3 flex items-baseline justify-between">
@@ -298,7 +298,7 @@ export function WatchlistButton({
                 value={draftRating}
                 onChange={(e) => setDraftRating(Number(e.target.value))}
                 className="w-full accent-(--color-accent)"
-                aria-label="Note de 1 à 10"
+                aria-label={t("ratingAria")}
               />
               <div className="mt-1 flex justify-between font-mono text-[9px] text-text-quaternary">
                 {[1, 3, 5, 7, 10].map((n) => (
@@ -331,7 +331,7 @@ export function WatchlistButton({
                     size="sm"
                     onClick={() => saveRating(draftRating)}
                     disabled={pending}
-                    style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+                    style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
                   >
                     Enregistrer
                   </Button>

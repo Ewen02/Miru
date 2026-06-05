@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 import type { AnimeCard } from "@miru/types";
@@ -19,6 +20,8 @@ interface CatalogPage {
 }
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
+  const t = useTranslations("a11y");
+  const th = useTranslations("header");
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
@@ -105,7 +108,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Recherche"
+      aria-label={t("search")}
       className="fixed inset-0 z-50 flex items-start justify-center bg-bg-base/70 backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -119,7 +122,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher un anime, un studio, une personne…"
+            placeholder={th("palettePlaceholder")}
             className="flex-1 bg-transparent font-body text-base text-text-primary outline-none placeholder:text-text-tertiary"
           />
           <kbd className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-text-tertiary">
@@ -130,13 +133,13 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         <div className="max-h-100 overflow-y-auto">
           {query.trim().length < 2 ? (
             <p className="px-5 py-6 font-body text-sm text-text-tertiary">
-              Tape au moins 2 caractères pour rechercher.
+              {th("paletteMinChars")}
             </p>
           ) : loading && results.length === 0 ? (
-            <p className="px-5 py-6 font-body text-sm text-text-tertiary">Recherche…</p>
+            <p className="px-5 py-6 font-body text-sm text-text-tertiary">{th("paletteSearching")}</p>
           ) : results.length === 0 ? (
             <p className="px-5 py-6 font-body text-sm text-text-tertiary">
-              Aucun résultat pour « {query.trim()} ».
+              {th("paletteNoResults", { query: query.trim() })}
             </p>
           ) : (
             <ul className="py-2">
@@ -187,10 +190,10 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
         <div className="flex items-center justify-between border-t border-border-subtle px-5 py-2.5 font-mono text-[10px] tracking-wider text-text-tertiary uppercase">
           <span className="flex gap-3">
-            <Hint k="↑↓">Naviguer</Hint>
-            <Hint k="↵">Ouvrir</Hint>
+            <Hint k="↑↓">{th("paletteNavigate")}</Hint>
+            <Hint k="↵">{th("paletteOpen")}</Hint>
           </span>
-          <Hint k="ESC">Fermer</Hint>
+          <Hint k="ESC">{th("paletteClose")}</Hint>
         </div>
       </div>
     </div>

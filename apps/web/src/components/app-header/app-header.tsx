@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@miru/ui";
 import { getServerSession } from "@/lib/server-auth";
@@ -14,6 +15,7 @@ import { AppHeaderClient } from "./app-header.client";
  * pathname check in the client.
  */
 export async function AppHeader() {
+  const t = await getTranslations("a11y");
   const session = await getServerSession();
   const notifications = session
     ? await fetchNotifications().catch(() => null)
@@ -26,7 +28,7 @@ export async function AppHeader() {
       logo={
         <Link
           href="/"
-          aria-label="Accueil Miru"
+          aria-label={t("homeMiru")}
           className="shrink-0 rounded-md text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
         >
           <Logo size={20} />

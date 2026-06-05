@@ -41,6 +41,43 @@
     "verifyError": "Lien invalide ou expiré.",
     "backToLogin": "Retour à la connexion"
   },
+  "a11y": {
+    "homeMiru": "Accueil Miru",
+    "mainNav": "Navigation principale",
+    "search": "Rechercher",
+    "userMenu": "Menu utilisateur",
+    "sections": "Sections",
+    "messages": "Messages"
+  },
+  "header": {
+    "catalogue": "Catalogue",
+    "watchlist": "Watchlist",
+    "calendar": "Calendrier",
+    "messages": "Messages",
+    "inbox": "Inbox",
+    "profile": "Profil",
+    "search": "Rechercher",
+    "signIn": "Se connecter",
+    "menuProfile": "Profil",
+    "menuWatchlist": "Ma watchlist",
+    "menuLists": "Mes listes",
+    "menuMessages": "Messages",
+    "menuActivity": "Activité",
+    "menuAchievements": "Badges",
+    "menuStats": "Mes stats",
+    "menuNotifications": "Notifications",
+    "menuSettings": "Paramètres",
+    "menuSecurity": "Sécurité",
+    "signOut": "Se déconnecter",
+    "signingOut": "Déconnexion…",
+    "palettePlaceholder": "Rechercher un anime, un studio, une personne…",
+    "paletteMinChars": "Tape au moins 2 caractères pour rechercher.",
+    "paletteSearching": "Recherche…",
+    "paletteNoResults": "Aucun résultat pour « {query} ».",
+    "paletteNavigate": "Naviguer",
+    "paletteOpen": "Ouvrir",
+    "paletteClose": "Fermer"
+  },
   "components": {
     "review": {
       "title": "Avis communauté",
@@ -53,7 +90,8 @@
       "edit": "Modifier",
       "delete": "Supprimer",
       "cancel": "Annuler",
-      "empty": "Aucun avis pour le moment. Sois le premier."
+      "empty": "Aucun avis pour le moment. Sois le premier.",
+      "ratingAria": "Ta note de 1 à 10"
     },
     "watchlist": {
       "add": "Ajouter à ma liste",
@@ -64,7 +102,11 @@
       "onHold": "En pause",
       "remove": "Retirer",
       "loginToTrack": "Se connecter pour suivre",
-      "loginRationale": "Suis ton avancement, note et reçois les nouveaux épisodes."
+      "loginRationale": "Suis ton avancement, note et reçois les nouveaux épisodes.",
+      "prevEpisode": "Épisode précédent",
+      "nextEpisode": "Épisode suivant",
+      "rateAnime": "Noter cet anime",
+      "ratingAria": "Note de 1 à 10"
     },
     "footer": {
       "discover": "Découvrir",
@@ -239,10 +281,44 @@
     "settingsAria": "Paramètres notifications",
     "emptyTitle": "Tu es à jour.",
     "emptyBody": "Aucune notification pour l'instant. Les nouveautés (nouveaux épisodes, récaps) apparaîtront ici.",
+    "emptyCta": "Explorer le catalogue",
     "relJustNow": "À l'instant",
     "relMin": "{n} min",
     "relHour": "{n}h",
     "relDay": "{n}j"
+  },
+  "onboardPage": {
+    "metaTitle": "Bienvenue",
+    "metaDescription": "Calibre Miru en 3 étapes.",
+    "skip": "Plus tard",
+    "stepLabel": "Étape {current} / {total} · {name}",
+    "stepImport": "Import",
+    "stepFavorites": "Favoris",
+    "stepGenres": "Genres",
+    "importTitle": "On part de zéro ou on importe ta liste ?",
+    "importSubtitle": "Importe ta watchlist publique AniList en un clic, ou passe cette étape pour commencer à blanc.",
+    "anilistUsername": "Username AniList",
+    "anilistPlaceholder": "ex. lea_anime",
+    "importCta": "Importer depuis AniList",
+    "importing": "Import en cours…",
+    "importHint": "Ta liste AniList doit être publique. Aucune connexion à un compte AniList n'est requise.",
+    "importErrorAuth": "Connecte-toi pour importer.",
+    "importErrorNotFound": "Username introuvable, ou liste privée côté AniList.",
+    "importErrorFailed": "L'import a échoué.",
+    "importErrorNetwork": "Impossible de joindre l'API.",
+    "importSuccess": "{count} anime ajoutés à ta watchlist",
+    "importSkipped": "{count} ignorés (pas encore dans notre catalogue)",
+    "favoritesTitle": "Choisis {count} favoris pour démarrer",
+    "favoritesSubtitle": "Ça calibre les recommandations dès le premier jour.",
+    "favoritesUnavailable": "Le catalogue est temporairement indisponible. Tu peux passer cette étape et revenir plus tard.",
+    "favoritesCount": "{count} sélectionné · {required} minimum requis",
+    "favoritesCountPlural": "{count} sélectionnés · {required} minimum requis",
+    "genresTitle": "Quels genres t'intéressent ?",
+    "genresSubtitle": "On filtre les reco. Tu pourras les changer plus tard depuis ton profil.",
+    "genresUnavailable": "La liste des genres est temporairement indisponible. Passe cette étape pour l'instant.",
+    "previous": "← Précédent",
+    "next": "Suivant →",
+    "finish": "Terminer →"
   },
   "calendarPage": {
     "metaTitle": "Calendrier",
@@ -475,9 +551,27 @@
     "emptyMine": "Tu n'as pas encore de liste. Clique sur « Créer une liste » pour commencer.",
     "emptyLiked": "Tu n'as pas encore liké de liste publique.",
     "emptyPublic": "Aucune liste publique pour l'instant.",
+    "emptyMineCta": "Explorer le catalogue",
+    "emptyPublicCta": "Voir les tendances",
     "privateBadge": "Privée",
     "titlesCount": "{count} titres",
-    "byOwner": "par {name}"
+    "byOwner": "par {name}",
+    "removeFromList": "Retirer de la liste",
+    "createCta": "+ Créer une liste",
+    "createModalAria": "Créer une liste",
+    "createEyebrow": "Nouvelle liste",
+    "createTitle": "Créer une liste",
+    "fieldTitle": "Titre",
+    "titlePlaceholder": "Ma watchlist 2026, Comfort watch, …",
+    "fieldDescription": "Description (optionnel)",
+    "descriptionPlaceholder": "Un mot sur la sélection…",
+    "publicToggle": "Liste publique (visible par tous)",
+    "createCancel": "Annuler",
+    "createSubmit": "Créer",
+    "createSubmitting": "Création…",
+    "errorDuplicate": "Tu as déjà une liste avec ce nom.",
+    "errorGeneric": "Erreur lors de la création.",
+    "errorMinLength": "Le titre doit faire au moins 2 caractères."
   },
   "profile": {
     "metaTitle": "Profil",
@@ -485,6 +579,21 @@
     "watchlistCardTitle": "Ta watchlist",
     "watchlistCardBody": "Retrouve les animes que tu suis, en pause, ou prévus.",
     "watchlistCardCta": "Voir ma watchlist →"
+  },
+  "profilePublic": {
+    "shareLabel": "Partager",
+    "shareCopied": "Copié",
+    "shareAria": "Partager le profil",
+    "bioPlaceholder": "Une ligne sur toi (250 caractères max)."
+  },
+  "settingsBio": {
+    "title": "Bio publique",
+    "description": "Affichée sur ta page /u/{handle}. 250 caractères max.",
+    "placeholder": "Fan club MAPPA. Le slice of life avant tout.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré",
+    "error": "Échec de l'enregistrement — réessaie."
   },
   "security": {
     "metaTitle": "Sécurité",
@@ -649,7 +758,8 @@
     "following": "Suivi",
     "followCta": "Suivre",
     "followers": "Abonnés",
-    "followingCount": "Abonnements"
+    "followingCount": "Abonnements",
+    "message": "Message"
   },
   "watchPartyPage": {
     "metaTitle": "Watch party",
@@ -713,6 +823,8 @@
     "join": "Rejoindre",
     "leave": "Quitter",
     "members": "{count} membres",
+    "ownedBy": "Animé par {name}",
+    "ownerBadge": "Hôte",
     "wall": "Mur",
     "postPlaceholder": "Partage quelque chose avec le club…",
     "post": "Publier",
@@ -733,6 +845,7 @@
     "body": "Message",
     "publish": "Publier",
     "reply": "Répondre",
+    "originalPost": "Auteur",
     "replyPlaceholder": "Écris une réponse…",
     "postsCount": "{count} messages",
     "loginToPost": "Connecte-toi pour participer.",
@@ -810,6 +923,8 @@
     "unlockedOn": "Débloqué le {date}",
     "locked": "À débloquer",
     "progress": "{unlocked} / {total} débloqués",
-    "empty": "Aucun badge pour l'instant — explore et organise pour en débloquer."
+    "empty": "Aucun badge pour l'instant — explore et organise pour en débloquer.",
+    "emptyDesc": "Regarde des anime, publie des avis et organise tes listes pour débloquer tes premiers badges.",
+    "emptyCta": "Explorer le catalogue"
   }
 }

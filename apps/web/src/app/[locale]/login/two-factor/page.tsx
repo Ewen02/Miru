@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Logo, cn } from "@miru/ui";
 import { authClient } from "@/lib/auth-client";
 
 export default function TwoFactorLoginPage() {
+  const t = useTranslations("a11y");
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/";
@@ -40,7 +42,7 @@ export default function TwoFactorLoginPage() {
         <div className="mb-7 flex flex-col items-center gap-4 text-center">
           <Link
             href="/"
-            aria-label="Accueil Miru"
+            aria-label={t("homeMiru")}
             className="rounded-md text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
           >
             <Logo size={24} />
@@ -86,7 +88,7 @@ export default function TwoFactorLoginPage() {
             type="submit"
             disabled={pending || code.length < (useBackup ? 6 : 6)}
             className="inline-flex h-11 items-center justify-center rounded-md font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-            style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
             {pending ? "Vérification…" : "Valider"}
           </button>

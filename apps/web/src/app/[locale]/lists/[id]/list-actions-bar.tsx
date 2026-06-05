@@ -55,7 +55,7 @@ export function ListActionsBar({ listId, initialLiked, ownedByViewer }: ListActi
         )}
         style={
           liked
-            ? { backgroundColor: "var(--color-accent)", color: "#08080c" }
+            ? { backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }
             : {
                 border: "1px solid var(--color-border)",
                 backgroundColor: "var(--color-bg-surface)",

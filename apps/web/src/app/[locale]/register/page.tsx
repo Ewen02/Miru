@@ -100,7 +100,7 @@ export default function RegisterPage() {
             disabled={loading}
             size="lg"
             className="mt-2"
-            style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
             {loading ? t("registerCtaLoading") : t("registerCta")}
           </Button>

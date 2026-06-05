@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Logo, cn } from "@miru/ui";
 import { authClient } from "@/lib/auth-client";
 
 export default function ResetPasswordPage() {
+  const t = useTranslations("a11y");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
@@ -57,7 +59,7 @@ export default function ResetPasswordPage() {
           <Link
             href="/forgot-password"
             className="inline-flex h-10 items-center rounded-md px-4 font-body text-sm font-semibold"
-            style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
             Nouvelle demande
           </Link>
@@ -72,7 +74,7 @@ export default function ResetPasswordPage() {
         <div className="mb-7 flex flex-col items-center gap-4 text-center">
           <Link
             href="/"
-            aria-label="Accueil Miru"
+            aria-label={t("homeMiru")}
             className="rounded-md text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
           >
             <Logo size={24} />
@@ -118,7 +120,7 @@ export default function ResetPasswordPage() {
               type="submit"
               disabled={loading || password.length === 0}
               className="mt-2 inline-flex h-11 items-center justify-center rounded-md font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
             >
               {loading ? "Mise à jour…" : "Mettre à jour"}
             </button>

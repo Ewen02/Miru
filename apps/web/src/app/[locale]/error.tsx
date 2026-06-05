@@ -56,7 +56,7 @@ export default function Error({ error, reset }: ErrorProps) {
           <Button
             type="button"
             onClick={reset}
-            style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
           >
             Réessayer
           </Button>

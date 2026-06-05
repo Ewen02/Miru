@@ -2,6 +2,7 @@
 
 import { Link, useRouter } from "@/i18n/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@miru/ui";
 import { authClient } from "@/lib/auth-client";
 
@@ -15,6 +16,8 @@ interface AvatarMenuProps {
 }
 
 export function AvatarMenu({ user }: AvatarMenuProps) {
+  const t = useTranslations("a11y");
+  const th = useTranslations("header");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -53,7 +56,7 @@ export function AvatarMenu({ user }: AvatarMenuProps) {
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Menu utilisateur"
+        aria-label={t("userMenu")}
         className={cn(
           "inline-flex h-8 w-8 items-center justify-center rounded-full",
           "border border-border bg-bg-elevated font-display text-[13px] text-text-primary",
@@ -79,37 +82,37 @@ export function AvatarMenu({ user }: AvatarMenuProps) {
 
           <nav className="flex flex-col py-1">
             <AvatarMenuItem href="/profile" onClick={() => setOpen(false)}>
-              Profil
+              {th("menuProfile")}
             </AvatarMenuItem>
             <AvatarMenuItem href="/watchlist" onClick={() => setOpen(false)}>
-              Ma watchlist
+              {th("menuWatchlist")}
             </AvatarMenuItem>
             <AvatarMenuItem href="/lists" onClick={() => setOpen(false)}>
-              Mes listes
+              {th("menuLists")}
             </AvatarMenuItem>
             <AvatarMenuItem href="/messages" onClick={() => setOpen(false)}>
-              Messages
+              {th("menuMessages")}
             </AvatarMenuItem>
             <AvatarMenuItem href="/activity" onClick={() => setOpen(false)}>
-              Activité
+              {th("menuActivity")}
             </AvatarMenuItem>
             <AvatarMenuItem href="/achievements" onClick={() => setOpen(false)}>
-              Badges
+              {th("menuAchievements")}
             </AvatarMenuItem>
             <AvatarMenuItem href="/lifetime-stats" onClick={() => setOpen(false)}>
-              Mes stats
+              {th("menuStats")}
             </AvatarMenuItem>
           </nav>
 
           <nav className="flex flex-col border-t border-border-subtle py-1">
             <AvatarMenuItem href="/notifications" onClick={() => setOpen(false)}>
-              Notifications
+              {th("menuNotifications")}
             </AvatarMenuItem>
             <AvatarMenuItem href="/settings" onClick={() => setOpen(false)}>
-              Paramètres
+              {th("menuSettings")}
             </AvatarMenuItem>
             <AvatarMenuItem href="/security" onClick={() => setOpen(false)}>
-              Sécurité
+              {th("menuSecurity")}
             </AvatarMenuItem>
           </nav>
 
@@ -126,7 +129,7 @@ export function AvatarMenu({ user }: AvatarMenuProps) {
                 "focus-visible:outline-none focus-visible:bg-bg-elevated",
               )}
             >
-              {signingOut ? "Déconnexion…" : "Se déconnecter"}
+              {signingOut ? th("signingOut") : th("signOut")}
             </button>
           </div>
         </div>

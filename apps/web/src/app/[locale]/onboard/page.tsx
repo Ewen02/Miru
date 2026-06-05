@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildAlternates } from "@/lib/alternates";
 import { fetchAnimeCatalog, fetchGenres } from "@/lib/api";
 import { OnboardFlow } from "./onboard-flow";
@@ -10,9 +10,10 @@ interface OnboardPageProps {
 
 export async function generateMetadata({ params }: OnboardPageProps): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "onboardPage" });
   return {
-    title: "Bienvenue",
-    description: "Calibre Miru en 3 étapes.",
+    title: t("metaTitle"),
+    description: t("metaDescription"),
     alternates: buildAlternates("/onboard", locale),
   };
 }

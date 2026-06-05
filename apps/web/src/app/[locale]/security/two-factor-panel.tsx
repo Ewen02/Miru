@@ -128,7 +128,7 @@ export function TwoFactorPanel({ enabled }: TwoFactorPanelProps) {
           type="button"
           onClick={() => setStep("password")}
           className="inline-flex h-9 items-center rounded-md px-4 font-body text-sm font-semibold"
-          style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
         >
           {t("enable")}
         </button>
@@ -234,7 +234,7 @@ function PasswordStep({
           type="submit"
           disabled={pending || password.length === 0}
           className="inline-flex h-9 items-center rounded-md px-4 font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
         >
           {pending ? "…" : t("continue")}
         </button>
@@ -307,7 +307,7 @@ function ScanStep({
           type="submit"
           disabled={pending || code.length !== 6}
           className="inline-flex h-9 items-center rounded-md px-4 font-body text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
         >
           {pending ? t("verifying") : t("verify")}
         </button>
@@ -356,7 +356,7 @@ function BackupStep({
           type="button"
           onClick={onDone}
           className="inline-flex h-9 items-center rounded-md px-4 font-body text-sm font-semibold"
-          style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
         >
           {t("done")}
         </button>

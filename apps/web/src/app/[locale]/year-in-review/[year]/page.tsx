@@ -337,7 +337,7 @@ async function EmptyYear({ year }: { year: number }) {
       <Link
         href="/watchlist"
         className="inline-flex h-11 items-center rounded-md px-5 font-body text-sm font-semibold"
-        style={{ backgroundColor: "var(--color-accent)", color: "#08080c" }}
+        style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
       >
         {t("emptyCta")}
       </Link>

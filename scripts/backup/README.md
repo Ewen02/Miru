@@ -31,17 +31,25 @@ In the Cloudflare dashboard:
 
 Add to **repo settings → Secrets and variables → Actions**:
 
-| Secret                  | Value                                          |
-| ----------------------- | ---------------------------------------------- |
-| `BACKUP_DATABASE_URL`   | Railway prod Postgres URL (with sslmode=require) |
-| `BACKUP_AGE_PUBLIC_KEY` | `age1…` from step 1                            |
-| `BACKUP_R2_BUCKET`      | bucket name                                    |
-| `BACKUP_R2_ENDPOINT`    | `https://<accountid>.r2.cloudflarestorage.com` |
-| `BACKUP_R2_ACCESS_KEY`  | from step 2                                    |
-| `BACKUP_R2_SECRET_KEY`  | from step 2                                    |
+| Secret                   | Used by         | Value                                            |
+| ------------------------ | --------------- | ------------------------------------------------ |
+| `BACKUP_DATABASE_URL`    | nightly         | Railway prod Postgres URL (with sslmode=require) |
+| `BACKUP_AGE_PUBLIC_KEY`  | nightly         | `age1…` from step 1                              |
+| `BACKUP_AGE_IDENTITY`    | restore-test    | full `AGE-SECRET-KEY-…` private key from step 1  |
+| `BACKUP_R2_BUCKET`       | both            | bucket name                                      |
+| `BACKUP_R2_ENDPOINT`     | both            | `https://<accountid>.r2.cloudflarestorage.com`   |
+| `BACKUP_R2_ACCESS_KEY`   | both            | from step 2                                      |
+| `BACKUP_R2_SECRET_KEY`   | both            | from step 2                                      |
 
 The workflow [.github/workflows/backup-nightly.yml](../../.github/workflows/backup-nightly.yml)
-runs every day at 03:00 UTC.
+runs every day at 03:00 UTC. The drill
+[.github/workflows/backup-restore-test.yml](../../.github/workflows/backup-restore-test.yml)
+runs every Sunday at 04:00 UTC and opens a GitHub issue if the restore
+fails — "untested backup = no backup".
+
+> ⚠️ `BACKUP_AGE_IDENTITY` is the private key. Treat as the single most
+> sensitive secret in this project. Anyone with this secret can read
+> every nightly dump.
 
 ## Restoring
 

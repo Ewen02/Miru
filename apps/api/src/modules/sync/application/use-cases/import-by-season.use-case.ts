@@ -1,5 +1,6 @@
 import { Injectable, Inject, Logger } from "@nestjs/common";
 import { UseCase } from "@shared/domain/use-case.base";
+import { concurrentMap } from "@shared/utils/concurrent-map";
 import { AnimeSyncPort, MediaSeason } from "@modules/anime/domain/ports/anime-sync.port";
 import { AnimeRepositoryPort } from "@modules/anime/domain/ports/anime-repository.port";
 import { ANIME_SYNC, ANIME_REPOSITORY } from "@modules/anime/application/tokens";
@@ -15,6 +16,14 @@ interface ImportBySeasonOutput {
   imported: number;
   pagesFetched: number;
 }
+
+/**
+ * Concurrency for the per-page `repo.save` fan-out, mirroring
+ * ImportTrendingUseCase. The HTTP fetch itself stays serial via the
+ * singleton AniListClient throttle, so this overlaps DB writes with
+ * the next throttle window.
+ */
+const SAVE_CONCURRENCY = 5;
 
 @Injectable()
 export class ImportBySeasonUseCase implements UseCase<ImportBySeasonInput, ImportBySeasonOutput> {
@@ -40,9 +49,7 @@ export class ImportBySeasonUseCase implements UseCase<ImportBySeasonInput, Impor
 
       if (entities.length === 0) break;
 
-      for (const entity of entities) {
-        await this.repo.save(entity);
-      }
+      await concurrentMap(entities, SAVE_CONCURRENCY, (entity) => this.repo.save(entity));
       imported += entities.length;
 
       this.logger.log(

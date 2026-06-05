@@ -13,6 +13,14 @@ export class JikanClient extends ThrottledRetryClient {
     super({ throttleMs: JIKAN_THROTTLE_MS });
   }
 
+  /** Snapshot of HTTP + cache counters for observability. */
+  metricsSnapshot() {
+    return {
+      http: this.stats(),
+      episodesCache: this.episodesCache.stats(),
+    };
+  }
+
   async fetchEpisodes(malId: number): Promise<JikanEpisode[]> {
     return this.episodesCache.getOrSet(String(malId), () => this.fetchEpisodesUncached(malId));
   }

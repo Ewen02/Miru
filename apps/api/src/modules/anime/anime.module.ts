@@ -43,6 +43,6 @@ import { PrismaModule } from "@shared/infrastructure/prisma/prisma.module";
     { provide: ANIME_SYNC, useClass: AniListSyncAdapter },
     { provide: EPISODE_SYNC, useClass: JikanEpisodeAdapter },
   ],
-  exports: [ANIME_REPOSITORY, ANIME_SYNC, EPISODE_SYNC, ANILIST_CLIENT],
+  exports: [ANIME_REPOSITORY, ANIME_SYNC, EPISODE_SYNC, ANILIST_CLIENT, JIKAN_CLIENT],
 })
 export class AnimeModule {}

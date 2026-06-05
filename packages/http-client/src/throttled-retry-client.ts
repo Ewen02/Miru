@@ -20,12 +20,23 @@ async function sleep(ms: number): Promise<void> {
  * Extend-la et appelle `this.request()` au lieu de `fetch`.
  * L'instance doit être un singleton pour que le throttle sérialise correctement.
  */
+export interface ThrottledRetryClientStats {
+  requests: number;
+  retries: number;
+  timeouts: number;
+  rateLimited: number;
+}
+
 export class ThrottledRetryClient {
   private lastRequestAt = 0;
   protected readonly throttleMs: number;
   protected readonly maxRetries: number;
   protected readonly retryStatuses: Set<number>;
   protected readonly requestTimeoutMs: number;
+  private _requests = 0;
+  private _retries = 0;
+  private _timeouts = 0;
+  private _rateLimited = 0;
 
   constructor(options: ThrottledRetryClientOptions) {
     this.throttleMs = options.throttleMs;
@@ -44,6 +55,7 @@ export class ThrottledRetryClient {
     let attempt = 0;
     while (true) {
       await this.throttle();
+      this._requests += 1;
 
       const timeoutSignal = AbortSignal.timeout(this.requestTimeoutMs);
       const signal = init?.signal
@@ -55,6 +67,8 @@ export class ThrottledRetryClient {
         res = await fetch(input, { ...init, signal });
       } catch (err) {
         if (isTimeoutAbort(err) && attempt < this.maxRetries) {
+          this._timeouts += 1;
+          this._retries += 1;
           await sleep(2000 * 2 ** attempt);
           attempt += 1;
           continue;
@@ -63,6 +77,8 @@ export class ThrottledRetryClient {
       }
 
       if (this.retryStatuses.has(res.status) && attempt < this.maxRetries) {
+        if (res.status === 429) this._rateLimited += 1;
+        this._retries += 1;
         const waitMs = parseRetryAfter(res.headers.get("retry-after")) ?? 2000 * 2 ** attempt;
         await sleep(waitMs);
         attempt += 1;
@@ -71,6 +87,15 @@ export class ThrottledRetryClient {
 
       return res;
     }
+  }
+
+  stats(): ThrottledRetryClientStats {
+    return {
+      requests: this._requests,
+      retries: this._retries,
+      timeouts: this._timeouts,
+      rateLimited: this._rateLimited,
+    };
   }
 }
 

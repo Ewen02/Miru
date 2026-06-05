@@ -4,9 +4,13 @@ import {
   Get,
   Headers,
   HttpCode,
+  Inject,
   ServiceUnavailableException,
 } from "@nestjs/common";
+import { AniListClient } from "@miru/anilist";
+import { JikanClient } from "@miru/jikan";
 import { PrismaService } from "@shared/infrastructure/prisma/prisma.service";
+import { ANILIST_CLIENT, JIKAN_CLIENT } from "@modules/anime/application/tokens";
 
 /**
  * Three endpoints designed for orchestrators (Railway, Kubernetes) and
@@ -24,7 +28,11 @@ export class HealthController {
   /** ~60s cache window — the diagnostics endpoint isn't a real-time view. */
   private readonly cacheTtlMs = 60_000;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(ANILIST_CLIENT) private readonly anilist: AniListClient,
+    @Inject(JIKAN_CLIENT) private readonly jikan: JikanClient,
+  ) {}
 
   @Get()
   @HttpCode(200)
@@ -100,6 +108,26 @@ export class HealthController {
     };
     this.cachedDb = { at: now, payload };
     return payload;
+  }
+
+  /**
+   * External-clients metrics (AniList + Jikan): request counts, retries,
+   * 429 hits, cache hit/miss ratios. Same admin gate as /health/db.
+   *
+   * Counters are process-lifetime — they reset on each pod restart.
+   * Good enough for trend-spotting and alerts; for proper time series
+   * scrape periodically and diff externally.
+   */
+  @Get("metrics")
+  metrics(@Headers("x-health-token") token?: string) {
+    const expected = process.env.HEALTH_DB_TOKEN;
+    if (!expected || token !== expected) {
+      throw new ForbiddenException("missing or invalid X-Health-Token");
+    }
+    return {
+      anilist: this.anilist.metricsSnapshot(),
+      jikan: this.jikan.metricsSnapshot(),
+    };
   }
 }
 

@@ -10,6 +10,15 @@ export interface MemoCacheOptions {
   maxEntries?: number;
 }
 
+export interface MemoCacheStats {
+  size: number;
+  hits: number;
+  misses: number;
+  /** Concurrent miss deduplications (a 2nd caller piggybacked on an in-flight factory). */
+  dedups: number;
+  evictions: number;
+}
+
 /**
  * In-memory TTL cache with bounded size and concurrent-miss deduplication.
  *
@@ -33,6 +42,10 @@ export class MemoCache<T> {
   private readonly inflight = new Map<string, Promise<T>>();
   private readonly ttlMs: number;
   private readonly maxEntries: number;
+  private hits = 0;
+  private misses = 0;
+  private dedups = 0;
+  private evictions = 0;
 
   constructor(ttlMs: number, options: MemoCacheOptions = {}) {
     this.ttlMs = ttlMs;
@@ -41,14 +54,19 @@ export class MemoCache<T> {
 
   get(key: string): T | undefined {
     const entry = this.store.get(key);
-    if (!entry) return undefined;
+    if (!entry) {
+      this.misses += 1;
+      return undefined;
+    }
     if (entry.expiresAt <= Date.now()) {
       this.store.delete(key);
+      this.misses += 1;
       return undefined;
     }
     // Refresh insertion order so this entry survives the next eviction.
     this.store.delete(key);
     this.store.set(key, entry);
+    this.hits += 1;
     return entry.value;
   }
 
@@ -68,7 +86,10 @@ export class MemoCache<T> {
     if (cached !== undefined) return cached;
 
     const inflight = this.inflight.get(key);
-    if (inflight) return inflight;
+    if (inflight) {
+      this.dedups += 1;
+      return inflight;
+    }
 
     const promise = factory()
       .then((value) => {
@@ -99,8 +120,21 @@ export class MemoCache<T> {
     return this.store.size;
   }
 
+  stats(): MemoCacheStats {
+    return {
+      size: this.store.size,
+      hits: this.hits,
+      misses: this.misses,
+      dedups: this.dedups,
+      evictions: this.evictions,
+    };
+  }
+
   private evictOldest(): void {
     const oldestKey = this.store.keys().next().value;
-    if (oldestKey !== undefined) this.store.delete(oldestKey);
+    if (oldestKey !== undefined) {
+      this.store.delete(oldestKey);
+      this.evictions += 1;
+    }
   }
 }

@@ -57,6 +57,16 @@ export class AniListClient extends ThrottledRetryClient {
     super({ throttleMs: ANILIST_THROTTLE_MS });
   }
 
+  /** Snapshot of HTTP + cache counters for observability. */
+  metricsSnapshot() {
+    return {
+      http: this.stats(),
+      trendingCache: this.trendingCache.stats(),
+      detailCache: this.detailCache.stats(),
+      circuitOpen: this.circuitOpenUntil > Date.now(),
+    };
+  }
+
   async getTrending(page = 1, perPage = 20): Promise<AniListAnime[]> {
     return this.trendingCache.getOrSet(`${page}:${perPage}`, async () => {
       const data = await this.graphql<{ Page: { media: unknown[] } }>(TRENDING_QUERY, {

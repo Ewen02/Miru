@@ -19,3 +19,9 @@ Miru/
 /test-results
 /blob-report
 /playwright/.cache
+
+# Local DB snapshots and dumps — never commit these
+/snapshots
+*.dump
+*.sql.gz
+*.dump.age

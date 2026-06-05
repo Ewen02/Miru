@@ -377,6 +377,18 @@ export interface UserProfile {
   stats: UserProfileStats;
   favorites: UserProfileFavorite[];
   reviews: UserProfileReview[];
+  /** Most recent unlocked badges shown on the profile rail. */
+  recentAchievements: UserProfileAchievement[];
+  /** Follower / following counts surfaced on the profile header. */
+  followCounts: { followers: number; following: number };
+}
+
+export interface UserProfileAchievement {
+  code: string;
+  name: string;
+  icon: string | null;
+  /** ISO string. */
+  unlockedAt: string;
 }
 
 export interface EpisodeItem {

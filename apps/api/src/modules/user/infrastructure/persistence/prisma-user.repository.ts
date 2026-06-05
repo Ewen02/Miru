@@ -105,6 +105,29 @@ export class PrismaUserRepository implements UserRepositoryPort {
     }));
   }
 
+  async recentAchievementsByUserId(userId: string, limit: number) {
+    const rows = await this.prisma.userAchievement.findMany({
+      where: { userId },
+      orderBy: { unlockedAt: "desc" },
+      take: limit,
+      include: { achievement: { select: { code: true, name: true, icon: true } } },
+    });
+    return rows.map((r) => ({
+      code: r.achievement.code,
+      name: r.achievement.name,
+      icon: r.achievement.icon,
+      unlockedAt: r.unlockedAt,
+    }));
+  }
+
+  async followCountsByUserId(userId: string): Promise<{ followers: number; following: number }> {
+    const [followers, following] = await Promise.all([
+      this.prisma.follow.count({ where: { followingId: userId } }),
+      this.prisma.follow.count({ where: { followerId: userId } }),
+    ]);
+    return { followers, following };
+  }
+
   async joinedAt(userId: string): Promise<Date | null> {
     const record = await this.prisma.user.findUnique({
       where: { id: userId },

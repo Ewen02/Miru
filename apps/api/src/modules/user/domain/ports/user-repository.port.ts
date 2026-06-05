@@ -27,6 +27,14 @@ export interface UserPublicReview {
   anime: { id: string; slug: string; title: string; coverUrl: string | null };
 }
 
+/** Lightweight achievement summary for the public profile rail. */
+export interface UserPublicAchievement {
+  code: string;
+  name: string;
+  icon: string | null;
+  unlockedAt: Date;
+}
+
 export interface UserLifetimeStats {
   completedCount: number;
   hoursWatched: number;
@@ -102,6 +110,10 @@ export interface UserRepositoryPort {
   statsByUserId(userId: string): Promise<UserProfileStats>;
   favoritesByUserId(userId: string, limit: number): Promise<UserFavoriteAnime[]>;
   reviewsByUserId(userId: string, limit: number): Promise<UserPublicReview[]>;
+  /** Latest unlocked badges shown on the public profile rail. */
+  recentAchievementsByUserId(userId: string, limit: number): Promise<UserPublicAchievement[]>;
+  /** Follower/following counts for the profile header. */
+  followCountsByUserId(userId: string): Promise<{ followers: number; following: number }>;
   joinedAt(userId: string): Promise<Date | null>;
   /** Sympathisant (Pro) flag — derived from the billing fields on User. */
   isProByUserId(userId: string): Promise<boolean>;

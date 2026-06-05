@@ -99,7 +99,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       </header>
 
       {/* Stats grid (3 stat cards + histogram). */}
-      <section className="mb-16 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(3,1fr)_2fr]">
+      <section className="mb-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(3,1fr)_2fr]">
         <StatCard label="Anime terminés" value={profile.stats.completedCount.toLocaleString("fr-FR")} />
         <StatCard
           label="Heures regardées"
@@ -117,6 +117,52 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           </p>
           <RatingHistogram bins={profile.stats.ratingHistogram} />
         </div>
+      </section>
+
+      {/* S3-03: follower / following counts + S3-01: 3 latest badges. */}
+      <section className="mb-16 flex flex-wrap items-stretch gap-3">
+        <div className="flex items-center gap-6 rounded-xl border border-border-subtle bg-bg-surface px-5 py-3.5">
+          <div>
+            <p className="m-0 font-mono text-[9px] uppercase tracking-[0.22em] text-text-tertiary">
+              Abonnés
+            </p>
+            <p className="m-0 font-display text-xl font-semibold text-text-primary">
+              {profile.followCounts.followers.toLocaleString("fr-FR")}
+            </p>
+          </div>
+          <div className="h-8 w-px bg-border" aria-hidden />
+          <div>
+            <p className="m-0 font-mono text-[9px] uppercase tracking-[0.22em] text-text-tertiary">
+              Abonnements
+            </p>
+            <p className="m-0 font-display text-xl font-semibold text-text-primary">
+              {profile.followCounts.following.toLocaleString("fr-FR")}
+            </p>
+          </div>
+        </div>
+        {profile.recentAchievements.length > 0 && (
+          <div className="flex flex-1 items-center gap-3 overflow-x-auto rounded-xl border border-border-subtle bg-bg-surface px-5 py-3.5">
+            <p className="m-0 shrink-0 font-mono text-[9px] uppercase tracking-[0.22em] text-text-tertiary">
+              Derniers badges
+            </p>
+            <ul className="m-0 flex list-none items-center gap-2 p-0">
+              {profile.recentAchievements.map((a) => (
+                <li
+                  key={a.code}
+                  className="inline-flex items-center gap-2 rounded-md border border-accent/30 bg-accent/8 px-2 py-1"
+                  title={`${a.name} — ${new Date(a.unlockedAt).toLocaleDateString("fr-FR")}`}
+                >
+                  <span aria-hidden style={{ color: "var(--color-accent)" }}>
+                    {a.icon ?? "★"}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-text-secondary">
+                    {a.name}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
       {/* Reviews */}

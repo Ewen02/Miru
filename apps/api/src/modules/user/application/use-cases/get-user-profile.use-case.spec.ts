@@ -41,6 +41,8 @@ describe("GetUserProfileUseCase", () => {
     });
     repo.favoritesByUserId.mockResolvedValue([]);
     repo.reviewsByUserId.mockResolvedValue([]);
+    repo.recentAchievementsByUserId.mockResolvedValue([]);
+    repo.followCountsByUserId.mockResolvedValue({ followers: 0, following: 0 });
 
     const result = await useCase.execute({ handle: "lea" });
 

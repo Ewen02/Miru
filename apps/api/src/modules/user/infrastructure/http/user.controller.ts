@@ -250,7 +250,16 @@ export class UserController {
     @Param("handle") handle: string,
     @OptionalUserId() viewerId: string | null,
   ): Promise<UserProfile> {
-    const { user, joinedAt, isPro, stats, favorites, reviews } = await this.getUserProfile.execute({
+    const {
+      user,
+      joinedAt,
+      isPro,
+      stats,
+      favorites,
+      reviews,
+      recentAchievements,
+      followCounts,
+    } = await this.getUserProfile.execute({
       handle,
       viewerId,
     });
@@ -272,6 +281,13 @@ export class UserController {
         createdAt: r.createdAt.toISOString(),
         anime: r.anime,
       })),
+      recentAchievements: recentAchievements.map((a) => ({
+        code: a.code,
+        name: a.name,
+        icon: a.icon,
+        unlockedAt: a.unlockedAt.toISOString(),
+      })),
+      followCounts,
     };
   }
 }

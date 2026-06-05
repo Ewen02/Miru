@@ -4,6 +4,7 @@ import { UseCase } from "@shared/domain/use-case.base";
 import {
   UserFavoriteAnime,
   UserProfileStats,
+  UserPublicAchievement,
   UserPublicReview,
   UserRepositoryPort,
 } from "../../domain/ports/user-repository.port";
@@ -26,10 +27,13 @@ interface GetUserProfileOutput {
   stats: UserProfileStats;
   favorites: UserFavoriteAnime[];
   reviews: UserPublicReview[];
+  recentAchievements: UserPublicAchievement[];
+  followCounts: { followers: number; following: number };
 }
 
 const FAVORITES_LIMIT = 5;
 const REVIEWS_LIMIT = 3;
+const ACHIEVEMENTS_LIMIT = 3;
 
 @Injectable()
 export class GetUserProfileUseCase implements UseCase<GetUserProfileInput, GetUserProfileOutput> {
@@ -49,14 +53,17 @@ export class GetUserProfileUseCase implements UseCase<GetUserProfileInput, GetUs
       }
     }
 
-    const [joinedAt, isPro, stats, favorites, reviews] = await Promise.all([
-      this.users.joinedAt(user.id),
-      this.users.isProByUserId(user.id),
-      this.users.statsByUserId(user.id),
-      this.users.favoritesByUserId(user.id, FAVORITES_LIMIT),
-      this.users.reviewsByUserId(user.id, REVIEWS_LIMIT),
-    ]);
+    const [joinedAt, isPro, stats, favorites, reviews, recentAchievements, followCounts] =
+      await Promise.all([
+        this.users.joinedAt(user.id),
+        this.users.isProByUserId(user.id),
+        this.users.statsByUserId(user.id),
+        this.users.favoritesByUserId(user.id, FAVORITES_LIMIT),
+        this.users.reviewsByUserId(user.id, REVIEWS_LIMIT),
+        this.users.recentAchievementsByUserId(user.id, ACHIEVEMENTS_LIMIT),
+        this.users.followCountsByUserId(user.id),
+      ]);
 
-    return { user, joinedAt, isPro, stats, favorites, reviews };
+    return { user, joinedAt, isPro, stats, favorites, reviews, recentAchievements, followCounts };
   }
 }

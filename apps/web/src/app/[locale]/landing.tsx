@@ -1,12 +1,14 @@
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
-import type { AnimeCard, ListSummaryDto } from "@miru/types";
+import type { ActivityEventDto, AnimeCard, ListSummaryDto } from "@miru/types";
 
 interface LandingProps {
   /** A handful of top-rated anime — used in the mockup screenshots. */
   featuredAnime: AnimeCard[];
   /** A few public lists — used in the "share your taste" mockup. */
   featuredLists: ListSummaryDto[];
+  /** Recent RATED_ANIME events from the global trending feed. May be empty. */
+  trendingReviews: ActivityEventDto[];
 }
 
 /**
@@ -18,7 +20,7 @@ interface LandingProps {
  *   - the user is anonymous
  *   - no catalog filter is active (search/filter mode keeps the grid)
  */
-export function Landing({ featuredAnime, featuredLists }: LandingProps) {
+export function Landing({ featuredAnime, featuredLists, trendingReviews }: LandingProps) {
   return (
     <>
       {/* Hero */}
@@ -90,6 +92,67 @@ export function Landing({ featuredAnime, featuredLists }: LandingProps) {
           </div>
         </div>
       </section>
+
+      {/* S3-06: trending community ratings — a glimpse of the activity feed
+          before the visitor signs up. Surfaces social proof + recent taste. */}
+      {trendingReviews.length > 0 && (
+        <section className="border-b border-border-subtle">
+          <div className="mx-auto max-w-300 px-7 py-20">
+            <div className="mb-8 flex items-baseline justify-between">
+              <div>
+                <p className="m-0 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-tertiary">
+                  Tendances
+                </p>
+                <h2 className="m-0 font-display text-3xl font-semibold tracking-[-0.025em] text-text-primary sm:text-4xl">
+                  Notés récemment par la communauté.
+                </h2>
+              </div>
+            </div>
+            <ul className="m-0 flex list-none gap-4 overflow-x-auto p-0 pb-2 [scrollbar-width:thin]">
+              {trendingReviews.slice(0, 8).map((event) => (
+                <li key={event.id} className="w-56 shrink-0 snap-start">
+                  <article className="flex h-full flex-col gap-3 rounded-xl border border-border bg-bg-surface p-3.5">
+                    {event.anime && (
+                      <div className="relative aspect-3/4 overflow-hidden rounded-lg">
+                        {event.anime.coverUrl ? (
+                          <Image
+                            src={event.anime.coverUrl}
+                            alt=""
+                            fill
+                            sizes="240px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-linear-to-br from-bg-elevated to-bg-base" />
+                        )}
+                        {typeof event.meta?.rating === "number" && (
+                          <span
+                            className="absolute right-2 top-2 inline-flex items-center rounded-md px-2 py-1 font-mono text-[11px] font-medium"
+                            style={{
+                              backgroundColor: "var(--color-accent)",
+                              color: "var(--color-on-accent)",
+                            }}
+                          >
+                            {event.meta.rating}/10
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="m-0 line-clamp-1 font-display text-sm font-semibold text-text-primary">
+                        {event.anime?.title ?? "—"}
+                      </p>
+                      <p className="m-0 mt-1 line-clamp-1 font-body text-xs text-text-tertiary">
+                        Noté par {event.actorName}
+                      </p>
+                    </div>
+                  </article>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* Watchlist mockup */}
       <section className="border-b border-border-subtle">

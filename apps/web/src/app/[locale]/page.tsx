@@ -11,7 +11,13 @@ import {
   Pagination,
   type HomeHeroSlide,
 } from "@miru/ui";
-import { fetchAnimeCatalog, fetchAnimeDetail, fetchGenres, type CatalogFilters } from "@/lib/api";
+import {
+  fetchAnimeCatalog,
+  fetchAnimeDetail,
+  fetchGenres,
+  fetchTrendingFeed,
+  type CatalogFilters,
+} from "@/lib/api";
 import { fetchLists } from "@/lib/server-lists";
 import { fetchUserWatchlist } from "@/lib/server-watchlist";
 import { fetchUserLifetimeStats } from "@/lib/server-lifetime-stats";
@@ -104,13 +110,23 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
   // Anonymous visitors with no active filter see the landing page instead of
   // the catalog grid. Filters/search keep working — useful for shared links.
   if (!session && !isFiltered) {
-    const [featuredAnime, featuredLists] = await Promise.all([
+    const [featuredAnime, featuredLists, trending] = await Promise.all([
       fetchAnimeCatalog({ pageSize: 6 })
         .then((res) => res?.data ?? [])
         .catch(() => []),
       fetchLists("public").catch(() => []),
+      // S3-06: only RATED_ANIME events from the trending feed are useful
+      // here; we over-fetch and filter to keep the API contract simple.
+      fetchTrendingFeed(30).catch(() => []),
     ]);
-    return <Landing featuredAnime={featuredAnime} featuredLists={featuredLists} />;
+    const trendingReviews = trending.filter((e) => e.kind === "RATED_ANIME");
+    return (
+      <Landing
+        featuredAnime={featuredAnime}
+        featuredLists={featuredLists}
+        trendingReviews={trendingReviews}
+      />
+    );
   }
 
   const totalPages = catalog ? Math.max(1, Math.ceil(catalog.total / PAGE_SIZE)) : 1;

@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpCode, Param, Post, Query, UseGuards } from "@nestjs/common";
+import { Controller, Delete, Get, Header, HttpCode, Param, Post, Query, UseGuards } from "@nestjs/common";
 import type { ActivityEventDto, FollowStatsDto } from "@miru/types";
 import { AuthRequiredGuard } from "@auth/auth-required.guard";
 import { OptionalAuthGuard } from "@auth/optional-auth.guard";
@@ -61,7 +61,11 @@ export class SocialController {
     return events.map((event) => ActivityMapper.toDto(event));
   }
 
+  // Public, identical for every viewer within the 60s window.
+  // Browser caches 60s, a CDN/reverse proxy can hold it for 5 min with
+  // stale-while-revalidate so cold misses don't show a blank feed.
   @Get("trending")
+  @Header("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600")
   async trending(@Query() query: FeedQueryDto): Promise<ActivityEventDto[]> {
     const events = await this.getTrendingFeed.execute({ limit: query.limit });
     return events.map((event) => ActivityMapper.toDto(event));

@@ -1,4 +1,4 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Header } from "@nestjs/common";
 import { ListPlatformsUseCase } from "../../application/use-cases/list-platforms.use-case";
 
 interface PlatformDto {
@@ -12,7 +12,13 @@ interface PlatformDto {
 export class PlatformController {
   constructor(private readonly listPlatforms: ListPlatformsUseCase) {}
 
+  // Streaming platform list is effectively static — seeded once, updated on
+  // rare manual edit. Long browser + CDN cache, busted via revalidateTag.
   @Get()
+  @Header(
+    "Cache-Control",
+    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+  )
   async list(): Promise<PlatformDto[]> {
     const platforms = await this.listPlatforms.execute();
     return platforms.map((p) => ({

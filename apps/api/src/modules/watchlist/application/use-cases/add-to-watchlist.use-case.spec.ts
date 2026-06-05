@@ -12,6 +12,7 @@ function makeRepoMock(): jest.Mocked<WatchlistRepositoryPort> {
     remove: jest.fn(),
     markEpisodeWatched: jest.fn(),
     unmarkEpisodeWatched: jest.fn(),
+    markEpisodesUpTo: jest.fn(),
     listWatchedEpisodes: jest.fn(),
   };
 }

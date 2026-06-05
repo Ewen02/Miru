@@ -31,6 +31,18 @@ export interface WatchlistRepositoryPort {
    */
   markEpisodeWatched(userId: string, episodeId: string): Promise<void>;
   unmarkEpisodeWatched(userId: string, episodeId: string): Promise<void>;
+  /**
+   * Mark every episode number <= upToEpisode as watched for this anime in
+   * one shot. Uses INSERT … ON CONFLICT DO NOTHING so re-running keeps the
+   * original watchedAt timestamps. Also bumps the WatchlistEntry's
+   * currentEpisode to upToEpisode (capped at episodeCount when known) so
+   * the progress bar stays in sync.
+   */
+  markEpisodesUpTo(
+    userId: string,
+    animeId: string,
+    upToEpisode: number,
+  ): Promise<{ newlyMarked: number; currentEpisode: number }>;
   /** Watched episodes for a given anime, newest first. */
   listWatchedEpisodes(userId: string, animeId: string): Promise<WatchedEpisodeSummary[]>;
 }

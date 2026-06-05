@@ -4,9 +4,12 @@ import { useState, useTransition } from "react";
 import { EpisodeRow, cn } from "@miru/ui";
 import type { AnimeDetail } from "@miru/types";
 import { episodesApi } from "@/lib/episodes-api";
+import { watchlistApi } from "@/lib/watchlist-api";
 import { EpisodeHeatmap } from "@/components/episode-heatmap";
 
 interface EpisodesTrackerProps {
+  /** Anime id — required to bulk-mark via the watchlist API. */
+  animeId: string;
   episodes: AnimeDetail["episodes"];
   animeTitle: string;
   /** Initial set of episode ids the user has marked as watched. */
@@ -22,6 +25,7 @@ interface EpisodesTrackerProps {
  * are safe.
  */
 export function EpisodesTracker({
+  animeId,
   episodes,
   animeTitle,
   initialWatchedIds,
@@ -30,6 +34,29 @@ export function EpisodesTracker({
   const [watched, setWatched] = useState<Set<string>>(() => new Set(initialWatchedIds));
   const [pending, startTransition] = useTransition();
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [bulkPending, setBulkPending] = useState<string | null>(null);
+
+  function bulkMarkUpTo(episodeId: string, episodeNumber: number) {
+    setBulkPending(episodeId);
+    const targetIds = episodes
+      .filter((e) => e.number <= episodeNumber)
+      .map((e) => e.id);
+    const previous = new Set(watched);
+    setWatched((prev) => {
+      const next = new Set(prev);
+      for (const id of targetIds) next.add(id);
+      return next;
+    });
+    startTransition(async () => {
+      try {
+        await watchlistApi.bulkMarkUpTo(animeId, episodeNumber);
+      } catch {
+        setWatched(previous);
+      } finally {
+        setBulkPending(null);
+      }
+    });
+  }
 
   function toggle(episodeId: string) {
     const wasWatched = watched.has(episodeId);
@@ -120,6 +147,18 @@ export function EpisodesTracker({
                   searchQuery={`${animeTitle} episode ${ep.number}`}
                 />
               </div>
+              {isAuthenticated && !isWatched && (
+                <button
+                  type="button"
+                  onClick={() => bulkMarkUpTo(ep.id, ep.number)}
+                  disabled={pending || bulkPending !== null}
+                  aria-label={`Marquer jusqu'à l'épisode ${ep.number} comme vu`}
+                  title={`Marquer jusqu'à l'ép. ${ep.number}`}
+                  className="shrink-0 rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-text-tertiary transition-colors duration-150 hover:bg-bg-elevated hover:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {bulkPending === ep.id ? "…" : "↡"}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setExpanded(isExpanded ? null : ep.id)}

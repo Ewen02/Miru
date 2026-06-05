@@ -75,6 +75,42 @@ export class PrismaWatchlistRepository implements WatchlistRepositoryPort {
     await this.prisma.userEpisode.deleteMany({ where: { userId, episodeId } });
   }
 
+  async markEpisodesUpTo(
+    userId: string,
+    animeId: string,
+    upToEpisode: number,
+  ): Promise<{ newlyMarked: number; currentEpisode: number }> {
+    if (upToEpisode <= 0) return { newlyMarked: 0, currentEpisode: 0 };
+    // 1. Find every episode <= upToEpisode for this anime.
+    const eligible = await this.prisma.episode.findMany({
+      where: { animeId, number: { lte: upToEpisode } },
+      select: { id: true, number: true },
+    });
+    if (eligible.length === 0) return { newlyMarked: 0, currentEpisode: 0 };
+
+    // 2. Bulk insert UserEpisode rows; skipDuplicates lets us be idempotent
+    //    without paying per-row upsert round trips.
+    const inserted = await this.prisma.userEpisode.createMany({
+      data: eligible.map((e) => ({ userId, episodeId: e.id })),
+      skipDuplicates: true,
+    });
+
+    // 3. Bring the WatchlistEntry progress up to date — cap at the anime
+    //    episodeCount when known so we don't overshoot a 12-ep series with
+    //    a "mark up to 999".
+    const anime = await this.prisma.anime.findUnique({
+      where: { id: animeId },
+      select: { episodeCount: true },
+    });
+    const cap = anime?.episodeCount ?? upToEpisode;
+    const currentEpisode = Math.min(upToEpisode, cap);
+    await this.prisma.watchlistEntry.updateMany({
+      where: { userId, animeId, currentEpisode: { lt: currentEpisode } },
+      data: { currentEpisode },
+    });
+    return { newlyMarked: inserted.count, currentEpisode };
+  }
+
   async listWatchedEpisodes(
     userId: string,
     animeId: string,

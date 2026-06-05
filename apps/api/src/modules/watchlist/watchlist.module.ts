@@ -6,6 +6,7 @@ import { GetUserWatchlistUseCase } from "./application/use-cases/get-user-watchl
 import { ImportAniListWatchlistUseCase } from "./application/use-cases/import-anilist-watchlist.use-case";
 import { ListWatchedEpisodesUseCase } from "./application/use-cases/list-watched-episodes.use-case";
 import { MarkEpisodeWatchedUseCase } from "./application/use-cases/mark-episode-watched.use-case";
+import { MarkEpisodesUpToUseCase } from "./application/use-cases/mark-episodes-up-to.use-case";
 import { RemoveFromWatchlistUseCase } from "./application/use-cases/remove-from-watchlist.use-case";
 import { UnmarkEpisodeWatchedUseCase } from "./application/use-cases/unmark-episode-watched.use-case";
 import { UpdateWatchlistEntryUseCase } from "./application/use-cases/update-watchlist-entry.use-case";
@@ -23,6 +24,7 @@ import { WatchlistController } from "./infrastructure/http/watchlist.controller"
     GetUserWatchlistUseCase,
     ImportAniListWatchlistUseCase,
     MarkEpisodeWatchedUseCase,
+    MarkEpisodesUpToUseCase,
     UnmarkEpisodeWatchedUseCase,
     ListWatchedEpisodesUseCase,
     { provide: WATCHLIST_REPOSITORY, useClass: PrismaWatchlistRepository },

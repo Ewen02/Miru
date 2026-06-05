@@ -18,6 +18,7 @@ import { GetUserWatchlistUseCase } from "../../application/use-cases/get-user-wa
 import { ImportAniListWatchlistUseCase } from "../../application/use-cases/import-anilist-watchlist.use-case";
 import { ListWatchedEpisodesUseCase } from "../../application/use-cases/list-watched-episodes.use-case";
 import { MarkEpisodeWatchedUseCase } from "../../application/use-cases/mark-episode-watched.use-case";
+import { MarkEpisodesUpToUseCase } from "../../application/use-cases/mark-episodes-up-to.use-case";
 import { RemoveFromWatchlistUseCase } from "../../application/use-cases/remove-from-watchlist.use-case";
 import { UnmarkEpisodeWatchedUseCase } from "../../application/use-cases/unmark-episode-watched.use-case";
 import { UpdateWatchlistEntryUseCase } from "../../application/use-cases/update-watchlist-entry.use-case";
@@ -38,6 +39,7 @@ export class WatchlistController {
     private readonly getWatchlist: GetUserWatchlistUseCase,
     private readonly importAniList: ImportAniListWatchlistUseCase,
     private readonly markEpisode: MarkEpisodeWatchedUseCase,
+    private readonly markEpisodesUpTo: MarkEpisodesUpToUseCase,
     private readonly unmarkEpisode: UnmarkEpisodeWatchedUseCase,
     private readonly listWatchedEpisodes: ListWatchedEpisodesUseCase,
   ) {}
@@ -133,6 +135,19 @@ export class WatchlistController {
     @Param("episodeId") episodeId: string,
   ): Promise<void> {
     await this.unmarkEpisode.execute({ userId, episodeId });
+  }
+
+  @Post("watchlist/anime/:animeId/episodes/bulk-mark")
+  async bulkMarkUpTo(
+    @CurrentUserId() userId: string,
+    @Param("animeId") animeId: string,
+    @Body() body: { upToEpisode: number },
+  ): Promise<{ newlyMarked: number; currentEpisode: number }> {
+    return this.markEpisodesUpTo.execute({
+      userId,
+      animeId,
+      upToEpisode: body?.upToEpisode,
+    });
   }
 }
 

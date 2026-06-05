@@ -177,6 +177,7 @@ async function AnimeDetailContent({ slug }: { slug: string }) {
       }
       episodes={showEpisodes ? (
         <EpisodesTracker
+          animeId={anime.id}
           episodes={anime.episodes}
           animeTitle={anime.title}
           initialWatchedIds={watchedEpisodeIds}

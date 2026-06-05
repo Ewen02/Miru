@@ -40,4 +40,25 @@ export const watchlistApi = {
     });
     if (!res.ok && res.status !== 204) throw new Error(`watchlist.remove ${res.status}`);
   },
+
+  /**
+   * Bulk mark every episode up to `upToEpisode` as watched in one round-trip.
+   * Idempotent server-side, so re-clicking the same episode is safe.
+   */
+  async bulkMarkUpTo(
+    animeId: string,
+    upToEpisode: number,
+  ): Promise<{ newlyMarked: number; currentEpisode: number }> {
+    const res = await fetch(
+      `${API_URL}/watchlist/anime/${encodeURIComponent(animeId)}/episodes/bulk-mark`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ upToEpisode }),
+      },
+    );
+    if (!res.ok) throw new Error(`watchlist.bulkMarkUpTo ${res.status}`);
+    return res.json() as Promise<{ newlyMarked: number; currentEpisode: number }>;
+  },
 };

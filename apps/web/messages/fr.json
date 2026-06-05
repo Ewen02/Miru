@@ -282,6 +282,7 @@
     "emptyTitle": "Tu es à jour.",
     "emptyBody": "Aucune notification pour l'instant. Les nouveautés (nouveaux épisodes, récaps) apparaîtront ici.",
     "emptyCta": "Explorer le catalogue",
+    "emptyCtaSecondary": "Régler les notifications",
     "relJustNow": "À l'instant",
     "relMin": "{n} min",
     "relHour": "{n}h",

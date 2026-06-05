@@ -282,6 +282,7 @@
     "emptyTitle": "All caught up.",
     "emptyBody": "No notifications yet. New episodes and recaps will show up here.",
     "emptyCta": "Explore the catalogue",
+    "emptyCtaSecondary": "Adjust notifications",
     "relJustNow": "Just now",
     "relMin": "{n} min",
     "relHour": "{n}h",

@@ -70,6 +70,7 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
           title={t("emptyTitle")}
           description={t("emptyBody")}
           primaryAction={{ label: t("emptyCta"), href: "/" }}
+          secondaryAction={{ label: t("emptyCtaSecondary"), href: "/settings#notifications" }}
         />
       ) : (
         <ul className="flex flex-col gap-2">

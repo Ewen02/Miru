@@ -35,9 +35,7 @@ export function ReviewSection({ animeId, reviews, currentUserId }: ReviewSection
       )}
 
       {othersReviews.length === 0 ? (
-        <p className="font-body text-sm text-text-tertiary">
-          {currentUserId ? "Aucun autre avis pour l'instant." : "Aucun avis pour l'instant."}
-        </p>
+        <EmptyReviewsBlock currentUserId={currentUserId} hasMyReview={Boolean(myReview)} />
       ) : (
         <ul className="flex flex-col gap-3">
           {othersReviews.map((r) => (
@@ -240,6 +238,52 @@ function ReviewForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+function EmptyReviewsBlock({
+  currentUserId,
+  hasMyReview,
+}: {
+  currentUserId: string | null;
+  hasMyReview: boolean;
+}) {
+  // Three distinct cases:
+  //  - anonymous → invite to log in
+  //  - logged in but no review yet → invite to be the first
+  //  - logged in with own review → simply say nobody else has chimed in
+  if (!currentUserId) {
+    return (
+      <div className="rounded-xl border border-dashed border-border bg-bg-surface/60 px-5 py-6 text-center">
+        <p className="m-0 mb-3 font-body text-sm text-text-secondary">
+          Aucun avis pour le moment.
+        </p>
+        <a
+          href="/login"
+          className="inline-flex h-9 items-center rounded-md px-4 font-body text-xs font-semibold uppercase tracking-wider"
+          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-on-accent)" }}
+        >
+          Connecte-toi pour donner ton avis
+        </a>
+      </div>
+    );
+  }
+  if (hasMyReview) {
+    return (
+      <p className="font-body text-sm text-text-tertiary">
+        Personne d'autre n'a encore donné son avis.
+      </p>
+    );
+  }
+  return (
+    <div className="rounded-xl border border-dashed border-accent/40 bg-accent/4 px-5 py-6 text-center">
+      <p className="m-0 mb-1 font-display text-sm font-semibold text-text-primary">
+        Sois le premier à donner ton avis.
+      </p>
+      <p className="m-0 font-body text-xs text-text-tertiary">
+        Note et partage ce que tu en as pensé — le formulaire est juste au-dessus.
+      </p>
+    </div>
   );
 }
 
